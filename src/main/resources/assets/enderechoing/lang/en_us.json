@@ -1,0 +1,13 @@
+{
+  "itemGroup.enderechoing": "Example Mod Tab",
+  "block.enderechoing.example_block": "Example Block",
+  "item.enderechoing.example_item": "Example Item",
+
+  "enderechoing.configuration.title": "Ender Echoing Configs",
+  "enderechoing.configuration.section.enderechoing.common.toml": "Ender Echoing Configs",
+  "enderechoing.configuration.section.enderechoing.common.toml.title": "Ender Echoing Configs",
+  "enderechoing.configuration.items": "Item List",
+  "enderechoing.configuration.logDirtBlock": "Log Dirt Block",
+  "enderechoing.configuration.magicNumberIntroduction": "Magic Number Text",
+  "enderechoing.configuration.magicNumber": "Magic Number"
+}
