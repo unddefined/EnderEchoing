@@ -10,7 +10,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-import static com.unddefined.enderechoing.registry.ItemRegistry.EXAMPLE_BLOCK_ITEM;
+import static com.unddefined.enderechoing.registry.ItemRegistry.ENDER_ECHOIC_TELEPORTER_ITEM;
 
 public class CreativeModeTabRegistry {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, "enderechoing");
@@ -19,14 +19,14 @@ public class CreativeModeTabRegistry {
         CreativeModeTab.builder()
             .title(Component.nullToEmpty("Ender Echoing"))
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> ItemRegistry.EXAMPLE_ITEM.get().getDefaultInstance())
+            .icon(() -> ItemRegistry.ENDER_ECHOIC_TELEPORTER_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
-                output.accept(ItemRegistry.EXAMPLE_ITEM.get());
+                output.accept(ItemRegistry.ENDER_ECHOIC_TELEPORTER_ITEM.get());
             }).build());
     @SubscribeEvent
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(EXAMPLE_BLOCK_ITEM);
+            event.accept(ENDER_ECHOIC_TELEPORTER_ITEM);
         }
     }
 }

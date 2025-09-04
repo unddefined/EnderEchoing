@@ -132,7 +132,7 @@ dependencies {
     // implementation "blank:coolmod-${mc_version}:${coolmod_version}"
 
     // Example mod dependency using a file as dependency
-    // implementation files("libs/coolmod-${mc_version}-${coolmod_version}.jar")
+    //implementation files("libs/coolmod-${mc_version}-${coolmod_version}.jar")
 
     // Example project dependency using a sister or child project:
     // implementation project(":myproject")
@@ -156,7 +156,8 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_license            : mod_license,
             mod_version            : mod_version,
             mod_authors            : mod_authors,
-            mod_description        : mod_description
+            mod_description        : mod_description,
+            geckolib_version       : geckolib_version
     ]
     inputs.properties replaceProperties
     expand replaceProperties

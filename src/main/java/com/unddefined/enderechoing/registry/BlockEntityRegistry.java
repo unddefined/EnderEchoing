@@ -12,7 +12,7 @@ public class BlockEntityRegistry {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderEchoicTeleporterBlockEntity>> ENDER_ECHOIC_TELEPORTER =
             BLOCK_ENTITY_TYPES.register("ender_echoic_teleporter", () -> {
                 return BlockEntityType.Builder.of((pos, state) ->
-                                new EnderEchoicTeleporterBlockEntity(BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get(), pos, state),
+                                new EnderEchoicTeleporterBlockEntity(pos, state),
                         BlockRegistry.ENDER_ECHOIC_TELEPORTER.get()).build(null);
             });
 }

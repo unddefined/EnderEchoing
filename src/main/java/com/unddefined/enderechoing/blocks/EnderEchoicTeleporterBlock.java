@@ -2,7 +2,8 @@ package com.unddefined.enderechoing.blocks;
 
 import com.mojang.serialization.MapCodec;
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.registry.BlockEntityRegistry;
+import com.unddefined.enderechoing.blocks.entity.EnderEchoicTeleporterBlockEntity;
+import com.unddefined.enderechoing.registry.ItemRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -12,8 +13,11 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +28,14 @@ public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
     protected static final VoxelShape SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D);
 
     public EnderEchoicTeleporterBlock() {
-        super(Properties.of().noOcclusion());
+        super(Properties.of()
+                .noOcclusion()
+                .noTerrainParticles()
+                .sound(SoundType.SCULK_SHRIEKER)
+                .explosionResistance(1000.0F)
+                .destroyTime(1.5F)
+                .pushReaction(PushReaction.DESTROY)
+        );
     }
 
     @Override
@@ -40,7 +51,7 @@ public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get().create(pos, state);
+        return new EnderEchoicTeleporterBlockEntity(pos, state);
     }
 
 
@@ -54,5 +65,10 @@ public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
         tooltip.add(Component.translatable("block." + EnderEchoing.MODID + ".fertilizer.tooltip"));
 
         super.appendHoverText(stack, context, tooltip, tooltipFlag);
+    }
+    
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        return List.of(new ItemStack(ItemRegistry.ENDER_ECHOIC_TELEPORTER_ITEM.get()));
     }
 }

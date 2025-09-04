@@ -88,7 +88,7 @@ side = "BOTH"
 [[dependencies]]
 modId = "geckolib"
 type = "required"
-versionRange = "[${gecko_version},)"
+versionRange = "${geckolib_version}"
 ordering = "NONE"
 side = "BOTH"
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
