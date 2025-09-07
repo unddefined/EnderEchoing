@@ -27,6 +27,10 @@ public class Config {
     public static final ModConfigSpec.ConfigValue<List<? extends String>> ITEM_STRINGS = BUILDER
             .comment("A list of items to log on common setup.")
             .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), () -> "", Config::validateItemName);
+            
+    public static final ModConfigSpec.IntValue ENDER_ECHOING_CORE_COOLDOWN = BUILDER
+            .comment("Cooldown time for the Ender Echoing Core in ticks (20 ticks = 1 second)")
+            .defineInRange("EnderEchoingCoreCooldown", 100, 1, Integer.MAX_VALUE);
 
     static final ModConfigSpec SPEC = BUILDER.build();
 

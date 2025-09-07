@@ -19,9 +19,10 @@ public class CreativeModeTabRegistry {
         CreativeModeTab.builder()
             .title(Component.nullToEmpty("Ender Echoing"))
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> ItemRegistry.ENDER_ECHOIC_TELEPORTER_ITEM.get().getDefaultInstance())
+            .icon(() -> ItemRegistry.ENDER_ECHOING_CORE.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(ItemRegistry.ENDER_ECHOIC_TELEPORTER_ITEM.get());
+                output.accept(ItemRegistry.ENDER_ECHOING_CORE.get());
             }).build());
     @SubscribeEvent
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
