@@ -10,7 +10,5 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public class BlockRegistry {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks("enderechoing");
 
-    public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block", BlockBehaviour.Properties.of().mapColor(MapColor.STONE));
-    
     public static final DeferredBlock<EnderEchoicTeleporterBlock> ENDER_ECHOIC_TELEPORTER = BLOCKS.register("ender_echoic_teleporter", EnderEchoicTeleporterBlock::new);
 }

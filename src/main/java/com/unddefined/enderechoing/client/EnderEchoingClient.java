@@ -3,7 +3,6 @@ package com.unddefined.enderechoing.client;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.renderer.block.EnderEchoicTeleporterRenderer;
 import com.unddefined.enderechoing.registry.BlockEntityRegistry;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -29,13 +28,9 @@ public class EnderEchoingClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         // Some client setup code
-        EnderEchoing.LOGGER.info("HELLO FROM CLIENT SETUP");
-        EnderEchoing.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
-        
+
         // Register block entity renderers
-        event.enqueueWork(() -> {
-            BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get(), 
-                    context -> new EnderEchoicTeleporterRenderer());
-        });
+        event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get(),
+                context -> new EnderEchoicTeleporterRenderer()));
     }
 }
