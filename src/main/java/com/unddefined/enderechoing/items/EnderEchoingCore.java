@@ -1,10 +1,18 @@
 package com.unddefined.enderechoing.items;
 
+import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.Config;
+import com.unddefined.enderechoing.client.model.EnderEchoingCoreModel;
+import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer;
 import com.unddefined.enderechoing.util.TeleporterManager;
+import dev.kosmx.playerAnim.api.layered.AnimationStack;
+import dev.kosmx.playerAnim.api.layered.IAnimation;
+import dev.kosmx.playerAnim.api.layered.ModifierLayer;
+import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
+import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,6 +28,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
@@ -28,13 +37,16 @@ import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.model.DefaultedBlockGeoModel;
+import software.bernie.geckolib.model.DefaultedItemGeoModel;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.function.Consumer;
 
 public class EnderEchoingCore extends Item implements GeoItem {
+    private static final String CONTROLLER_NAME = "controller";
+    private static final String ANIM_USE = "use";
+    Logger logger = LogUtils.getLogger();
     private static final RawAnimation USE_ANIM = RawAnimation.begin().thenPlay("ender_echoing_core.use");
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -50,8 +62,9 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
             @Override
             public BlockEntityWithoutLevelRenderer getGeoItemRenderer() {
-                if (this.renderer == null)
-                    this.renderer = new GeoItemRenderer<>(new DefaultedBlockGeoModel<>(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoing_core")));
+                if (this.renderer == null) {
+                    this.renderer = new EnderEchoingCoreRenderer(new EnderEchoingCoreModel());
+                }
 
                 return this.renderer;
             }
@@ -60,26 +73,24 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "Activation", 0, state -> PlayState.STOP)
-                .triggerableAnim("ender_echoing_core.use", USE_ANIM));
+        controllers.add(new AnimationController<>(this, CONTROLLER_NAME, 0, state -> PlayState.STOP)
+                .triggerableAnim(ANIM_USE, USE_ANIM));
     }
 
     @Override
-    public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
+    public int getUseDuration(@NotNull ItemStack itemStack, @NotNull LivingEntity livingEntity) {
         return 40;
     }
 
     @Override
-    public UseAnim getUseAnimation(ItemStack stack) {
-        return UseAnim.BOW; // 显示使用动画
+    public @NotNull UseAnim getUseAnimation(@NotNull ItemStack stack) {
+        return UseAnim.CUSTOM;
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-        if (level instanceof ServerLevel serverLevel) {
-            triggerAnim(player, GeoItem.getOrAssignId(player.getItemInHand(hand), serverLevel), "Activation", "ender_echoing_core.use");
-        }
+
         // 检查是否在冷却中
         if (player.getCooldowns().isOnCooldown(this)) {
             return InteractionResultHolder.fail(itemStack);
@@ -101,11 +112,26 @@ public class EnderEchoingCore extends Item implements GeoItem {
             }
         }
 
+        // 播放动画
+        if (level instanceof ServerLevel serverLevel) {
+            triggerAnim(player, GeoItem.getOrAssignId(itemStack, serverLevel), CONTROLLER_NAME, ANIM_USE);
+        }
+        if (level.isClientSide()) {
+            if (player instanceof AbstractClientPlayer clientPlayer) {
+                AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
+                ModifierLayer<IAnimation> playerAnimation = new ModifierLayer<>();
+                playerAnimation.setAnimation(PlayerAnimationRegistry
+                        .getAnimation(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoing_core.player.use"))
+                        .playAnimation());
+                animationStack.addAnimLayer(42, playerAnimation);
+            }
+        }
+
         player.startUsingItem(hand);
-        return super.use(level, player, hand);
+        return InteractionResultHolder.consume(itemStack);
     }
 
-    public @NotNull ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity livingEntity) {
+    public @NotNull ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity livingEntity) {
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel && livingEntity instanceof Player player) {
             // 再次检查玩家是否有末影珍珠
             if (!player.getInventory().hasAnyMatching(itemStack -> itemStack.getItem() == Items.ENDER_PEARL)) {
@@ -125,14 +151,21 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
             // 传送玩家到最近的传送器位置
             if (player instanceof ServerPlayer serverPlayer) {
-                serverPlayer.teleportTo(nearestTeleporterPos.getX() + 0.5, nearestTeleporterPos.getY() + 1, nearestTeleporterPos.getZ() + 0.5);
+                serverPlayer.teleportTo(nearestTeleporterPos.getX() + 0.5, nearestTeleporterPos.getY() + 0.5, nearestTeleporterPos.getZ() + 0.5);
 
                 // 播放传送声音
                 level.playSound(null, nearestTeleporterPos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
-            }
 
+            }
             // 设置冷却时间
             player.getCooldowns().addCooldown(this, Config.ENDER_ECHOING_CORE_COOLDOWN.get());
+        }
+
+        if (level.isClientSide() && livingEntity instanceof Player player) {
+            if (player instanceof AbstractClientPlayer clientPlayer) {
+                AnimationStack PlayerAnim = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
+                PlayerAnim.removeLayer(42);
+            }
         }
 
         return stack;

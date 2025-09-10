@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.client;
 
 import com.unddefined.enderechoing.EnderEchoing;
+import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShrienkerRenderer;
 import com.unddefined.enderechoing.client.renderer.block.EnderEchoicTeleporterRenderer;
 import com.unddefined.enderechoing.registry.BlockEntityRegistry;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -32,5 +33,7 @@ public class EnderEchoingClient {
         // Register block entity renderers
         event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get(),
                 context -> new EnderEchoicTeleporterRenderer()));
+        event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.CALIBRATED_SCULK_SHRIENKER.get(),
+                context -> new CalibratedSculkShrienkerRenderer()));
     }
 }

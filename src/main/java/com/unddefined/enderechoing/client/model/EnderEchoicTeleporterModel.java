@@ -14,31 +14,14 @@ public class EnderEchoicTeleporterModel extends DefaultedBlockGeoModel<EnderEcho
     }
     @Override
     public ResourceLocation getAnimationResource( EnderEchoicTeleporterBlockEntity animatable){
-        if (animatable.getLevel().isRaining()) {
-            return super.getAnimationResource(animatable);
-        }
-        else {
             return animationPath;
-        }
     }
     @Override
     public ResourceLocation getModelResource(EnderEchoicTeleporterBlockEntity animatable) {
-        if (animatable.getLevel().isRaining()) {
-            return super.getModelResource(animatable);
-        }
-        else {
             return modelPath;
-        }
     }
     @Override
-    public ResourceLocation getTextureResource(EnderEchoicTeleporterBlockEntity animatable) {
-        if (animatable.getLevel().isRaining()) {
-            return super.getTextureResource(animatable);
-        }
-        else {
-            return texturePath;
-        }
-    }
+    public ResourceLocation getTextureResource(EnderEchoicTeleporterBlockEntity animatable) {return texturePath;}
     @Override
     public RenderType getRenderType(EnderEchoicTeleporterBlockEntity animatable, ResourceLocation texture){
         return RenderType.entityTranslucent(texture);
