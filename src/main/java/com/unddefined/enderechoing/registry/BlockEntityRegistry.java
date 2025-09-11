@@ -1,6 +1,6 @@
 package com.unddefined.enderechoing.registry;
 
-import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShrienkerBlockEntity;
+import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEntity;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicTeleporterBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -16,9 +16,9 @@ public class BlockEntityRegistry {
                     BlockRegistry.ENDER_ECHOIC_TELEPORTER.get()
             ).build(null));
             
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CalibratedSculkShrienkerBlockEntity>> CALIBRATED_SCULK_SHRIENKER =
-            BLOCK_ENTITY_TYPES.register("calibrated_sculk_shrienker", () -> BlockEntityType.Builder.<CalibratedSculkShrienkerBlockEntity>of(
-                    CalibratedSculkShrienkerBlockEntity::new,
-                    BlockRegistry.CALIBRATED_SCULK_SHRIENKER.get()
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CalibratedSculkShriekerBlockEntity>> CALIBRATED_SCULK_SHRIEKER =
+            BLOCK_ENTITY_TYPES.register("calibrated_sculk_shrieker", () -> BlockEntityType.Builder.<CalibratedSculkShriekerBlockEntity>of(
+                    CalibratedSculkShriekerBlockEntity::new,
+                    BlockRegistry.CALIBRATED_SCULK_SHRIEKER.get()
             ).build(null));
 }

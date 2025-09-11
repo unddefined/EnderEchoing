@@ -1,9 +1,10 @@
 package com.unddefined.enderechoing.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.TransparentScreen;
-import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShrienkerRenderer;
+import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShriekerRenderer;
 import com.unddefined.enderechoing.client.renderer.block.EnderEchoicTeleporterRenderer;
 import com.unddefined.enderechoing.registry.BlockEntityRegistry;
 import net.minecraft.client.KeyMapping;
@@ -46,13 +47,14 @@ public class EnderEchoingClient {
         // Register block entity renderers
         event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get(),
                 context -> new EnderEchoicTeleporterRenderer()));
-        event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.CALIBRATED_SCULK_SHRIENKER.get(),
-                context -> new CalibratedSculkShrienkerRenderer()));
+        event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.CALIBRATED_SCULK_SHRIEKER.get(),
+                context -> new CalibratedSculkShriekerRenderer()));
     }
 
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(OPEN_TRANSPARENT_SCREEN);
+        LogUtils.getLogger().info("onRegisterKeyMappings"+OPEN_TRANSPARENT_SCREEN);
     }
     
     @SubscribeEvent

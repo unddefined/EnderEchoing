@@ -1,6 +1,5 @@
 package com.unddefined.enderechoing.registry;
 
-import com.unddefined.enderechoing.registry.ItemRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -23,7 +22,7 @@ public class CreativeModeTabRegistry {
             .displayItems((parameters, output) -> {
                 output.accept(ItemRegistry.ENDER_ECHOIC_TELEPORTER_ITEM.get());
                 output.accept(ItemRegistry.ENDER_ECHOING_CORE.get());
-                output.accept(ItemRegistry.CALIBRATED_SCULK_SHRIENKER_ITEM.get());
+                output.accept(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get());
             }).build());
     @SubscribeEvent
     private void addCreative(BuildCreativeModeTabContentsEvent event) {

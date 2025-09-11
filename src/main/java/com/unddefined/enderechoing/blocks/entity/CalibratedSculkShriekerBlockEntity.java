@@ -9,10 +9,10 @@ import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class CalibratedSculkShrienkerBlockEntity extends BlockEntity implements GeoBlockEntity {
+public class CalibratedSculkShriekerBlockEntity extends BlockEntity implements GeoBlockEntity {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    public CalibratedSculkShrienkerBlockEntity(BlockPos pos, BlockState blockState) {
-        super(BlockEntityRegistry.CALIBRATED_SCULK_SHRIENKER.get(), pos, blockState);
+    public CalibratedSculkShriekerBlockEntity(BlockPos pos, BlockState blockState) {
+        super(BlockEntityRegistry.CALIBRATED_SCULK_SHRIEKER.get(), pos, blockState);
     }
 
     @Override

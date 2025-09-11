@@ -6,7 +6,7 @@ import software.bernie.geckolib.model.DefaultedBlockGeoModel;
 
 public class EnderEchoicTeleporterModel extends DefaultedBlockGeoModel<EnderEchoicTeleporterBlockEntity> {
     private final ResourceLocation modelPath = buildFormattedModelPath(ResourceLocation.fromNamespaceAndPath( "enderechoing", "ender_echoic_teleporter"));
-    private final ResourceLocation texturePath = buildFormattedTexturePath(ResourceLocation.fromNamespaceAndPath( "enderechoing", "calibrated_sculk_shrienker"));
+    private final ResourceLocation texturePath = buildFormattedTexturePath(ResourceLocation.fromNamespaceAndPath( "enderechoing", "calibrated_sculk_shrieker"));
     private final ResourceLocation animationPath = buildFormattedAnimationPath(ResourceLocation.fromNamespaceAndPath( "enderechoing", "ender_echoic_teleporter"));
     public EnderEchoicTeleporterModel() {
         super(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoic_teleporter"));
