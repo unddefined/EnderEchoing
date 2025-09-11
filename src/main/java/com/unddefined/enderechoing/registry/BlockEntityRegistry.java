@@ -15,6 +15,7 @@ public class BlockEntityRegistry {
                     EnderEchoicTeleporterBlockEntity::new,
                     BlockRegistry.ENDER_ECHOIC_TELEPORTER.get()
             ).build(null));
+            
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CalibratedSculkShrienkerBlockEntity>> CALIBRATED_SCULK_SHRIENKER =
             BLOCK_ENTITY_TYPES.register("calibrated_sculk_shrienker", () -> BlockEntityType.Builder.<CalibratedSculkShrienkerBlockEntity>of(
                     CalibratedSculkShrienkerBlockEntity::new,

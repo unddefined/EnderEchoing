@@ -37,7 +37,6 @@ import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.model.DefaultedItemGeoModel;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
@@ -98,8 +97,6 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
         // 检查玩家是否有末影珍珠
         if (!player.getInventory().hasAnyMatching(stack -> stack.getItem() == Items.ENDER_PEARL)) {
-            if (level.isClientSide()) {
-            }
             return InteractionResultHolder.fail(itemStack);
         }
 
@@ -112,13 +109,21 @@ public class EnderEchoingCore extends Item implements GeoItem {
             }
         }
 
-        // 播放动画
+        player.startUsingItem(hand);
+        
+        // 触发动画
         if (level instanceof ServerLevel serverLevel) {
             triggerAnim(player, GeoItem.getOrAssignId(itemStack, serverLevel), CONTROLLER_NAME, ANIM_USE);
         }
+        
+        // 添加玩家动画
         if (level.isClientSide()) {
             if (player instanceof AbstractClientPlayer clientPlayer) {
                 AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
+                // 移除之前的动画层（如果存在）
+                animationStack.removeLayer(42);
+                
+                // 添加新的动画层
                 ModifierLayer<IAnimation> playerAnimation = new ModifierLayer<>();
                 playerAnimation.setAnimation(PlayerAnimationRegistry
                         .getAnimation(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoing_core.player.use"))
@@ -127,10 +132,22 @@ public class EnderEchoingCore extends Item implements GeoItem {
             }
         }
 
-        player.startUsingItem(hand);
         return InteractionResultHolder.consume(itemStack);
     }
+    // 当玩家释放使用物品时，移除动画层
+    @Override
+    public void releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int timeLeft) {
+        super.releaseUsing(stack, level, livingEntity, timeLeft);
 
+        if (level.isClientSide() && livingEntity instanceof AbstractClientPlayer clientPlayer) {
+            AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
+            animationStack.removeLayer(42);
+        }
+
+        if (!level.isClientSide() && level instanceof ServerLevel serverLevel && livingEntity instanceof Player player) {
+            stopTriggeredAnim(player, GeoItem.getOrAssignId(stack, serverLevel), CONTROLLER_NAME, null);
+        }
+    }
     public @NotNull ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity livingEntity) {
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel && livingEntity instanceof Player player) {
             // 再次检查玩家是否有末影珍珠
@@ -155,16 +172,16 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
                 // 播放传送声音
                 level.playSound(null, nearestTeleporterPos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
-
             }
+
             // 设置冷却时间
             player.getCooldowns().addCooldown(this, Config.ENDER_ECHOING_CORE_COOLDOWN.get());
         }
 
-        if (level.isClientSide() && livingEntity instanceof Player player) {
+        if (level.isClientSide() && livingEntity instanceof Player player && !player.isUsingItem()) {
             if (player instanceof AbstractClientPlayer clientPlayer) {
-                AnimationStack PlayerAnim = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
-                PlayerAnim.removeLayer(42);
+                AnimationStack playerAnim = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
+                playerAnim.removeLayer(42);
             }
         }
 
@@ -175,4 +192,6 @@ public class EnderEchoingCore extends Item implements GeoItem {
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
     }
+
+
 }

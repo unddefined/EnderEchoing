@@ -8,5 +8,4 @@ public class CalibratedSculkShrienkerRenderer extends GeoBlockRenderer<Calibrate
     public CalibratedSculkShrienkerRenderer() {
         super(new CalibratedSculkShrienkerModel());
     }
-
 }

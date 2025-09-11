@@ -3,14 +3,14 @@
 	"animations": {
 		"ender_echoic_teleporter.common": {
 			"loop": true,
-			"animation_length": 12,
+			"animation_length": 60,
 			"bones": {
 				"EnderEchoingCore": {
 					"rotation": {
 						"vector": ["math.sin(query.anim_time * 60) * 90", 0, "math.cos(query.anim_time * 60) * 90"]
 					},
 					"position": {
-						"vector": [0, "math.sin(query.anim_time * 120) * 1.5", 0]
+						"vector": [0, "math.sin(query.anim_time * 90) * 1.5", 0]
 					}
 				}
 			}

@@ -8,5 +8,7 @@
   "item.enderechoing.ender_echoing_core.cooldown": "物品正在冷却中！",
   "item.enderechoing.ender_echoing_core.no_ender_pearl": "你需要末影珍珠来使用此物品！",
   "item.enderechoing.ender_echoing_core.no_teleporter": "未找到传送器！",
-  "item.enderechoing.ender_echoing_core.success": "传送成功！"
+  "item.enderechoing.ender_echoing_core.success": "传送成功！",
+  "key.categories.enderechoing": "末影回响",
+  "key.enderechoing.open_transparent_screen": "打开透明屏幕"
 }

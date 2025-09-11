@@ -1,13 +1,12 @@
 package com.unddefined.enderechoing.client.model;
 
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicTeleporterBlockEntity;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.DefaultedBlockGeoModel;
 
 public class EnderEchoicTeleporterModel extends DefaultedBlockGeoModel<EnderEchoicTeleporterBlockEntity> {
     private final ResourceLocation modelPath = buildFormattedModelPath(ResourceLocation.fromNamespaceAndPath( "enderechoing", "ender_echoic_teleporter"));
-    private final ResourceLocation texturePath = buildFormattedTexturePath(ResourceLocation.fromNamespaceAndPath( "enderechoing", "ender_echoic_teleporter"));
+    private final ResourceLocation texturePath = buildFormattedTexturePath(ResourceLocation.fromNamespaceAndPath( "enderechoing", "calibrated_sculk_shrienker"));
     private final ResourceLocation animationPath = buildFormattedAnimationPath(ResourceLocation.fromNamespaceAndPath( "enderechoing", "ender_echoic_teleporter"));
     public EnderEchoicTeleporterModel() {
         super(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoic_teleporter"));
@@ -22,8 +21,4 @@ public class EnderEchoicTeleporterModel extends DefaultedBlockGeoModel<EnderEcho
     }
     @Override
     public ResourceLocation getTextureResource(EnderEchoicTeleporterBlockEntity animatable) {return texturePath;}
-    @Override
-    public RenderType getRenderType(EnderEchoicTeleporterBlockEntity animatable, ResourceLocation texture){
-        return RenderType.entityTranslucent(texture);
-    }
 }

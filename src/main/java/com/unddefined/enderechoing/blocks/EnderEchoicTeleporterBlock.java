@@ -8,9 +8,6 @@ import com.unddefined.enderechoing.util.TeleporterManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -81,11 +78,6 @@ public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
         super.onPlace(state, level, pos, oldState, isMoving);
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
             TeleporterManager.get(level).addTeleporter(serverLevel, pos);
-            // 向附近玩家发送反馈消息
-            level.players().stream()
-                .filter(player -> player.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < 64.0) // 8格范围内的玩家
-                .forEach(player -> player.displayClientMessage(
-                    Component.translatable("block.enderechoing.ender_echoic_teleporter.placed"), true));
         }
     }
     
@@ -94,11 +86,6 @@ public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
         super.onRemove(state, level, pos, newState, isMoving);
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
             TeleporterManager.get(level).removeTeleporter(serverLevel, pos);
-            // 向附近玩家发送反馈消息
-            level.players().stream()
-                .filter(player -> player.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < 64.0) // 8格范围内的玩家
-                .forEach(player -> player.displayClientMessage(
-                    Component.translatable("block.enderechoing.ender_echoic_teleporter.removed"), true));
         }
     }
 
