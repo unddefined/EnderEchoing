@@ -42,6 +42,8 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
                 .explosionResistance(1000.0F)
                 .destroyTime(1.5F)
                 .pushReaction(PushReaction.DESTROY)
+                .dynamicShape()
+                .lightLevel(state -> 1)
         );
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.UP));
     }
@@ -79,6 +81,7 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
         return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
+    
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (stack.getItem() == ItemRegistry.ENDER_ECHOING_CORE.get()) {

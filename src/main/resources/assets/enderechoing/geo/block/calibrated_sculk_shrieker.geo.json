@@ -10,7 +10,8 @@
 				"visible_bounds_height": 2.5,
 				"visible_bounds_offset": [0, 0.75, 0]
 			},
-			"bones": [
+          "particle": "enderechoing:block/calibrated_sculk_shrieker",
+          "bones": [
 				{
 					"name": "bb_main",
 					"pivot": [0, 8, 0],

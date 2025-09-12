@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "enderechoing:block/calibrated_sculk_shrieker"
+    },
+    "facing=south": {
+      "model": "enderechoing:block/calibrated_sculk_shrieker"
+    },
+    "facing=east": {
+      "model": "enderechoing:block/calibrated_sculk_shrieker"
+    },
+    "facing=west": {
+      "model": "enderechoing:block/calibrated_sculk_shrieker"
+    },
+    "facing=up": {
+      "model": "enderechoing:block/calibrated_sculk_shrieker"
+    },
+    "facing=down": {
+      "model": "enderechoing:block/calibrated_sculk_shrieker"
+    }
+  }
+}
