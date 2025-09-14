@@ -1,10 +1,10 @@
 package com.unddefined.enderechoing;
 
-import java.util.List;
-
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
+
+import java.util.List;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Neo's config APIs
@@ -32,6 +32,9 @@ public class Config {
             .comment("Cooldown time for the Ender Echoing Core in ticks (20 ticks = 1 second)")
             .defineInRange("EnderEchoingCoreCooldown", 100, 1, Integer.MAX_VALUE);
 
+    public static final ModConfigSpec.IntValue ECHO_DRUSE_MAX_GROWTH_VALUE = BUILDER
+            .comment( "Max growth value for the Echo Druse")
+            .defineInRange("echo druse max growth value", 40000, 4, Integer.MAX_VALUE);
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private static boolean validateItemName(final Object obj) {

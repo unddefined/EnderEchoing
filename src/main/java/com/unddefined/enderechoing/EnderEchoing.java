@@ -30,6 +30,7 @@ public class EnderEchoing {
         BlockEntityRegistry.BLOCK_ENTITY_TYPES.register(modEventBus);
         CreativeModeTabRegistry.CREATIVE_MODE_TABS.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

@@ -1,6 +1,5 @@
 package com.unddefined.enderechoing.items;
 
-import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.client.model.EnderEchoingCoreModel;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer;
@@ -28,7 +27,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
@@ -45,7 +43,6 @@ import java.util.function.Consumer;
 public class EnderEchoingCore extends Item implements GeoItem {
     private static final String CONTROLLER_NAME = "controller";
     private static final String ANIM_USE = "use";
-    Logger logger = LogUtils.getLogger();
     private static final RawAnimation USE_ANIM = RawAnimation.begin().thenPlay("ender_echoing_core.use");
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -134,9 +131,10 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
         return InteractionResultHolder.consume(itemStack);
     }
-    // 当玩家释放使用物品时，移除动画层
+
     @Override
     public void releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int timeLeft) {
+        // 当玩家释放使用物品时，移除动画层
         super.releaseUsing(stack, level, livingEntity, timeLeft);
 
         if (level.isClientSide() && livingEntity instanceof AbstractClientPlayer clientPlayer) {

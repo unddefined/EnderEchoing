@@ -84,6 +84,7 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
     
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        // 如果不是使用回响碎片，则保持原有的逻辑
         if (stack.getItem() == ItemRegistry.ENDER_ECHOING_CORE.get()) {
             if (!level.isClientSide()) {
                 // 消耗一个EnderEchoingCore物品

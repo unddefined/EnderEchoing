@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.unddefined.enderechoing.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "CatalystListenerMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

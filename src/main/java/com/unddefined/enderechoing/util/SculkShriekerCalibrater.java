@@ -47,6 +47,7 @@ public class SculkShriekerCalibrater {
                     }
                     //播放Sculk音效
                     event.getLevel().playSound(null, event.getPos(), SoundEvents.SCULK_BLOCK_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    event.getLevel().playSound(null, event.getPos(), SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.BLOCKS, 0.3F, 1.0F);
                     event.getLevel().gameEvent(event.getEntity(), GameEvent.BLOCK_PLACE, event.getPos());
                 }
             }
