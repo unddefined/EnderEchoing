@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PAP",
+    "ABA",
+    "PAP"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:ender_pearl"
+    },
+    "P": {
+      "item": "minecraft:phantom_membrane"
+    },
+    "B": {
+      "item": "enderechoing:echo_druse"
+    }
+  },
+  "result": {
+    "id": "enderechoing:ender_echoing_core",
+    "count": 1
+  }
+}

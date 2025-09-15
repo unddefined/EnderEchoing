@@ -3,7 +3,7 @@ package com.unddefined.enderechoing.blocks;
 import com.mojang.serialization.MapCodec;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicTeleporterBlockEntity;
-import com.unddefined.enderechoing.registry.ItemRegistry;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.TeleporterManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;

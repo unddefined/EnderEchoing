@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "com.unddefined.enderechoing.mixin",
+  "package": "com.unddefined.enderechoing.server.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "CatalystListenerMixin",

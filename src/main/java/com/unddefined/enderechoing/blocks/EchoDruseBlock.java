@@ -2,7 +2,7 @@ package com.unddefined.enderechoing.blocks;
 
 import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.blocks.entity.EchoDruseBlockEntity;
-import com.unddefined.enderechoing.registry.ItemRegistry;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;

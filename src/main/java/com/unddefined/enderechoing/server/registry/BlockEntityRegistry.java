@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.registry;
+package com.unddefined.enderechoing.server.registry;
 
 import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEntity;
 import com.unddefined.enderechoing.blocks.entity.EchoDruseBlockEntity;

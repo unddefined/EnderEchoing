@@ -1,8 +1,8 @@
 package com.unddefined.enderechoing.blocks;
 
 import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEntity;
-import com.unddefined.enderechoing.registry.BlockRegistry;
-import com.unddefined.enderechoing.registry.ItemRegistry;
+import com.unddefined.enderechoing.server.registry.BlockRegistry;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;

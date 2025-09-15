@@ -1,8 +1,8 @@
-package com.unddefined.enderechoing.mixin;
+package com.unddefined.enderechoing.server.mixin;
 
 import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.blocks.entity.EchoDruseBlockEntity;
-import com.unddefined.enderechoing.registry.BlockRegistry;
+import com.unddefined.enderechoing.server.registry.BlockRegistry;
 import net.minecraft.Optionull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;

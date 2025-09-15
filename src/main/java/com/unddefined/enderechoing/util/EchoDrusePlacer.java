@@ -1,7 +1,7 @@
 package com.unddefined.enderechoing.util;
 
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.registry.BlockRegistry;
+import com.unddefined.enderechoing.server.registry.BlockRegistry;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;

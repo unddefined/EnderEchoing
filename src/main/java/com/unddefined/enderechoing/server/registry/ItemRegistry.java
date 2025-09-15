@@ -1,8 +1,9 @@
-package com.unddefined.enderechoing.registry;
+package com.unddefined.enderechoing.server.registry;
 
 import com.unddefined.enderechoing.blocks.EchoDruseBlock;
 import com.unddefined.enderechoing.items.EchoDruse;
 import com.unddefined.enderechoing.items.EnderEchoingCore;
+import com.unddefined.enderechoing.items.EnderEchoingPearl;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -14,6 +15,8 @@ public class ItemRegistry {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems("enderechoing");
     public static final DeferredItem<Item> ENDER_ECHOING_CORE = ITEMS.registerItem("ender_echoing_core", EnderEchoingCore::new);
     public static final DeferredItem<Item> ECHO_DRUSE = ITEMS.registerItem("echo_druse", EchoDruse::new);
+    public static final DeferredItem<Item> ENDER_ECHOING_PEARL = ITEMS.registerItem("ender_echoing_pearl", EnderEchoingPearl::new);
+
 
     public static final DeferredItem<BlockItem> ENDER_ECHOIC_TELEPORTER_ITEM = ITEMS.registerSimpleBlockItem("ender_echoic_teleporter", BlockRegistry.ENDER_ECHOIC_TELEPORTER);
     public static final DeferredItem<BlockItem> CALIBRATED_SCULK_SHRIEKER_ITEM = ITEMS.registerSimpleBlockItem("calibrated_sculk_shrieker", BlockRegistry.CALIBRATED_SCULK_SHRIEKER);

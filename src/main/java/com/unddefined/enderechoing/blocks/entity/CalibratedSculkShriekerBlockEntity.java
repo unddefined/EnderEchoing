@@ -1,6 +1,6 @@
 package com.unddefined.enderechoing.blocks.entity;
 
-import com.unddefined.enderechoing.registry.BlockEntityRegistry;
+import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;

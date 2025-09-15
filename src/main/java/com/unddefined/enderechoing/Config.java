@@ -10,7 +10,6 @@ import java.util.List;
 // Demonstrates how to use Neo's config APIs
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
-    static final ModConfigSpec SPEC = BUILDER.build();
 
     // a list of strings that are treated as resource locations for items
     public static final ModConfigSpec.ConfigValue<List<? extends String>> ITEM_STRINGS = BUILDER
@@ -31,4 +30,5 @@ public class Config {
     private static boolean validateItemName(final Object obj) {
         return obj instanceof String itemName && BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(itemName));
     }
+    static final ModConfigSpec SPEC = BUILDER.build();
 }

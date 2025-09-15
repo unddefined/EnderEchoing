@@ -2,7 +2,7 @@ package com.unddefined.enderechoing.client.renderer.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicTeleporterBlockEntity;
-import com.unddefined.enderechoing.registry.ItemRegistry;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.item.ItemStack;
 import software.bernie.geckolib.cache.object.GeoBone;

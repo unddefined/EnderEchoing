@@ -1,12 +1,11 @@
 package com.unddefined.enderechoing;
 
 import com.mojang.logging.LogUtils;
-import com.unddefined.enderechoing.registry.BlockEntityRegistry;
-import com.unddefined.enderechoing.registry.BlockRegistry;
-import com.unddefined.enderechoing.registry.CreativeModeTabRegistry;
-import com.unddefined.enderechoing.registry.ItemRegistry;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.level.block.Blocks;
+import com.unddefined.enderechoing.server.DataComponents.EnderEchoingPearlData;
+import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
+import com.unddefined.enderechoing.server.registry.BlockRegistry;
+import com.unddefined.enderechoing.server.registry.CreativeModeTabRegistry;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -29,18 +28,13 @@ public class EnderEchoing {
         ItemRegistry.ITEMS.register(modEventBus);
         BlockEntityRegistry.BLOCK_ENTITY_TYPES.register(modEventBus);
         CreativeModeTabRegistry.CREATIVE_MODE_TABS.register(modEventBus);
+        EnderEchoingPearlData.REGISTRAR.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
         LOGGER.info("HELLO FROM COMMON SETUP");
-
-        if (Config.LOG_DIRT_BLOCK.getAsBoolean()) {
-            LOGGER.info("DIRT BLOCK >> {}", BuiltInRegistries.BLOCK.getKey(Blocks.DIRT));
-        }
-
-        LOGGER.info("{}{}", Config.MAGIC_NUMBER_INTRODUCTION.get(), Config.MAGIC_NUMBER.getAsInt());
 
         Config.ITEM_STRINGS.get().forEach((item) -> LOGGER.info("ITEM >> {}", item));
     }

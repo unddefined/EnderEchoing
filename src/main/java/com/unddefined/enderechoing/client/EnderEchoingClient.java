@@ -5,7 +5,7 @@ import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.TransparentScreen;
 import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShriekerRenderer;
 import com.unddefined.enderechoing.client.renderer.block.EnderEchoicTeleporterRenderer;
-import com.unddefined.enderechoing.registry.BlockEntityRegistry;
+import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -31,6 +31,7 @@ public class EnderEchoingClient {
             InputConstants.KEY_R,
             "key.categories." + EnderEchoing.MODID
     );
+    
 
     public EnderEchoingClient(ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.
@@ -54,7 +55,7 @@ public class EnderEchoingClient {
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(OPEN_TRANSPARENT_SCREEN);
     }
-    
+
     @SubscribeEvent
     public static void onKeyInput(InputEvent.Key event) {
         if (OPEN_TRANSPARENT_SCREEN.consumeClick()) {
@@ -67,5 +68,4 @@ public class EnderEchoingClient {
             }
         }
     }
-
 }
