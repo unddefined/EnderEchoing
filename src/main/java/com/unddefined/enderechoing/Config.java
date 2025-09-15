@@ -10,24 +10,13 @@ import java.util.List;
 // Demonstrates how to use Neo's config APIs
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
-
-    public static final ModConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
-            .comment("Whether to log the dirt block on common setup")
-            .define("logDirtBlock", true);
-
-    public static final ModConfigSpec.IntValue MAGIC_NUMBER = BUILDER
-            .comment("A magic number")
-            .defineInRange("magicNumber", 42, 0, Integer.MAX_VALUE);
-
-    public static final ModConfigSpec.ConfigValue<String> MAGIC_NUMBER_INTRODUCTION = BUILDER
-            .comment("What you want the introduction message to be for the magic number")
-            .define("magicNumberIntroduction", "The magic number is... ");
+    static final ModConfigSpec SPEC = BUILDER.build();
 
     // a list of strings that are treated as resource locations for items
     public static final ModConfigSpec.ConfigValue<List<? extends String>> ITEM_STRINGS = BUILDER
             .comment("A list of items to log on common setup.")
             .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), () -> "", Config::validateItemName);
-            
+
     public static final ModConfigSpec.IntValue ENDER_ECHOING_CORE_COOLDOWN = BUILDER
             .comment("Cooldown time for the Ender Echoing Core in ticks (20 ticks = 1 second)")
             .defineInRange("EnderEchoingCoreCooldown", 100, 1, Integer.MAX_VALUE);
@@ -35,8 +24,10 @@ public class Config {
     public static final ModConfigSpec.IntValue ECHO_DRUSE_MAX_GROWTH_VALUE = BUILDER
             .comment( "Max growth value for the Echo Druse")
             .defineInRange("echo druse max growth value", 40000, 4, Integer.MAX_VALUE);
-    static final ModConfigSpec SPEC = BUILDER.build();
 
+    public static final ModConfigSpec.DoubleValue ECHO_DRUSE_GENERATION_PROBABILITY = BUILDER
+            .comment( "Probability of Echo Druse block generation")
+            .defineInRange("echo druse max growth value",  0.3, 0, Double.MAX_VALUE);
     private static boolean validateItemName(final Object obj) {
         return obj instanceof String itemName && BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(itemName));
     }

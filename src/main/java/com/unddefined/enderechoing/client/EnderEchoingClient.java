@@ -1,7 +1,6 @@
 package com.unddefined.enderechoing.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.TransparentScreen;
 import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShriekerRenderer;
@@ -54,7 +53,6 @@ public class EnderEchoingClient {
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(OPEN_TRANSPARENT_SCREEN);
-        LogUtils.getLogger().info("onRegisterKeyMappings"+OPEN_TRANSPARENT_SCREEN);
     }
     
     @SubscribeEvent

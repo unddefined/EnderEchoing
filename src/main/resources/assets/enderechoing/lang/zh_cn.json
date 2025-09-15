@@ -3,6 +3,7 @@
   "block.enderechoing.ender_echoic_teleporter.tooltip": "放置在世界中，使用末影回响核心传送到此处！",
   "block.enderechoing.ender_echoic_teleporter.placed": "末影回响传送器已放置！您现在可以传送到这个位置。",
   "block.enderechoing.ender_echoic_teleporter.removed": "末影回响传送器已移除！",
+  "block.enderechoing.echo_druse_block": "回响晶簇",
   "item.enderechoing.ender_echoing_core": "末影回响核心",
   "item.enderechoing.ender_echoing_core.cooldown": "物品正在冷却中！",
   "item.enderechoing.ender_echoing_core.no_ender_pearl": "你需要末影珍珠来使用此物品！",

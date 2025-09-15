@@ -3,6 +3,7 @@
   "block.enderechoing.ender_echoic_teleporter.tooltip": "Place in the world and use Ender Echoing Core to teleport to it!",
   "block.enderechoing.ender_echoic_teleporter.placed": "Ender Echoic Teleporter placed! You can now teleport to this location.",
   "block.enderechoing.ender_echoic_teleporter.removed": "Ender Echoic Teleporter removed!",
+  "block.enderechoing.echo_druse_block": "Echo Druse",
   "item.enderechoing.ender_echoing_core": "Ender echoing core",
   "item.enderechoing.ender_echoing_core.no_ender_pearl": "You need an Ender Pearl to use this item!",
   "item.enderechoing.ender_echoing_core.no_teleporter": "No teleporter found!",

@@ -37,9 +37,8 @@ public class CalibratedSculkShriekerRenderer extends GeoBlockRenderer<Calibrated
                 poseStack.mulPose(Axis.XN.rotationDegrees(180));
                 poseStack.translate(0, -1.0, 0);
             }
-            case UP -> {
-                poseStack.translate(0, 0, 0);
-            }
+            default -> poseStack.translate(0, 0, 0);
+
         }
     }
 

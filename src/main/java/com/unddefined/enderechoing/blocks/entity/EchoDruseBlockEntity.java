@@ -17,7 +17,7 @@ public class EchoDruseBlockEntity extends BlockEntity {
             default -> 0;
         };
     }
-    private static final int MAX_GROWTH_VALUE = Config.ECHO_DRUSE_MAX_GROWTH_VALUE.get();;
+    private static final int MAX_GROWTH_VALUE = Config.ECHO_DRUSE_MAX_GROWTH_VALUE.get();
 
     public EchoDruseBlockEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityRegistry.ECHO_DRUSE.get(), pos, blockState);

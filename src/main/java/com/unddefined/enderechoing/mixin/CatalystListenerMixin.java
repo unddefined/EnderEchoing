@@ -1,6 +1,5 @@
 package com.unddefined.enderechoing.mixin;
 
-import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.blocks.entity.EchoDruseBlockEntity;
 import com.unddefined.enderechoing.registry.BlockRegistry;
@@ -40,7 +39,6 @@ public class CatalystListenerMixin {
         if (gameEvent.is(GameEvent.ENTITY_DIE) && context.sourceEntity() instanceof LivingEntity livingEntity) {
             if (!livingEntity.wasExperienceConsumed()) {
                 int experienceReward = livingEntity.getExperienceReward(level, Optionull.map(livingEntity.getLastDamageSource(), DamageSource::getEntity));
-                LogUtils.getLogger().info("Experience Reward: " + experienceReward);
                 if (livingEntity.shouldDropExperience() && experienceReward > 0) {
                     
                     // 通过positionSource获取Sculk Catalyst的位置
@@ -54,14 +52,13 @@ public class CatalystListenerMixin {
                             // 获取方块实体
                             if (level.getBlockEntity(catalystPos.above()) instanceof EchoDruseBlockEntity echoDruseEntity) {
                                 if(echoDruseEntity.getGrowthValue() <= Config.ECHO_DRUSE_MAX_GROWTH_VALUE.get()) {
-                                    LogUtils.getLogger().info("EchoDruse growth value: " + echoDruseEntity.getGrowthValue());
                                     // 增加EchoDruse的生长值
                                     echoDruseEntity.setGrowthValue(experienceReward);
                                     // 标记经验已被消耗
                                     livingEntity.skipDropExperience();
                                     //region 调用bloom方法
                                     BlockState catalystState = level.getBlockState(catalystPos);
-                                    level.setBlock(catalystPos, catalystState.setValue(SculkCatalystBlock.PULSE, Boolean.valueOf(true)), 3);
+                                    level.setBlock(catalystPos, catalystState.setValue(SculkCatalystBlock.PULSE, Boolean.TRUE), 3);
                                     level.scheduleTick(catalystPos, catalystState.getBlock(), 8);
                                     level.sendParticles(
                                             ParticleTypes.SCULK_SOUL,

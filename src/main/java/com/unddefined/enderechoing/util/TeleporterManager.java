@@ -90,15 +90,12 @@ public class TeleporterManager extends SavedData {
     public boolean hasTeleporters() {
         return !teleporters.isEmpty();
     }
-    
+
     // 内部类用于存储传送器位置和所在世界的信息
-    private static class TeleporterEntry {
-        private final String dimensionLocation;
-        private final BlockPos pos;
-        
-        public TeleporterEntry(String dimensionLocation, BlockPos pos) {
-            this.dimensionLocation = dimensionLocation;
-            this.pos = pos.immutable();
+        private record TeleporterEntry(String dimensionLocation, BlockPos pos) {
+            private TeleporterEntry(String dimensionLocation, BlockPos pos) {
+                this.dimensionLocation = dimensionLocation;
+                this.pos = pos.immutable();
+            }
         }
-    }
 }
