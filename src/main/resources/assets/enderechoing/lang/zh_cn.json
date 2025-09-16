@@ -21,5 +21,9 @@
   "item.enderechoing.ender_echoing_pearl.position": "x:%s y:%s z:%s %s",
   "key.categories.enderechoing": "末影回响",
   "key.enderechoing.open_transparent_screen": "打开透明屏幕",
-  "creativetab.enderechoing": "末影回响"
+  "creativetab.enderechoing": "末影回响",
+  "effect.enderechoing.tinnitus": "耳鸣",
+  "effect.enderechoing.deafness": "失聪",
+  "effect.enderechoing.dysfunction": "机能失调",
+  "effect.enderechoing.attack_dyscoordination": "攻击失调"
 }

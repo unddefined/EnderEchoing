@@ -42,8 +42,6 @@ public class EnderEchoingClient {
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
-        // Some client setup code
-
         // Register block entity renderers
         event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get(),
                 context -> new EnderEchoicTeleporterRenderer()));

@@ -27,5 +27,9 @@
   "screen.enderechoing.cancel": "Cancel",
   "key.categories.enderechoing": "Ender Echoing",
   "key.enderechoing.open_transparent_screen": "Open Transparent Screen",
-  "creativetab.enderechoing": "Ender Echoing"
+  "creativetab.enderechoing": "Ender Echoing",
+  "effect.enderechoing.tinnitus": "Tinnitus",
+  "effect.enderechoing.deafness": "Deafness",
+  "effect.enderechoing.dysfunction": "Dysfunction",
+  "effect.enderechoing.attack_dyscoordination": "Attack Dyscoordination"
 }

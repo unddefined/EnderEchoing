@@ -1,0 +1,10 @@
+{
+  "tinnitus": {
+    "sounds": [
+      {
+        "name": "enderechoing:tinnitus",
+        "stream": false
+      }
+    ]
+  }
+}

@@ -1,6 +1,11 @@
 package com.unddefined.enderechoing;
 
 import com.mojang.logging.LogUtils;
+import com.unddefined.enderechoing.client.ModSoundEvents;
+import com.unddefined.enderechoing.effects.AttackScatteredEffect;
+import com.unddefined.enderechoing.effects.DeafEffect;
+import com.unddefined.enderechoing.effects.StaggerEffect;
+import com.unddefined.enderechoing.effects.TinnitusEffect;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoingPearlData;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.BlockRegistry;
@@ -28,9 +33,13 @@ public class EnderEchoing {
         ItemRegistry.ITEMS.register(modEventBus);
         BlockEntityRegistry.BLOCK_ENTITY_TYPES.register(modEventBus);
         CreativeModeTabRegistry.CREATIVE_MODE_TABS.register(modEventBus);
+        DeafEffect.MOB_EFFECTS.register(modEventBus);
+        TinnitusEffect.MOB_EFFECTS.register(modEventBus);
+        StaggerEffect.MOB_EFFECTS.register(modEventBus);
+        AttackScatteredEffect.MOB_EFFECTS.register(modEventBus);
         EnderEchoingPearlData.REGISTRAR.register(modEventBus);
+        ModSoundEvents.SOUND_EVENTS.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
-
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
