@@ -2,12 +2,17 @@ package com.unddefined.enderechoing.effects;
 
 import com.unddefined.enderechoing.EnderEchoing;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.monster.Monster;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import static net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
 
 
 public class StaggerEffect extends MobEffect {
@@ -26,22 +31,30 @@ public class StaggerEffect extends MobEffect {
         if (!entity.onGround()) {
             RandomSource random = entity.getRandom();
             // 等级越高摔倒概率越高
-
-            if (random.nextDouble() <  0.1 * (amplifier + 1)) {
+            if (random.nextDouble() < 0.1 * (amplifier + 1)) {
                 // 取消跳跃并施加向下的力模拟摔倒
                 entity.setOnGround(false);
                 entity.setDeltaMovement(entity.getDeltaMovement().add(0, -0.3, 0));
             }
         }
         final float random = entity.getRandom().nextFloat();
-        if (random < 0.1f) {
-            double x = entity.getRandom().nextDouble() * 0.3 - 0.15;
-            double z = entity.getRandom().nextDouble() * 0.3 - 0.15;
+        if (random < 0.8f) {
+            if (entity instanceof Monster monster) {
+                monster.getMoveControl().strafe(
+                        (entity.getRandom().nextFloat() - 0.5f) * 0.5f,
+                        (entity.getRandom().nextFloat() - 0.5f) * 0.5f
+                );
+            }
+            double x = entity.getRandom().nextDouble() * 0.3 - 0.1;
+            double z = entity.getRandom().nextDouble() * 0.3 - 0.1;
             entity.setDeltaMovement(entity.getDeltaMovement().add(x, 0, z));
         }
-        if (random < 0.1f) {
-            float slowdownFactor = 0.9f - (amplifier * random);
-            entity.setSpeed(entity.getSpeed() * slowdownFactor);
+        if (random < 0.8f) {
+            // 随机改变移动速度
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "stagger_effect");
+            AttributeModifier modifier = new AttributeModifier(id, -random+0.3, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+            entity.getAttribute(MOVEMENT_SPEED).removeModifier(modifier);
+            entity.getAttribute(MOVEMENT_SPEED).addTransientModifier(modifier);
         }
         return true;
     }

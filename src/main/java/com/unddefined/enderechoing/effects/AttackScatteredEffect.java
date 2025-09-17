@@ -2,15 +2,19 @@ package com.unddefined.enderechoing.effects;
 
 import com.unddefined.enderechoing.EnderEchoing;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import static net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_SPEED;
+import static net.minecraft.world.entity.ai.memory.MemoryModuleType.ATTACK_TARGET;
+import static net.minecraft.world.entity.ai.memory.MemoryModuleType.NEAREST_ATTACKABLE;
 
 public class AttackScatteredEffect extends MobEffect {
     //攻击失调
@@ -24,13 +28,24 @@ public class AttackScatteredEffect extends MobEffect {
 
     @Override
     public boolean applyEffectTick(LivingEntity entity, int amplifier) {
-        if (entity.getRandom().nextInt(8) == 0){
-            entity.releaseUsingItem();
-            if (entity instanceof Monster monster){
-                monster.setTarget(null);
-            }
+        entity.releaseUsingItem();
+        if (entity instanceof Monster monster && entity.getRandom().nextFloat()<=0.7f) {
+            // 强制清除目标
+            monster.setTarget(null);
+            // 清除记忆中的攻击目标
+            monster.setLastHurtByMob(null);
+            monster.setLastHurtByPlayer(null);
+            monster.getNavigation().stop();
+            monster.getBrain().eraseMemory(ATTACK_TARGET);
+            monster.getBrain().eraseMemory(NEAREST_ATTACKABLE);
         }
-        if (entity instanceof Player player) player.getAttribute(ATTACK_SPEED).setBaseValue(entity.getRandom().nextFloat()+2.5f);
+        if (entity instanceof Player player) {
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "attack_scattered");
+            AttributeModifier modifier = new AttributeModifier(id, -entity.getRandom().nextFloat(), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+            player.getAttribute(ATTACK_SPEED).removeModifier(modifier);
+            player.getAttribute(ATTACK_SPEED).addTransientModifier(modifier);
+        }
+
 
         return true;
     }

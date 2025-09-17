@@ -30,6 +30,6 @@
   "creativetab.enderechoing": "Ender Echoing",
   "effect.enderechoing.tinnitus": "Tinnitus",
   "effect.enderechoing.deafness": "Deafness",
-  "effect.enderechoing.dysfunction": "Dysfunction",
-  "effect.enderechoing.attack_dyscoordination": "Attack Dyscoordination"
+  "effect.enderechoing.stagger": "Stagger",
+  "effect.enderechoing.attack_scattered": "Attack Scattered"
 }

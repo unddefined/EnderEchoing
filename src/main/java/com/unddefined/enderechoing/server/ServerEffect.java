@@ -34,6 +34,7 @@ public class ServerEffect {
             movement.forwardImpulse += (random.nextFloat() - 0.5f) * offsetStrength;
             movement.leftImpulse += (random.nextFloat() - 0.5f) * offsetStrength;
         }
+
     }
 
     @SubscribeEvent
@@ -47,7 +48,7 @@ public class ServerEffect {
 
                 // 根据效果等级有概率取消攻击
                 RandomSource random = entity.getRandom();
-                float chance = 0.05f * (amplifier + 1); // 每级增加5%的概率
+                float chance = 0.3f * (amplifier + 1); // 每级增加5%的概率
                 if (random.nextFloat() < chance) {
                     // 取消攻击
                     event.setCanceled(true);
