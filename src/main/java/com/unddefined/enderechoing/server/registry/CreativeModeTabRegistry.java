@@ -25,6 +25,7 @@ public class CreativeModeTabRegistry {
                 output.accept(ItemRegistry.ECHO_DRUSE.get());
                 output.accept(ItemRegistry.ENDER_ECHOING_PEARL.get());
                 output.accept(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get());
+                output.accept(ItemRegistry.SCULK_WHISPER_ITEM.get());
                 output.accept(ItemRegistry.ECHO_DRUSE_STAGE1_ITEM.get());
                 output.accept(ItemRegistry.ECHO_DRUSE_STAGE2_ITEM.get());
                 output.accept(ItemRegistry.ECHO_DRUSE_STAGE3_ITEM.get());

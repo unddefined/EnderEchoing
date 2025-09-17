@@ -7,6 +7,7 @@ import com.unddefined.enderechoing.items.EnderEchoingCore;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import software.bernie.geckolib.model.GeoModel;
@@ -31,7 +32,7 @@ public class EnderEchoingCoreRenderer extends GeoItemRenderer<EnderEchoingCore> 
             poseStack.translate(0.3, 0.26, 0);
         }
         RenderType renderType = getRenderType(this.animatable, getTextureLocation(this.animatable), bufferSource, partialTick);
-        VertexConsumer buffer = Minecraft.getInstance().getItemRenderer().getFoilBufferDirect(bufferSource, renderType, true, this.currentItemStack != null && this.currentItemStack.hasFoil());
+        VertexConsumer buffer = ItemRenderer.getFoilBufferDirect(bufferSource, renderType, true, this.currentItemStack != null && this.currentItemStack.hasFoil());
 
         defaultRender(poseStack, this.animatable, bufferSource, renderType, buffer, 0f, partialTick, packedLight);
 

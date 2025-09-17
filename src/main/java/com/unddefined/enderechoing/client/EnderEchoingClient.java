@@ -5,6 +5,7 @@ import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.TransparentScreen;
 import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShriekerRenderer;
 import com.unddefined.enderechoing.client.renderer.block.EnderEchoicTeleporterRenderer;
+import com.unddefined.enderechoing.client.renderer.block.SculkWhisperRenderer;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -47,6 +48,8 @@ public class EnderEchoingClient {
                 context -> new EnderEchoicTeleporterRenderer()));
         event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.CALIBRATED_SCULK_SHRIEKER.get(),
                 context -> new CalibratedSculkShriekerRenderer()));
+        event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.SCULK_WHISPER.get(),
+                context -> new SculkWhisperRenderer()));
     }
 
     @SubscribeEvent

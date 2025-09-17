@@ -29,14 +29,12 @@ public class EditScreen extends Screen {
         this.setInitialFocus(this.nameField);
 
         // 添加完成按钮
-        this.doneButton = this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.done"), (button) -> {
-            this.onDone();
-        }).bounds(this.width / 2 - 102, this.height / 2 + 25, 100, 20).build());
+        this.doneButton = this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.done"), (button) ->
+                this.onDone()).bounds(this.width / 2 - 102, this.height / 2 + 25, 100, 20).build());
 
         // 添加取消按钮
-        this.cancelButton = this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.cancel"), (button) -> {
-            this.onClose();
-        }).bounds(this.width / 2 + 2, this.height / 2 + 25, 100, 20).build());
+        this.cancelButton = this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.cancel"), (button) ->
+                this.onClose()).bounds(this.width / 2 + 2, this.height / 2 + 25, 100, 20).build());
     }
 
     @Override
@@ -73,5 +71,13 @@ public class EditScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false; // 不暂停游戏
+    }
+
+    public Button getDoneButton() {
+        return doneButton;
+    }
+
+    public Button getCancelButton() {
+        return cancelButton;
     }
 }

@@ -39,7 +39,7 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
         super(Properties.of()
                 .noOcclusion()
                 .sound(SoundType.SCULK_SHRIEKER)
-                .explosionResistance(1000.0F)
+                .explosionResistance(1.0F)
                 .destroyTime(1.5F)
                 .pushReaction(PushReaction.DESTROY)
                 .dynamicShape()

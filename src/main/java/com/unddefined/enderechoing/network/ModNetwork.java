@@ -20,14 +20,14 @@ public class ModNetwork {
         registrar.playToServer(
                 ItemRenamePacket.TYPE,
                 ItemRenamePacket.STREAM_CODEC,
-                (packet, context) -> packet.handle(context)
+                ItemRenamePacket::handle
         );
         
         // 注册打开编辑屏幕数据包
         registrar.playToClient(
                 OpenEditScreenPacket.TYPE,
                 OpenEditScreenPacket.STREAM_CODEC,
-                (packet, context) -> packet.handle(context)
+                OpenEditScreenPacket::handle
         );
     }
 }

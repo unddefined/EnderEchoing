@@ -17,11 +17,11 @@ public class EnderEchoingPearlData {
                         Codec.STRING.fieldOf("dimension").forGetter(PositionData::dimension)
                 ).apply(instance, PositionData::new)
         );
-    };
+    }
     
     public record EntityData(){
         public static final Codec<EntityData> CODEC = Codec.unit(EntityData::new);
-    };
+    }
 
     public static final DeferredRegister.DataComponents REGISTRAR = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, "enderechoing");
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<PositionData>> POSITION = REGISTRAR.registerComponentType("position", builder -> builder.persistent(PositionData.CODEC));
