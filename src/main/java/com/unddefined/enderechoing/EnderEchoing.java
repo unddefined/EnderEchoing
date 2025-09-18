@@ -7,10 +7,7 @@ import com.unddefined.enderechoing.effects.DeafEffect;
 import com.unddefined.enderechoing.effects.StaggerEffect;
 import com.unddefined.enderechoing.effects.TinnitusEffect;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoingPearlData;
-import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
-import com.unddefined.enderechoing.server.registry.BlockRegistry;
-import com.unddefined.enderechoing.server.registry.CreativeModeTabRegistry;
-import com.unddefined.enderechoing.server.registry.ItemRegistry;
+import com.unddefined.enderechoing.server.registry.*;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -39,6 +36,7 @@ public class EnderEchoing {
         AttackScatteredEffect.MOB_EFFECTS.register(modEventBus);
         EnderEchoingPearlData.REGISTRAR.register(modEventBus);
         ModSoundEvents.SOUND_EVENTS.register(modEventBus);
+        ParticlesRegistry.PARTICLE_TYPES.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 

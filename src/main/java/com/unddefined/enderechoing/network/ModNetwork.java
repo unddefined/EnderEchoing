@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.network;
 
 import com.unddefined.enderechoing.EnderEchoing;
+import com.unddefined.enderechoing.network.packet.InfrasoundParticlePacket;
 import com.unddefined.enderechoing.network.packet.ItemRenamePacket;
 import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -28,6 +29,13 @@ public class ModNetwork {
                 OpenEditScreenPacket.TYPE,
                 OpenEditScreenPacket.STREAM_CODEC,
                 OpenEditScreenPacket::handle
+        );
+
+        // 注册次声波粒子效果数据包
+        registrar.playToClient(
+                InfrasoundParticlePacket.TYPE,
+                InfrasoundParticlePacket.STREAM_CODEC,
+                InfrasoundParticlePacket::handle
         );
     }
 }

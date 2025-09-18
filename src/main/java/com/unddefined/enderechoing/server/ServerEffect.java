@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.server;
 
 import com.unddefined.enderechoing.EnderEchoing;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -9,12 +10,37 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
 import static com.unddefined.enderechoing.effects.AttackScatteredEffect.ATTACK_SCATTERED;
+import static com.unddefined.enderechoing.effects.AttackScatteredEffect.attack_scattered_modifier_id;
 import static com.unddefined.enderechoing.effects.StaggerEffect.STAGGER;
+import static com.unddefined.enderechoing.effects.StaggerEffect.stagger_modifier_id;
+import static com.unddefined.enderechoing.effects.TinnitusEffect.TINNITUS;
+import static com.unddefined.enderechoing.effects.TinnitusEffect.tinnitusSound;
+import static net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
 
 @EventBusSubscriber(modid = EnderEchoing.MODID)
 public class ServerEffect {
+    @SubscribeEvent
+    public static void onExpireEffect(MobEffectEvent.Expired event) {
+        if (!event.getEntity().hasEffect(TINNITUS)) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player == event.getEntity()) {
+                if (tinnitusSound.get() != null) {
+                    mc.getSoundManager().stop(tinnitusSound.get());
+                    tinnitusSound.remove();
+                }
+            }
+        }
+        if (!event.getEntity().hasEffect(STAGGER)) {
+            event.getEntity().getAttribute(MOVEMENT_SPEED).removeModifier(stagger_modifier_id);
+        }
+        if (!event.getEntity().hasEffect(ATTACK_SCATTERED)) {
+            event.getEntity().getAttribute(MOVEMENT_SPEED).removeModifier(attack_scattered_modifier_id);
+        }
+
+    }
 
     @SubscribeEvent
     public static void onMovementInput(MovementInputUpdateEvent event) {
@@ -40,7 +66,7 @@ public class ServerEffect {
     @SubscribeEvent
     public static void onLivingAttack(LivingIncomingDamageEvent event) {
         LivingEntity entity = event.getEntity();
-        if (entity.hasEffect(ATTACK_SCATTERED) ){
+        if (entity.hasEffect(ATTACK_SCATTERED)) {
             // 获取效果实例
             MobEffectInstance effectInstance = entity.getEffect(ATTACK_SCATTERED);
             if (effectInstance != null) {

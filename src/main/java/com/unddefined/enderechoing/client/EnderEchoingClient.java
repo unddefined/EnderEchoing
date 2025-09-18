@@ -3,10 +3,12 @@ package com.unddefined.enderechoing.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.TransparentScreen;
+import com.unddefined.enderechoing.client.particles.DirectlyMovingDust;
 import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShriekerRenderer;
 import com.unddefined.enderechoing.client.renderer.block.EnderEchoicTeleporterRenderer;
 import com.unddefined.enderechoing.client.renderer.block.SculkWhisperRenderer;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
+import com.unddefined.enderechoing.server.registry.ParticlesRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -18,6 +20,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
@@ -26,7 +29,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 @Mod(value = EnderEchoing.MODID, dist = Dist.CLIENT)
 // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
 @EventBusSubscriber(modid = EnderEchoing.MODID, value = Dist.CLIENT)
-public class EnderEchoingClient {
+public class    EnderEchoingClient {
     private static final KeyMapping OPEN_TRANSPARENT_SCREEN = new KeyMapping(
             "key." + EnderEchoing.MODID + ".open_transparent_screen",
             InputConstants.KEY_R,
@@ -56,7 +59,12 @@ public class EnderEchoingClient {
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(OPEN_TRANSPARENT_SCREEN);
     }
-
+    
+    @SubscribeEvent
+    public static void registerParticleProviders(RegisterParticleProvidersEvent event){
+        event.registerSpriteSet(ParticlesRegistry.DIRECT_MOVING_DUST.get(), DirectlyMovingDust.Provider::new);
+    }
+    
     @SubscribeEvent
     public static void onKeyInput(InputEvent.Key event) {
         if (OPEN_TRANSPARENT_SCREEN.consumeClick()) {

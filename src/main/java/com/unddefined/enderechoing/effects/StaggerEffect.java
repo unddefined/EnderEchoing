@@ -21,9 +21,9 @@ public class StaggerEffect extends MobEffect {
         super(MobEffectCategory.HARMFUL, 0x8B4513); // 有害效果，棕色
     }
 
+    public static final ResourceLocation stagger_modifier_id = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "stagger_effect");
     public static final DeferredRegister<MobEffect> MOB_EFFECTS = DeferredRegister.create(Registries.MOB_EFFECT, EnderEchoing.MODID);
-    public static final DeferredHolder<MobEffect, StaggerEffect> STAGGER = MOB_EFFECTS.register("stagger",
-            StaggerEffect::new);
+    public static final DeferredHolder<MobEffect, StaggerEffect> STAGGER = MOB_EFFECTS.register("stagger", StaggerEffect::new);
 
     @Override
     public boolean applyEffectTick(LivingEntity entity, int amplifier) {
@@ -49,12 +49,10 @@ public class StaggerEffect extends MobEffect {
             double z = entity.getRandom().nextDouble() * 0.3 - 0.1;
             entity.setDeltaMovement(entity.getDeltaMovement().add(x, 0, z));
         }
+        AttributeModifier stagger_modifier = new AttributeModifier(stagger_modifier_id, -random + 0.3, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         if (random < 0.8f) {
             // 随机改变移动速度
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "stagger_effect");
-            AttributeModifier modifier = new AttributeModifier(id, -random+0.3, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-            entity.getAttribute(MOVEMENT_SPEED).removeModifier(modifier);
-            entity.getAttribute(MOVEMENT_SPEED).addTransientModifier(modifier);
+            entity.getAttribute(MOVEMENT_SPEED).addOrUpdateTransientModifier(stagger_modifier);
         }
         return true;
     }

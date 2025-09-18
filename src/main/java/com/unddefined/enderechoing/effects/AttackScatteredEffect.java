@@ -21,7 +21,7 @@ public class AttackScatteredEffect extends MobEffect {
     public AttackScatteredEffect() {
         super(MobEffectCategory.HARMFUL, 0x808080);
     }
-
+    public static final ResourceLocation attack_scattered_modifier_id = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "attack_scattered");
     public static final DeferredRegister<MobEffect> MOB_EFFECTS = DeferredRegister.create(Registries.MOB_EFFECT, EnderEchoing.MODID);
     public static final DeferredHolder<MobEffect, AttackScatteredEffect> ATTACK_SCATTERED = MOB_EFFECTS.register("attack_scattered",
             AttackScatteredEffect::new);
@@ -40,10 +40,8 @@ public class AttackScatteredEffect extends MobEffect {
             monster.getBrain().eraseMemory(NEAREST_ATTACKABLE);
         }
         if (entity instanceof Player player) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "attack_scattered");
-            AttributeModifier modifier = new AttributeModifier(id, -entity.getRandom().nextFloat(), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-            player.getAttribute(ATTACK_SPEED).removeModifier(modifier);
-            player.getAttribute(ATTACK_SPEED).addTransientModifier(modifier);
+            AttributeModifier modifier = new AttributeModifier(attack_scattered_modifier_id, -entity.getRandom().nextFloat(), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+            player.getAttribute(ATTACK_SPEED).addOrUpdateTransientModifier(modifier);
         }
 
 
