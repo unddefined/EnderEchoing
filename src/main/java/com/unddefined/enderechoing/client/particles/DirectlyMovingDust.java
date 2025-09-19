@@ -27,7 +27,7 @@ public class DirectlyMovingDust extends TextureSheetParticle {
 
         // 设置粒子的基本属性
         this.gravity = 0;
-        this.quadSize = 1F;
+        this.quadSize = options.size;
         this.hasPhysics = false;
         this.setLifetime(options.lifetime);
         // 设置颜色
@@ -43,7 +43,7 @@ public class DirectlyMovingDust extends TextureSheetParticle {
 
         if (this.age++ >= this.lifetime) {
             this.remove();
-        } else {
+        } else if(this.quadSize >= 1F){
             // 计算移动进度
             float progress = (float)this.age / (float)this.lifetime * 10;
             
@@ -57,6 +57,12 @@ public class DirectlyMovingDust extends TextureSheetParticle {
 
             // 随着粒子变老，逐渐减小透明度 (从不透明到透明)
             this.alpha = (float) (this.lifetime - this.age) /200;
+        }else {
+            // 更新精灵帧
+            this.setSpriteFromAge(this.sprites);
+
+            // 随着粒子变老，逐渐减小透明度 (从不透明到透明)
+            this.alpha = (float) (this.lifetime - this.age);
         }
     }
 

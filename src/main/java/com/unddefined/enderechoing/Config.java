@@ -26,7 +26,10 @@ public class Config {
 
     public static final ModConfigSpec.DoubleValue ECHO_DRUSE_GENERATION_PROBABILITY = BUILDER
             .comment( "Probability of Echo Druse block generation")
-            .defineInRange("echo druse max growth value",  0.3, 0, Double.MAX_VALUE);
+            .defineInRange("echo druse generation probability",  0.3, 0, Double.MAX_VALUE);
+    public static final ModConfigSpec.IntValue SCULK_WHISPER_COOLDOWN = BUILDER
+            .comment( "Cooldown of sculk shrieker's InfrasoundBurst")
+            .defineInRange("sculk whisper cooldown",  900, 0, Integer.MAX_VALUE);
     private static boolean validateItemName(final Object obj) {
         return obj instanceof String itemName && BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(itemName));
     }

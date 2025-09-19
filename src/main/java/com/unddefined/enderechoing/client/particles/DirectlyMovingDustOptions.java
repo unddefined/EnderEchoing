@@ -9,14 +9,15 @@ import net.minecraft.network.codec.StreamCodec;
 
 public class DirectlyMovingDustOptions implements ParticleOptions {
     public final int lifetime;
-    public final float red, green, blue;
-    public static final MapCodec<DirectlyMovingDustOptions> CODEC = MapCodec.unit(new DirectlyMovingDustOptions(0, 0f, 0f, 0f));
+    public final float red, green, blue, size;
+    public static final MapCodec<DirectlyMovingDustOptions> CODEC = MapCodec.unit(new DirectlyMovingDustOptions(0, 0f, 0f, 0f, 0f));
 
-    public DirectlyMovingDustOptions(int lifetime, float red, float green, float blue) {
+    public DirectlyMovingDustOptions(int lifetime, float red, float green, float blue,float size) {
         this.lifetime = lifetime;
         this.red = red;
         this.green = green;
         this.blue = blue;
+        this.size = size;
     }
 
     public static final StreamCodec<ByteBuf, DirectlyMovingDustOptions> STREAM_CODEC = StreamCodec.of(
@@ -25,8 +26,9 @@ public class DirectlyMovingDustOptions implements ParticleOptions {
                 buf.writeFloat(options.red);
                 buf.writeFloat(options.green);
                 buf.writeFloat(options.blue);
+                buf.writeFloat(options.size);
             },
-            buf -> new DirectlyMovingDustOptions(buf.readInt(), buf.readFloat(), buf.readFloat(), buf.readFloat())
+            buf -> new DirectlyMovingDustOptions(buf.readInt(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat())
     );
 
     @Override

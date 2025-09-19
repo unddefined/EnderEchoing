@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
-import static net.minecraft.world.effect.MobEffects.CONFUSION;
 import static net.minecraft.world.effect.MobEffects.WEAKNESS;
 
 public class InfrasoundDamage extends DamageSource {
@@ -29,7 +28,7 @@ public class InfrasoundDamage extends DamageSource {
         super(type, directEntity, causingEntity, damageSourcePosition);
     }
 
-    public static void InfrasoundBurst(ServerLevel level, Vec3 center, float hurt_range, float effect_range, Entity causingEntity) {
+    public static void InfrasoundBurst(ServerLevel level, Vec3 center, float hurt_range, float effect_range, int damage, Entity causingEntity) {
         // 获取范围内的所有生物实体
         List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class,
                 net.minecraft.world.phys.AABB.ofSize(center, effect_range * 2, effect_range * 2, effect_range * 2));
@@ -45,11 +44,11 @@ public class InfrasoundDamage extends DamageSource {
                 DamageSource damageSource = new InfrasoundDamage(damageTypeHolder, null, causingEntity, center);
 
                 // 造成effect_range点真实伤害（忽略护甲）
-                entity.hurt(damageSource, effect_range);
+                entity.hurt(damageSource, damage);
             }
 
             // 对在effect_range范围内的生物应用debuff效果
-            if (distanceSqrt <= hurt_range*3) {
+            if (distanceSqrt <= effect_range) {
                 // 计算持续时间 = effect_range - 与中心的距离
                 int duration = (int) (effect_range - distanceSqrt);
 
@@ -57,13 +56,12 @@ public class InfrasoundDamage extends DamageSource {
                 entity.addEffect(new MobEffectInstance(ATTACK_SCATTERED, duration * 20, 1));
                 entity.addEffect(new MobEffectInstance(STAGGER, duration * 20, 1));
                 entity.addEffect(new MobEffectInstance(TINNITUS, duration * 20, 1));
-                // 添加反胃和虚弱效果
-                entity.addEffect(new MobEffectInstance(CONFUSION, duration * 20, 1));
+//                entity.addEffect(new MobEffectInstance(CONFUSION, duration * 20, 1));
                 entity.addEffect(new MobEffectInstance(WEAKNESS, duration * 20, 1));
             }
         }
         // 向所有客户端发送粒子效果数据包
-        PacketDistributor.sendToAllPlayers(new InfrasoundParticlePacket(center, effect_range));
+        PacketDistributor.sendToAllPlayers(new InfrasoundParticlePacket(center, effect_range, false));
     }
 
 

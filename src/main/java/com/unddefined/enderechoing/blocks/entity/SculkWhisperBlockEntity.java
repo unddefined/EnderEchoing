@@ -1,5 +1,7 @@
 package com.unddefined.enderechoing.blocks.entity;
 
+import com.mojang.logging.LogUtils;
+import com.unddefined.enderechoing.network.packet.InfrasoundParticlePacket;
 import com.unddefined.enderechoing.server.InfrasoundDamage;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import net.minecraft.core.BlockPos;
@@ -16,6 +18,7 @@ import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -24,11 +27,17 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
+import static com.unddefined.enderechoing.Config.SCULK_WHISPER_COOLDOWN;
+
 public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEntity, VibrationSystem, GameEventListener.Provider<VibrationSystem.Listener> {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private final VibrationSystem.Data vibrationData = new VibrationSystem.Data();
     private final VibrationSystem.User vibrationUser = new SculkWhisperVibrationUser(this);
     private final VibrationSystem.Listener vibrationListener = new VibrationSystem.Listener(this);
+
+    // 添加冷却计时器
+    private int cooldownTicks = 0;
+    private static final int DEFAULT_COOLDOWN = SCULK_WHISPER_COOLDOWN.get();
 
     public SculkWhisperBlockEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityRegistry.SCULK_WHISPER.get(), pos, blockState);
@@ -63,6 +72,14 @@ public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEnti
         if (level instanceof ServerLevel serverLevel) {
             VibrationSystem.Ticker.tick(serverLevel, blockEntity.vibrationData, blockEntity.vibrationUser);
         }
+        // 更新冷却计时器
+        if (blockEntity.cooldownTicks >= 0) {
+            blockEntity.cooldownTicks--;
+            if(blockEntity.cooldownTicks < 0){ blockEntity.cooldownTicks = 0;}
+            LogUtils.getLogger().info("Cooldown: " + blockEntity.cooldownTicks);
+            float radius = (float) (DEFAULT_COOLDOWN - blockEntity.cooldownTicks) * 0.00025f;
+            PacketDistributor.sendToAllPlayers(new InfrasoundParticlePacket(Vec3.atCenterOf(pos), radius, true));
+        }
     }
 
     static class SculkWhisperVibrationUser implements VibrationSystem.User {
@@ -91,14 +108,17 @@ public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEnti
 
         @Override
         public boolean canReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, GameEvent.Context context) {
-            // 只接收SHRIEKER_CAN_LISTEN标签中的游戏事件
-            return gameEvent.is(GameEventTags.SHRIEKER_CAN_LISTEN);
+            // 只接收SHRIEKER_CAN_LISTEN标签中的游戏事件，并检查冷却状态
+            return gameEvent.is(GameEventTags.SHRIEKER_CAN_LISTEN) && blockEntity.cooldownTicks <= 0;
         }
 
         @Override
         public void onReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, @Nullable Entity entity, @Nullable Entity playerEntity, float distance) {
             Vec3 center = Vec3.atCenterOf(this.blockEntity.getBlockPos().above());
-            InfrasoundDamage.InfrasoundBurst(level, center, 6.0f, 30.0f, entity);
+            InfrasoundDamage.InfrasoundBurst(level, center, 10.0f, 30.0f, 18, entity);
+
+            // 触发后设置冷却时间
+            this.blockEntity.cooldownTicks = DEFAULT_COOLDOWN;
         }
 
         @Override
