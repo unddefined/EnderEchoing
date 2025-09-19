@@ -14,7 +14,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import static net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_SPEED;
 import static net.minecraft.world.entity.ai.memory.MemoryModuleType.ATTACK_TARGET;
-import static net.minecraft.world.entity.ai.memory.MemoryModuleType.NEAREST_ATTACKABLE;
 
 public class AttackScatteredEffect extends MobEffect {
     //攻击失调
@@ -32,12 +31,12 @@ public class AttackScatteredEffect extends MobEffect {
         if (entity instanceof Monster monster && entity.getRandom().nextFloat()<=0.7f) {
             // 强制清除目标
             monster.setTarget(null);
-            // 清除记忆中的攻击目标
+//            // 清除记忆中的攻击目标
             monster.setLastHurtByMob(null);
             monster.setLastHurtByPlayer(null);
             monster.getNavigation().stop();
             monster.getBrain().eraseMemory(ATTACK_TARGET);
-            monster.getBrain().eraseMemory(NEAREST_ATTACKABLE);
+
         }
         if (entity instanceof Player player) {
             AttributeModifier modifier = new AttributeModifier(attack_scattered_modifier_id, -entity.getRandom().nextFloat(), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);

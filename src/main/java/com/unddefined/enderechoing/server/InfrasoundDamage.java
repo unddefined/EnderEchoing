@@ -20,7 +20,8 @@ import java.util.List;
 import static com.unddefined.enderechoing.effects.AttackScatteredEffect.ATTACK_SCATTERED;
 import static com.unddefined.enderechoing.effects.StaggerEffect.STAGGER;
 import static com.unddefined.enderechoing.effects.TinnitusEffect.TINNITUS;
-import static net.minecraft.world.effect.MobEffects.*;
+import static net.minecraft.world.effect.MobEffects.CONFUSION;
+import static net.minecraft.world.effect.MobEffects.WEAKNESS;
 
 public class InfrasoundDamage extends DamageSource {
     public static final ResourceKey<DamageType> INFRASOUND_DAMAGE =
@@ -50,7 +51,7 @@ public class InfrasoundDamage extends DamageSource {
             }
 
             // 对在effect_range范围内的生物应用debuff效果
-            if (distanceSqrt <= effect_range) {
+            if (distanceSqrt <= hurt_range*3) {
                 // 计算持续时间 = effect_range - 与中心的距离
                 int duration = (int) (effect_range - distanceSqrt);
 

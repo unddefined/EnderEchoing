@@ -98,7 +98,7 @@ public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEnti
         @Override
         public void onReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, @Nullable Entity entity, @Nullable Entity playerEntity, float distance) {
             Vec3 center = Vec3.atCenterOf(this.blockEntity.getBlockPos().above());
-            InfrasoundDamage.InfrasoundBurst(level, center, 4.0f, 12.0f, entity);
+            InfrasoundDamage.InfrasoundBurst(level, center, 6.0f, 30.0f, entity);
         }
 
         @Override

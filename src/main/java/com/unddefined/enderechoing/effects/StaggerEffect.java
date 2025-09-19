@@ -48,9 +48,12 @@ public class StaggerEffect extends MobEffect {
             double x = entity.getRandom().nextDouble() * 0.3 - 0.1;
             double z = entity.getRandom().nextDouble() * 0.3 - 0.1;
             entity.setDeltaMovement(entity.getDeltaMovement().add(x, 0, z));
+            if(entity.isSteppingCarefully()){
+                entity.setDeltaMovement(entity.getDeltaMovement().add(0, 0.5, 0));
+            }
         }
         AttributeModifier stagger_modifier = new AttributeModifier(stagger_modifier_id, -random + 0.3, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-        if (random < 0.8f) {
+        if (random < 0.5f) {
             // 随机改变移动速度
             entity.getAttribute(MOVEMENT_SPEED).addOrUpdateTransientModifier(stagger_modifier);
         }
