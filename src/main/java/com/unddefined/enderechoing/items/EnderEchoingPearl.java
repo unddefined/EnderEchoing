@@ -1,7 +1,7 @@
 package com.unddefined.enderechoing.items;
 
 import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
-import com.unddefined.enderechoing.server.DataComponents.EnderEchoingPearlData;
+import com.unddefined.enderechoing.server.DataComponents.PositionData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -17,6 +17,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
+import static com.unddefined.enderechoing.server.registry.DataComponentsRegistry.POSITION;
+
 public class EnderEchoingPearl extends Item {
     public EnderEchoingPearl(Properties properties) {
         super(properties.stacksTo(8));
@@ -29,22 +31,22 @@ public class EnderEchoingPearl extends Item {
             // 检查玩家是否按住Shift键
             if (player.isShiftKeyDown()) {
                 // 清除数据
-                itemStack.remove(EnderEchoingPearlData.POSITION.get());
+                itemStack.remove(POSITION.get());
                 itemStack.remove(DataComponents.CUSTOM_NAME);
 
                 return InteractionResultHolder.success(itemStack);
             }
 
-            EnderEchoingPearlData.PositionData positionData = itemStack.get(EnderEchoingPearlData.POSITION.get());
+            PositionData positionData = itemStack.get(POSITION.get());
             if (positionData == null) {
                 // 发送网络包打开编辑屏幕
                 PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket());
                 // 获取玩家当前位置并存储到物品的NBT中
                 BlockPos playerPos = player.blockPosition();
-                EnderEchoingPearlData.PositionData location = new EnderEchoingPearlData.PositionData(playerPos.getX(), playerPos.getY(), playerPos.getZ(), level.dimension().location().toString());
+                PositionData location = new PositionData(playerPos.getX(), playerPos.getY(), playerPos.getZ(), level.dimension().location().toString());
                 
                 // 将数据存储到物品的位置组件中
-                itemStack.set(EnderEchoingPearlData.POSITION.get(), location);
+                itemStack.set(POSITION.get(), location);
             }
         }
         
@@ -75,7 +77,7 @@ public class EnderEchoingPearl extends Item {
     
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag tooltipFlag) {
-        EnderEchoingPearlData.PositionData positionData = stack.get(EnderEchoingPearlData.POSITION.get());
+        PositionData positionData = stack.get(POSITION.get());
         if (positionData != null) {
             int x = positionData.x();
             int y = positionData.y();

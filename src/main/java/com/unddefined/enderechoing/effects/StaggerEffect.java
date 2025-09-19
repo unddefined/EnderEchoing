@@ -1,7 +1,6 @@
 package com.unddefined.enderechoing.effects;
 
 import com.unddefined.enderechoing.EnderEchoing;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
@@ -9,8 +8,6 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.monster.Monster;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 import static net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
 
@@ -22,9 +19,6 @@ public class StaggerEffect extends MobEffect {
     }
 
     public static final ResourceLocation stagger_modifier_id = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "stagger_effect");
-    public static final DeferredRegister<MobEffect> MOB_EFFECTS = DeferredRegister.create(Registries.MOB_EFFECT, EnderEchoing.MODID);
-    public static final DeferredHolder<MobEffect, StaggerEffect> STAGGER = MOB_EFFECTS.register("stagger", StaggerEffect::new);
-
     @Override
     public boolean applyEffectTick(LivingEntity entity, int amplifier) {
         // 每tick应用效果

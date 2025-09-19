@@ -14,12 +14,10 @@ import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
 import java.util.Objects;
 
-import static com.unddefined.enderechoing.effects.AttackScatteredEffect.ATTACK_SCATTERED;
 import static com.unddefined.enderechoing.effects.AttackScatteredEffect.attack_scattered_modifier_id;
-import static com.unddefined.enderechoing.effects.StaggerEffect.STAGGER;
 import static com.unddefined.enderechoing.effects.StaggerEffect.stagger_modifier_id;
-import static com.unddefined.enderechoing.effects.TinnitusEffect.TINNITUS;
 import static com.unddefined.enderechoing.effects.TinnitusEffect.tinnitus_modifier_id;
+import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
 import static net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE;
 import static net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
 

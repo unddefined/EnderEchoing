@@ -17,9 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static com.unddefined.enderechoing.effects.AttackScatteredEffect.ATTACK_SCATTERED;
-import static com.unddefined.enderechoing.effects.StaggerEffect.STAGGER;
-import static com.unddefined.enderechoing.effects.TinnitusEffect.TINNITUS;
+import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
 import static net.minecraft.world.effect.MobEffects.CONFUSION;
 import static net.minecraft.world.effect.MobEffects.WEAKNESS;
 

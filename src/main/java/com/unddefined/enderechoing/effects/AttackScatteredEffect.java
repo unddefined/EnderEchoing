@@ -1,7 +1,6 @@
 package com.unddefined.enderechoing.effects;
 
 import com.unddefined.enderechoing.EnderEchoing;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -9,8 +8,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 import static net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_SPEED;
 import static net.minecraft.world.entity.ai.memory.MemoryModuleType.ATTACK_TARGET;
@@ -21,9 +18,7 @@ public class AttackScatteredEffect extends MobEffect {
         super(MobEffectCategory.HARMFUL, 0x808080);
     }
     public static final ResourceLocation attack_scattered_modifier_id = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "attack_scattered");
-    public static final DeferredRegister<MobEffect> MOB_EFFECTS = DeferredRegister.create(Registries.MOB_EFFECT, EnderEchoing.MODID);
-    public static final DeferredHolder<MobEffect, AttackScatteredEffect> ATTACK_SCATTERED = MOB_EFFECTS.register("attack_scattered",
-            AttackScatteredEffect::new);
+
 
     @Override
     public boolean applyEffectTick(LivingEntity entity, int amplifier) {
