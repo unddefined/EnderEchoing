@@ -1,6 +1,5 @@
 package com.unddefined.enderechoing.blocks.entity;
 
-import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.network.packet.InfrasoundParticlePacket;
 import com.unddefined.enderechoing.server.InfrasoundDamage;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
@@ -71,13 +70,10 @@ public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEnti
     public static void tick(Level level, BlockPos pos, BlockState state, SculkWhisperBlockEntity blockEntity) {
         if (level instanceof ServerLevel serverLevel) {
             VibrationSystem.Ticker.tick(serverLevel, blockEntity.vibrationData, blockEntity.vibrationUser);
-        }
-        // 更新冷却计时器
-        if (blockEntity.cooldownTicks >= 0) {
-            blockEntity.cooldownTicks--;
-            if(blockEntity.cooldownTicks < 0){ blockEntity.cooldownTicks = 0;}
-            LogUtils.getLogger().info("Cooldown: " + blockEntity.cooldownTicks);
+            // 更新冷却计时器
             float radius = (float) (DEFAULT_COOLDOWN - blockEntity.cooldownTicks) * 0.00025f;
+            if (blockEntity.cooldownTicks > 0) blockEntity.cooldownTicks--;
+
             PacketDistributor.sendToAllPlayers(new InfrasoundParticlePacket(Vec3.atCenterOf(pos), radius, true));
         }
     }

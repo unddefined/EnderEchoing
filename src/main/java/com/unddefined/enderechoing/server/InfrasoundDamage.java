@@ -11,6 +11,7 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
+import static net.minecraft.world.effect.MobEffects.CONFUSION;
 import static net.minecraft.world.effect.MobEffects.WEAKNESS;
 
 public class InfrasoundDamage extends DamageSource {
@@ -45,6 +47,9 @@ public class InfrasoundDamage extends DamageSource {
 
                 // 造成effect_range点真实伤害（忽略护甲）
                 entity.hurt(damageSource, damage);
+                if (entity instanceof Player player)
+                    player.getWardenSpawnTracker()
+                            .ifPresent(tracker -> tracker.setWarningLevel(tracker.getWarningLevel() - 1));
             }
 
             // 对在effect_range范围内的生物应用debuff效果
@@ -56,13 +61,13 @@ public class InfrasoundDamage extends DamageSource {
                 entity.addEffect(new MobEffectInstance(ATTACK_SCATTERED, duration * 20, 1));
                 entity.addEffect(new MobEffectInstance(STAGGER, duration * 20, 1));
                 entity.addEffect(new MobEffectInstance(TINNITUS, duration * 20, 1));
-//                entity.addEffect(new MobEffectInstance(CONFUSION, duration * 20, 1));
+                entity.addEffect(new MobEffectInstance(CONFUSION, duration * 20, 1));
                 entity.addEffect(new MobEffectInstance(WEAKNESS, duration * 20, 1));
             }
+
         }
+
         // 向所有客户端发送粒子效果数据包
         PacketDistributor.sendToAllPlayers(new InfrasoundParticlePacket(center, effect_range, false));
     }
-
-
 }

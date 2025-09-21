@@ -31,7 +31,6 @@ public class AttackScatteredEffect extends MobEffect {
             monster.setLastHurtByPlayer(null);
             monster.getNavigation().stop();
             monster.getBrain().eraseMemory(ATTACK_TARGET);
-
         }
         if (entity instanceof Player player) {
             AttributeModifier modifier = new AttributeModifier(attack_scattered_modifier_id, -entity.getRandom().nextFloat(), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
