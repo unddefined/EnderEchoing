@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.client.gui;
 
 import com.unddefined.enderechoing.network.packet.ItemRenamePacket;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -56,9 +57,12 @@ public class EditScreen extends Screen {
 
     private void onDone() {
         String name = this.nameField.getValue().trim();
+        String OriginalName = ItemRegistry.ENDER_ECHOING_PEARL.getRegisteredName();
         if (!name.isEmpty()) {
             // 发送重命名数据包到服务端
             PacketDistributor.sendToServer(new ItemRenamePacket(name));
+        }else {
+            PacketDistributor.sendToServer(new ItemRenamePacket(OriginalName));
         }
         this.onClose();
     }

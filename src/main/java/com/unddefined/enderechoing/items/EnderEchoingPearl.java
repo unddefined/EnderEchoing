@@ -44,7 +44,7 @@ public class EnderEchoingPearl extends Item {
                 // 获取玩家当前位置并存储到物品的NBT中
                 BlockPos playerPos = player.blockPosition();
                 PositionData location = new PositionData(playerPos.getX(), playerPos.getY(), playerPos.getZ(), level.dimension().location().toString());
-                
+                ((ServerPlayer) player).setExperiencePoints(player.totalExperience - 80);
                 // 将数据存储到物品的位置组件中
                 itemStack.set(POSITION.get(), location);
             }

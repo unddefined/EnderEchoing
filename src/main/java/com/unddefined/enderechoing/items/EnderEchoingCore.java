@@ -3,6 +3,7 @@ package com.unddefined.enderechoing.items;
 import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.client.model.EnderEchoingCoreModel;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.TeleporterManager;
 import dev.kosmx.playerAnim.api.layered.AnimationStack;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
@@ -23,7 +24,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +39,8 @@ import software.bernie.geckolib.renderer.GeoItemRenderer;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.function.Consumer;
+
+import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoingCore extends Item implements GeoItem {
     private static final String CONTROLLER_NAME = "controller";
@@ -92,20 +94,6 @@ public class EnderEchoingCore extends Item implements GeoItem {
             return InteractionResultHolder.fail(itemStack);
         }
 
-        // 检查玩家是否有末影珍珠
-        if (!player.getInventory().hasAnyMatching(stack -> stack.getItem() == Items.ENDER_PEARL)) {
-            return InteractionResultHolder.fail(itemStack);
-        }
-
-        // 检查是否有传送器
-        if (level instanceof ServerLevel serverLevel) {
-            TeleporterManager manager = TeleporterManager.get(level);
-            BlockPos nearestTeleporterPos = manager.getNearestTeleporter(serverLevel, player.blockPosition());
-            if (nearestTeleporterPos == null) {
-                return InteractionResultHolder.fail(itemStack);
-            }
-        }
-
         player.startUsingItem(hand);
         
         // 触发动画
@@ -148,8 +136,9 @@ public class EnderEchoingCore extends Item implements GeoItem {
     }
     public @NotNull ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity livingEntity) {
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel && livingEntity instanceof Player player) {
-            // 再次检查玩家是否有末影珍珠
-            if (!player.getInventory().hasAnyMatching(itemStack -> itemStack.getItem() == Items.ENDER_PEARL)) {
+            // 再次检查玩家是否有未保存数据的末影珍珠
+            if (!player.getInventory().hasAnyMatching(itemStack ->
+                    itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
                 return stack;
             }
 
@@ -161,14 +150,16 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 return stack;
             }
 
-            // 消耗一个末影珍珠
-            player.getInventory().clearOrCountMatchingItems(itemStack -> itemStack.getItem() == Items.ENDER_PEARL, 1, player.inventoryMenu.getCraftSlots());
+            // 消耗一个没有保存数据的珍珠
+            player.getInventory().clearOrCountMatchingItems(itemStack -> 
+                            itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && 
+                            itemStack.get(CUSTOM_NAME) == null,
+                    1, player.inventoryMenu.getCraftSlots());
 
             // 传送玩家到最近的传送器位置
             if (player instanceof ServerPlayer serverPlayer) {
                 serverPlayer.teleportTo(nearestTeleporterPos.getX() + 0.5, nearestTeleporterPos.getY() + 0.5, nearestTeleporterPos.getZ() + 0.5);
 
-                // 播放传送声音
                 level.playSound(null, nearestTeleporterPos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
             }
 
