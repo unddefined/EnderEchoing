@@ -3,6 +3,7 @@ package com.unddefined.enderechoing.blocks;
 import com.mojang.serialization.MapCodec;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicTeleporterBlockEntity;
+import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.TeleporterManager;
 import net.minecraft.core.BlockPos;
@@ -18,6 +19,8 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -43,7 +46,7 @@ public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return  Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D);
+        return Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D);
     }
 
     @Override
@@ -68,10 +71,10 @@ public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
 
         super.appendHoverText(stack, context, tooltip, tooltipFlag);
     }
-    
+
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
-        return List.of(new ItemStack(ItemRegistry.ENDER_ECHOIC_TELEPORTER_ITEM.get()));
+        return List.of(new ItemStack(ItemRegistry.ENDER_ECHOING_CORE.get()), new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));
     }
 
     @Override
@@ -81,7 +84,7 @@ public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
             TeleporterManager.get(level).addTeleporter(serverLevel, pos);
         }
     }
-    
+
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         super.onRemove(state, level, pos, newState, isMoving);
@@ -89,5 +92,13 @@ public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
             TeleporterManager.get(level).removeTeleporter(serverLevel, pos);
         }
     }
-
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
+        return createTickerHelper(blockEntityType, BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get(), EnderEchoicTeleporterBlockEntity::tick);
+    }
+    @Nullable
+    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> typeA, BlockEntityType<E> typeB, BlockEntityTicker<? super E> ticker) {
+        return typeA == typeB ? (BlockEntityTicker<A>) ticker : null;
+    }
 }

@@ -2,6 +2,8 @@ package com.unddefined.enderechoing.blocks.entity;
 
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
@@ -31,6 +33,19 @@ public class EnderEchoicTeleporterBlockEntity extends BlockEntity implements Geo
             }
             return PlayState.STOP;
         }));
+    }
+
+    public static void tick(Level level, BlockPos pos, BlockState state, EnderEchoicTeleporterBlockEntity blockEntity) {
+
+        if (level.isClientSide && level.getRandom().nextFloat() < 0.1) {
+            level.addParticle(ParticleTypes.PORTAL,
+                pos.getX() + 0.5 + (level.random.nextDouble() - 0.1) * 0.2,
+                pos.getY() + 1 + (level.random.nextDouble() - 0.1) * 0.2,
+                pos.getZ() + 0.5 + (level.random.nextDouble() - 0.1) * 0.2,
+                (level.random.nextDouble() - 0.5) ,
+                -level.random.nextDouble(),
+                (level.random.nextDouble() - 0.5) );
+        }
     }
 
     @Override
