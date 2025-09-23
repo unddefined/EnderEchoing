@@ -26,7 +26,7 @@ public class AttackScatteredEffect extends MobEffect {
         if (entity instanceof Monster monster && entity.getRandom().nextFloat()<=0.7f) {
             // 强制清除目标
             monster.setTarget(null);
-//            // 清除记忆中的攻击目标
+            // 清除记忆中的攻击目标
             monster.setLastHurtByMob(null);
             monster.setLastHurtByPlayer(null);
             monster.getNavigation().stop();

@@ -1,10 +1,7 @@
 package com.unddefined.enderechoing.server.registry;
 
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.effects.AttackScatteredEffect;
-import com.unddefined.enderechoing.effects.DeafEffect;
-import com.unddefined.enderechoing.effects.StaggerEffect;
-import com.unddefined.enderechoing.effects.TinnitusEffect;
+import com.unddefined.enderechoing.effects.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -19,4 +16,6 @@ public class MobEffectRegistry {
     public static final DeferredHolder<MobEffect, StaggerEffect> STAGGER = MOB_EFFECTS.register("stagger", StaggerEffect::new);
     public static final DeferredHolder<MobEffect, DeafEffect> DEAFNESS = MOB_EFFECTS.register("deafness",
             DeafEffect::new);
+    public static final DeferredHolder<MobEffect, ShadowVeilEffect> SHADOW_VEIL = MOB_EFFECTS.register("shadow_veil",
+            ShadowVeilEffect::new);
 }

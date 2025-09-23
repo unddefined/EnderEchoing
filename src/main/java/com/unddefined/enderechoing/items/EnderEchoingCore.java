@@ -4,6 +4,7 @@ import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.client.model.EnderEchoingCoreModel;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
+import com.unddefined.enderechoing.server.registry.MobEffectRegistry;
 import com.unddefined.enderechoing.util.TeleporterManager;
 import dev.kosmx.playerAnim.api.layered.AnimationStack;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
@@ -20,6 +21,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -93,9 +96,12 @@ public class EnderEchoingCore extends Item implements GeoItem {
         if (player.getCooldowns().isOnCooldown(this)) {
             return InteractionResultHolder.fail(itemStack);
         }
-
+        // 检查玩家是否发光，如果发光则无法使用
+        if (player.isCurrentlyGlowing()) {
+            return InteractionResultHolder.fail(itemStack);
+        }
         player.startUsingItem(hand);
-        
+        player.addEffect(new MobEffectInstance(MobEffectRegistry.SHADOW_VEIL, 20 * 3, 0, false, true));
         // 触发动画
         if (level instanceof ServerLevel serverLevel) {
             triggerAnim(player, GeoItem.getOrAssignId(itemStack, serverLevel), CONTROLLER_NAME, ANIM_USE);
@@ -132,6 +138,8 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel && livingEntity instanceof Player player) {
             stopTriggeredAnim(player, GeoItem.getOrAssignId(stack, serverLevel), CONTROLLER_NAME, null);
+            player.addEffect(new MobEffectInstance(MobEffects.GLOWING,400));
+
         }
     }
     public @NotNull ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity livingEntity) {
@@ -142,7 +150,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 return stack;
             }
 
-            // 查找最近的EnderEchoicTeleporter方块
+            // 查找最近的EnderEchoicResonator方块
             TeleporterManager manager = TeleporterManager.get(level);
             BlockPos nearestTeleporterPos = manager.getNearestTeleporter(serverLevel, player.blockPosition());
 
@@ -162,7 +170,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
                 level.playSound(null, nearestTeleporterPos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
             }
-
+            player.addEffect(new MobEffectInstance(MobEffects.GLOWING,300));
             // 设置冷却时间
             player.getCooldowns().addCooldown(this, Config.ENDER_ECHOING_CORE_COOLDOWN.get());
         }
