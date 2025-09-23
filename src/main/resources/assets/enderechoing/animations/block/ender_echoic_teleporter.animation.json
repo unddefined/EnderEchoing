@@ -14,20 +14,6 @@
           }
         }
       }
-    },
-    "EnderEchoingCoreUP": {
-      "loop": true,
-      "animation_length": 60,
-      "bones": {
-        "EnderEchoingCore": {
-          "rotation": {
-            "vector": ["math.sin(query.anim_time * 60) * 90", 0, "math.cos(query.anim_time * 60) * 90"]
-          },
-          "position": {
-            "vector": [0, "math.sin(query.anim_time * 90) * 1.5 - 3", 0]
-          }
-        }
-      }
     }
   },
   "geckolib_format_version": 2

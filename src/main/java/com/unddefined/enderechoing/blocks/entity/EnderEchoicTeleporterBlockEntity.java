@@ -1,14 +1,11 @@
 package com.unddefined.enderechoing.blocks.entity;
 
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
@@ -16,13 +13,10 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import java.util.Objects;
-
 public class EnderEchoicTeleporterBlockEntity extends BlockEntity implements GeoBlockEntity {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private static final RawAnimation ANIMS = RawAnimation.begin().thenPlay("ender_echoic_teleporter.common");
-    private static final RawAnimation UP = RawAnimation.begin().thenPlay("EnderEchoingCoreUP");
 
     public EnderEchoicTeleporterBlockEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get(), pos, blockState);
@@ -30,12 +24,8 @@ public class EnderEchoicTeleporterBlockEntity extends BlockEntity implements Geo
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        Vec3 blockpos = this.getBlockPos().getCenter();
-        Player NearestPlayer =
-                Objects.requireNonNull(Minecraft.getInstance().level).
-                        getNearestPlayer(blockpos.x, blockpos.y, blockpos.z, 2.0, false);
         controllers.add(new AnimationController<>(this, "Activation", 0,
-                state -> state.setAndContinue(NearestPlayer == null ? ANIMS : UP)));
+                state -> state.setAndContinue(ANIMS)));
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, EnderEchoicTeleporterBlockEntity blockEntity) {
