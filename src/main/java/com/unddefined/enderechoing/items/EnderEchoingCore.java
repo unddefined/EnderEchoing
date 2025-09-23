@@ -101,9 +101,9 @@ public class EnderEchoingCore extends Item implements GeoItem {
             return InteractionResultHolder.fail(itemStack);
         }
         player.startUsingItem(hand);
-        player.addEffect(new MobEffectInstance(MobEffectRegistry.SHADOW_VEIL, 20 * 3, 0, false, true));
-        // 触发动画
+
         if (level instanceof ServerLevel serverLevel) {
+            player.addEffect(new MobEffectInstance(MobEffectRegistry.SHADOW_VEIL, 20 * 3, 0, false, true));
             triggerAnim(player, GeoItem.getOrAssignId(itemStack, serverLevel), CONTROLLER_NAME, ANIM_USE);
         }
         

@@ -16,27 +16,19 @@ public class ShadowVeilEffect extends MobEffect {
         super(MobEffectCategory.BENEFICIAL, 0x4215441);
     }
     int lastHurtTimestamp;
-    // 用于防止onEffectAdded被多次调用的标记
-    private static final String TAG_SHADOW_VEIL_APPLIED = "ShadowVeilApplied";
 
     @Override
     public void onEffectAdded(LivingEntity livingEntity, int pAmplifier) {
-        // 检查是否已经应用过效果，防止重复调用
-        if (livingEntity.getPersistentData().getBoolean(TAG_SHADOW_VEIL_APPLIED)) return;
-        // 设置标记，表示已经应用过效果
-        livingEntity.getPersistentData().putBoolean(TAG_SHADOW_VEIL_APPLIED, true);
 
         // 检查实体是否发光，如果发光则不应用影匿效果
         if (livingEntity.isCurrentlyGlowing()) {
             // 直接移除刚刚添加的效果
             livingEntity.removeEffect(MobEffectRegistry.SHADOW_VEIL);
-            // 清除标记
-            livingEntity.getPersistentData().remove(TAG_SHADOW_VEIL_APPLIED);
             return;
         }
         // 获取当前效果实例并确保不为null
         var effectInstance = livingEntity.getEffect(MobEffectRegistry.SHADOW_VEIL);
-        int duration = 60; // 默认基础持续时间
+        int duration = 60;
         if (effectInstance != null) duration = Math.max(duration, effectInstance.getDuration());
 
         MobEffectInstance WEAKNESS = new MobEffectInstance(MobEffects.WEAKNESS, duration);
@@ -58,7 +50,7 @@ public class ShadowVeilEffect extends MobEffect {
         livingEntity.addEffect(effects[secondEffectIndex]);
 
         // 添加黑暗效果
-        livingEntity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 400));
+        livingEntity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300));
 
         var targetingCondition = TargetingConditions.forCombat().ignoreLineOfSight().
             selector(e -> (((Mob) e).getTarget() == livingEntity));
@@ -80,11 +72,9 @@ public class ShadowVeilEffect extends MobEffect {
     @Override
     public boolean applyEffectTick(LivingEntity pLivingEntity, int pAmplifier) {
         // 检查实体是否发光，如果发光则取消影匿效果
-        if (pLivingEntity.isCurrentlyGlowing()) {
-            // 清除标记
-            pLivingEntity.getPersistentData().remove(TAG_SHADOW_VEIL_APPLIED);
-            return false; // 返回false会移除效果
-        }
+        if (pLivingEntity.isCurrentlyGlowing()) return false;
+
+        pLivingEntity.setInvisible(true);
         //If we attack, we lose invis
         //TODO: can be optimized via use of event instead of checking every tick
         return pLivingEntity.level().isClientSide || lastHurtTimestamp == pLivingEntity.getLastHurtMobTimestamp();
