@@ -1,8 +1,10 @@
 package com.unddefined.enderechoing.blocks;
 
 import com.unddefined.enderechoing.blocks.entity.SculkWhisperBlockEntity;
+import com.unddefined.enderechoing.server.InfrasoundDamage;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -23,8 +25,9 @@ public class SculkWhisperBlock extends Block implements EntityBlock {
         super(Properties.of()
                 .strength(0.5F)
                 .sound(SoundType.SCULK_SHRIEKER)
-                .lightLevel(state -> 1)
+                .lightLevel(state -> 2)
                 .noOcclusion()
+                .noLootTable()
         );
     }
 
@@ -49,5 +52,11 @@ public class SculkWhisperBlock extends Block implements EntityBlock {
     @Nullable
     protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> typeA, BlockEntityType<E> typeB, BlockEntityTicker<? super E> ticker) {
         return typeA == typeB ? (BlockEntityTicker<A>) ticker : null;
+    }
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+        super.onRemove(state, level, pos, newState, isMoving);
+        if ( level instanceof ServerLevel serverLevel)
+            InfrasoundDamage.InfrasoundBurst(serverLevel, pos.above().getCenter(), 5.0f, 20.0f, 12,null);
     }
 }

@@ -3,30 +3,50 @@ package com.unddefined.enderechoing.client.renderer.layer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicTeleporterBlockEntity;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
 
-public class EnderEchoicTeleporterLayer extends BlockAndItemGeoLayer<EnderEchoicTeleporterBlockEntity> {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
+public class EnderEchoicTeleporterLayer extends BlockAndItemGeoLayer<EnderEchoicTeleporterBlockEntity> {
     public EnderEchoicTeleporterLayer(GeoRenderer<EnderEchoicTeleporterBlockEntity> renderer) {
-        super(renderer, 
-              (bone, animatable) -> {
-                  // 只在特定骨骼上渲染物品
-                  if (bone.getName().equals("EnderEchoingCore")) {
-                      return new ItemStack(ItemRegistry.ENDER_ECHOING_CORE.get());
-                  }
-                  return null;
-              }, 
-              (bone, animatable) -> null);
+        super(renderer);
     }
 
+    @Override
+    protected ItemStack getStackForBone(GeoBone bone, EnderEchoicTeleporterBlockEntity animatable) {
+        // 只在特定骨骼上渲染物品
+        if (bone.getName().equals("EnderEchoingCore")) return new ItemStack(ItemRegistry.ENDER_ECHOING_CORE.get());
+        return null;
+    }
+    double currentPositionY = -0.18;
     protected void renderStackForBone(PoseStack poseStack, GeoBone bone, ItemStack stack, EnderEchoicTeleporterBlockEntity animatable,
                                       MultiBufferSource bufferSource, float partialTick, int packedLight, int packedOverlay) {
-        // 修正位置
-        poseStack.translate(0, -0.18, 0);
+        Vec3 blockpos = animatable.getBlockPos().getCenter();
+        Player NearestPlayer =
+                Objects.requireNonNull(Minecraft.getInstance().level).
+                        getNearestPlayer(blockpos.x, blockpos.y, blockpos.z, 2.0, false);
+
+        double positionYNoPlayer = -0.18;
+        double positionYWithPlayer = -0.54;
+
+// 根据是否有玩家来决定目标位置
+        double targetPositionY = NearestPlayer == null ? positionYNoPlayer : positionYWithPlayer;
+// 平滑过渡：每帧向目标位置靠近一点
+        currentPositionY = Mth.lerp(0.05, currentPositionY, targetPositionY);
+
+// 应用到渲染
+        poseStack.translate(0, currentPositionY, 0);
+
         super.renderStackForBone(poseStack, bone, stack, animatable, bufferSource, partialTick, packedLight, packedOverlay);
     }
 }
