@@ -94,8 +94,8 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
                 // 消耗一个EnderEchoingCore物品
                 if (!player.isCreative()) stack.shrink(1);
 
-                // 将方块替换为EnderEchoicTeleporter
-                level.setBlock(pos, BlockRegistry.ENDER_ECHOIC_TELEPORTER.get().defaultBlockState(), 3);
+                // 将方块替换为EnderEchoicResonator
+                level.setBlock(pos, BlockRegistry.ENDER_ECHOIC_RESONATOR.get().defaultBlockState(), 3);
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide());
         }

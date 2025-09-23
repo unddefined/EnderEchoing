@@ -2,7 +2,7 @@ package com.unddefined.enderechoing.server.registry;
 
 import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEntity;
 import com.unddefined.enderechoing.blocks.entity.EchoDruseBlockEntity;
-import com.unddefined.enderechoing.blocks.entity.EnderEchoicTeleporterBlockEntity;
+import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.blocks.entity.SculkWhisperBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -12,10 +12,10 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public class BlockEntityRegistry {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, "enderechoing");
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderEchoicTeleporterBlockEntity>> ENDER_ECHOIC_TELEPORTER =
-            BLOCK_ENTITY_TYPES.register("ender_echoic_teleporter_blockentity", () -> BlockEntityType.Builder.of(
-                    EnderEchoicTeleporterBlockEntity::new,
-                    BlockRegistry.ENDER_ECHOIC_TELEPORTER.get()
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderEchoicResonatorBlockEntity>> ENDER_ECHOIC_RESONATOR =
+            BLOCK_ENTITY_TYPES.register("ender_echoic_resonator_blockentity", () -> BlockEntityType.Builder.of(
+                    EnderEchoicResonatorBlockEntity::new,
+                    BlockRegistry.ENDER_ECHOIC_RESONATOR.get()
             ).build(null));
             
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CalibratedSculkShriekerBlockEntity>> CALIBRATED_SCULK_SHRIEKER =

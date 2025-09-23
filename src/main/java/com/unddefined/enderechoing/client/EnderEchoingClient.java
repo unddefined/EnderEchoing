@@ -5,7 +5,7 @@ import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.TransparentScreen;
 import com.unddefined.enderechoing.client.particles.DirectlyMovingDust;
 import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShriekerRenderer;
-import com.unddefined.enderechoing.client.renderer.block.EnderEchoicTeleporterRenderer;
+import com.unddefined.enderechoing.client.renderer.block.EnderEchoicResonatorRenderer;
 import com.unddefined.enderechoing.client.renderer.block.SculkWhisperRenderer;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ParticlesRegistry;
@@ -47,8 +47,8 @@ public class    EnderEchoingClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         // Register block entity renderers
-        event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get(),
-                context -> new EnderEchoicTeleporterRenderer()));
+        event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHOIC_RESONATOR.get(),
+                context -> new EnderEchoicResonatorRenderer()));
         event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.CALIBRATED_SCULK_SHRIEKER.get(),
                 context -> new CalibratedSculkShriekerRenderer()));
         event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.SCULK_WHISPER.get(),

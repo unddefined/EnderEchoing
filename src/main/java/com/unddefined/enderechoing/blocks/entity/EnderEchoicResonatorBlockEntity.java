@@ -13,13 +13,13 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class EnderEchoicTeleporterBlockEntity extends BlockEntity implements GeoBlockEntity {
+public class EnderEchoicResonatorBlockEntity extends BlockEntity implements GeoBlockEntity {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    private static final RawAnimation ANIMS = RawAnimation.begin().thenPlay("ender_echoic_teleporter.common");
+    private static final RawAnimation ANIMS = RawAnimation.begin().thenPlay("ender_echoic_resonator.common");
 
-    public EnderEchoicTeleporterBlockEntity(BlockPos pos, BlockState blockState) {
-        super(BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get(), pos, blockState);
+    public EnderEchoicResonatorBlockEntity(BlockPos pos, BlockState blockState) {
+        super(BlockEntityRegistry.ENDER_ECHOIC_RESONATOR.get(), pos, blockState);
     }
 
     @Override
@@ -28,8 +28,8 @@ public class EnderEchoicTeleporterBlockEntity extends BlockEntity implements Geo
                 state -> state.setAndContinue(ANIMS)));
     }
 
-    public static void tick(Level level, BlockPos pos, BlockState state, EnderEchoicTeleporterBlockEntity blockEntity) {
-
+    public static void tick(Level level, BlockPos pos, BlockState state, EnderEchoicResonatorBlockEntity blockEntity) {
+        //粒子效果
         if (level.isClientSide && level.getRandom().nextFloat() < 0.1) {
             level.addParticle(ParticleTypes.PORTAL,
                     pos.getX() + 0.5 + (level.random.nextDouble() - 0.1) * 0.2,

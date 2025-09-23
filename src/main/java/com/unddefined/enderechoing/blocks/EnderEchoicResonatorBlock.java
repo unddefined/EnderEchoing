@@ -1,17 +1,13 @@
 package com.unddefined.enderechoing.blocks;
 
 import com.mojang.serialization.MapCodec;
-import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.blocks.entity.EnderEchoicTeleporterBlockEntity;
+import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.TeleporterManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -30,9 +26,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
+public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
 
-    public EnderEchoicTeleporterBlock() {
+    public EnderEchoicResonatorBlock() {
         super(Properties.of()
                 .noOcclusion()
                 .noTerrainParticles()
@@ -57,19 +53,12 @@ public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new EnderEchoicTeleporterBlockEntity(pos, state);
+        return new EnderEchoicResonatorBlockEntity(pos, state);
     }
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
         return RenderShape.ENTITYBLOCK_ANIMATED;
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag tooltipFlag) {
-        tooltip.add(Component.translatable("block." + EnderEchoing.MODID + ".ender_echoic_teleporter.tooltip"));
-
-        super.appendHoverText(stack, context, tooltip, tooltipFlag);
     }
 
     @Override
@@ -92,13 +81,21 @@ public class EnderEchoicTeleporterBlock extends Block implements EntityBlock {
             TeleporterManager.get(level).removeTeleporter(serverLevel, pos);
         }
     }
+
+//    @Override
+//    public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
+//
+//    }
+
+    //region Ticker
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        return createTickerHelper(blockEntityType, BlockEntityRegistry.ENDER_ECHOIC_TELEPORTER.get(), EnderEchoicTeleporterBlockEntity::tick);
+        return createTickerHelper(blockEntityType, BlockEntityRegistry.ENDER_ECHOIC_RESONATOR.get(), EnderEchoicResonatorBlockEntity::tick);
     }
     @Nullable
     protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> typeA, BlockEntityType<E> typeB, BlockEntityTicker<? super E> ticker) {
         return typeA == typeB ? (BlockEntityTicker<A>) ticker : null;
     }
+    //endregion
 }

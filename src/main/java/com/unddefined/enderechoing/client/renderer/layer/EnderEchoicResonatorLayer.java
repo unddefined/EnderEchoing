@@ -1,7 +1,7 @@
 package com.unddefined.enderechoing.client.renderer.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.unddefined.enderechoing.blocks.entity.EnderEchoicTeleporterBlockEntity;
+import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -15,20 +15,20 @@ import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
 
 import java.util.Objects;
 
-public class EnderEchoicTeleporterLayer extends BlockAndItemGeoLayer<EnderEchoicTeleporterBlockEntity> {
-    public EnderEchoicTeleporterLayer(GeoRenderer<EnderEchoicTeleporterBlockEntity> renderer) {
+public class EnderEchoicResonatorLayer extends BlockAndItemGeoLayer<EnderEchoicResonatorBlockEntity> {
+    public EnderEchoicResonatorLayer(GeoRenderer<EnderEchoicResonatorBlockEntity> renderer) {
         super(renderer);
     }
 
     @Override
-    protected ItemStack getStackForBone(GeoBone bone, EnderEchoicTeleporterBlockEntity animatable) {
+    protected ItemStack getStackForBone(GeoBone bone, EnderEchoicResonatorBlockEntity animatable) {
         // 只在特定骨骼上渲染物品
         if (bone.getName().equals("EnderEchoingCore")) return new ItemStack(ItemRegistry.ENDER_ECHOING_CORE.get());
         return this.stackForBone.apply(bone, animatable);
     }
     double currentPositionY = -0.18;
     double currentPivotY = 16;
-    protected void renderStackForBone(PoseStack poseStack, GeoBone bone, ItemStack stack, EnderEchoicTeleporterBlockEntity animatable,
+    protected void renderStackForBone(PoseStack poseStack, GeoBone bone, ItemStack stack, EnderEchoicResonatorBlockEntity animatable,
                                       MultiBufferSource bufferSource, float partialTick, int packedLight, int packedOverlay) {
         Vec3 blockpos = animatable.getBlockPos().getCenter();
         Player NearestPlayer =

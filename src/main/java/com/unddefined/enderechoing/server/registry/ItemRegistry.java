@@ -18,7 +18,7 @@ public class ItemRegistry {
     public static final DeferredItem<Item> ENDER_ECHOING_PEARL = ITEMS.registerItem("ender_echoing_pearl", EnderEchoingPearl::new);
 
 
-    public static final DeferredItem<BlockItem> ENDER_ECHOIC_TELEPORTER_ITEM = ITEMS.registerSimpleBlockItem("ender_echoic_teleporter", BlockRegistry.ENDER_ECHOIC_TELEPORTER);
+    public static final DeferredItem<BlockItem> ENDER_ECHOIC_RESONATOR_ITEM = ITEMS.registerSimpleBlockItem("ender_echoic_resonator", BlockRegistry.ENDER_ECHOIC_RESONATOR);
     public static final DeferredItem<BlockItem> CALIBRATED_SCULK_SHRIEKER_ITEM = ITEMS.registerSimpleBlockItem("calibrated_sculk_shrieker", BlockRegistry.CALIBRATED_SCULK_SHRIEKER);
     public static final DeferredItem<BlockItem> SCULK_WHISPER_ITEM = ITEMS.registerSimpleBlockItem("sculk_whisper", BlockRegistry.SCULK_WHISPER);
     //region ECHO_DRUSE_BLOCKITEM register
