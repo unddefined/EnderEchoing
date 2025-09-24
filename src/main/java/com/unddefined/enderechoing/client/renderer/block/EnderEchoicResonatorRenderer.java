@@ -1,14 +1,29 @@
 package com.unddefined.enderechoing.client.renderer.block;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.client.model.EnderEchoicResonatorModel;
+import com.unddefined.enderechoing.client.renderer.EchoResponse;
 import com.unddefined.enderechoing.client.renderer.layer.EnderEchoicResonatorLayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoBlockRenderer;
 
 public class EnderEchoicResonatorRenderer extends GeoBlockRenderer<EnderEchoicResonatorBlockEntity> {
     public EnderEchoicResonatorRenderer() {
         super(new EnderEchoicResonatorModel());
-        // 添加渲染层以在方块上渲染EnderEchoingCore物品
         this.addRenderLayer(new EnderEchoicResonatorLayer(this));
+    }
+    @Override
+    public void actuallyRender(PoseStack poseStack, EnderEchoicResonatorBlockEntity animatable, BakedGeoModel model, @Nullable RenderType renderType,
+                               MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight,
+                               int packedOverlay, int colour) {
+        super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
+        float gameTimes = animatable.getLevel().getGameTime();
+        EchoResponse.render(poseStack, bufferSource, 0, 1.3, 0, partialTick, gameTimes, packedLight);
+
     }
 }
