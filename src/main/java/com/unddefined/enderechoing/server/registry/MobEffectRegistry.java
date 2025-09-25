@@ -16,6 +16,6 @@ public class MobEffectRegistry {
     public static final DeferredHolder<MobEffect, StaggerEffect> STAGGER = MOB_EFFECTS.register("stagger", StaggerEffect::new);
     public static final DeferredHolder<MobEffect, DeafEffect> DEAFNESS = MOB_EFFECTS.register("deafness",
             DeafEffect::new);
-    public static final DeferredHolder<MobEffect, ShadowVeilEffect> SHADOW_VEIL = MOB_EFFECTS.register("shadow_veil",
-            ShadowVeilEffect::new);
+    public static final DeferredHolder<MobEffect, SculkVeilEffect> SCULK_VEIL = MOB_EFFECTS.register("sculk_veil",
+            SculkVeilEffect::new);
 }

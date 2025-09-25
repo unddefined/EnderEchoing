@@ -27,7 +27,7 @@ public class ServerEffect {
     public static void onExpireEffect(MobEffectEvent.Expired event) {
         if (!event.getEntity().hasEffect(TINNITUS)) {
             if (event.getEntity() instanceof Monster monster) {
-                monster.getAttribute(FOLLOW_RANGE).removeModifier(tinnitus_modifier_id);
+                Objects.requireNonNull(monster.getAttribute(FOLLOW_RANGE)).removeModifier(tinnitus_modifier_id);
             }
         }
         if (!event.getEntity().hasEffect(STAGGER)) {
@@ -36,7 +36,6 @@ public class ServerEffect {
         if (!event.getEntity().hasEffect(ATTACK_SCATTERED)) {
             Objects.requireNonNull(event.getEntity().getAttribute(MOVEMENT_SPEED)).removeModifier(attack_scattered_modifier_id);
         }
-
     }
 
     @SubscribeEvent
@@ -78,5 +77,6 @@ public class ServerEffect {
                 }
             }
         }
+        if (entity.hasEffect(SCULK_VEIL)) {entity.removeEffect(SCULK_VEIL);}
     }
 }

@@ -23,7 +23,7 @@ public class EchoResponse {
             false,
             true,
             RenderType.CompositeState.builder()
-                    .setShaderState(RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+                    .setShaderState(RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
                     .setTextureState(new RenderStateShard.TextureStateShard(ResourceLocation.fromNamespaceAndPath("enderechoing", "textures/misc/wave.png"), false, false))
                     .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                     .setLightmapState(RenderStateShard.LIGHTMAP)
@@ -43,7 +43,7 @@ public class EchoResponse {
         poseStack.mulPose(Axis.XN.rotationDegrees(-camera.getXRot()));
         // 当前时间（每波纹起始时刻不同）
         float gameTime = gameTimes + partialTicks;
-
+//TODO:随距离缩放
         // 渲染三个波纹
         for (int i = 0; i < 3; i++) {
             float offset = i * 30f; // 每个波纹错开起始时间

@@ -11,11 +11,10 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 
-public class ShadowVeilEffect extends MobEffect {
-    public ShadowVeilEffect() {
+public class SculkVeilEffect extends MobEffect {
+    public SculkVeilEffect() {
         super(MobEffectCategory.BENEFICIAL, 0x4215441);
     }
-    int lastHurtTimestamp;
 
     @Override
     public void onEffectAdded(LivingEntity livingEntity, int pAmplifier) {
@@ -23,11 +22,11 @@ public class ShadowVeilEffect extends MobEffect {
         // 检查实体是否发光，如果发光则不应用影匿效果
         if (livingEntity.isCurrentlyGlowing()) {
             // 直接移除刚刚添加的效果
-            livingEntity.removeEffect(MobEffectRegistry.SHADOW_VEIL);
+            livingEntity.removeEffect(MobEffectRegistry.SCULK_VEIL);
             return;
         }
         // 获取当前效果实例并确保不为null
-        var effectInstance = livingEntity.getEffect(MobEffectRegistry.SHADOW_VEIL);
+        var effectInstance = livingEntity.getEffect(MobEffectRegistry.SCULK_VEIL);
         int duration = 60;
         if (effectInstance != null) duration = Math.max(duration, effectInstance.getDuration());
 
@@ -43,7 +42,7 @@ public class ShadowVeilEffect extends MobEffect {
         int secondEffectIndex;
         do {
             secondEffectIndex = livingEntity.getRandom().nextInt(6);
-        } while (secondEffectIndex == firstEffectIndex); // 确保两个效果不同
+        } while (secondEffectIndex == firstEffectIndex);
 
         MobEffectInstance[] effects = {WEAKNESS, DIG_SLOWDOWN, HUNGER, MOVEMENT_SLOWDOWN, BLINDNESS, DEAFNESS};
         livingEntity.addEffect(effects[firstEffectIndex]);
@@ -62,21 +61,17 @@ public class ShadowVeilEffect extends MobEffect {
                 entityTargetingCaster.targetSelector.getAvailableGoals().forEach(WrappedGoal::stop);
                 entityTargetingCaster.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
             });
-        this.lastHurtTimestamp = livingEntity.getLastHurtMobTimestamp();
-
     }
 
     @Override
     public boolean shouldApplyEffectTickThisTick(int pDuration, int pAmplifier) {return true;}
 
     @Override
-    public boolean applyEffectTick(LivingEntity pLivingEntity, int pAmplifier) {
+    public boolean applyEffectTick(LivingEntity entity, int pAmplifier) {
         // 检查实体是否发光，如果发光则取消影匿效果
-        if (pLivingEntity.isCurrentlyGlowing()) return false;
+        return !entity.isCurrentlyGlowing();
+        //TODO: 半透明+粒子环绕
+//        pLivingEntity.setInvisible(true);
 
-        pLivingEntity.setInvisible(true);
-        //If we attack, we lose invis
-        //TODO: can be optimized via use of event instead of checking every tick
-        return pLivingEntity.level().isClientSide || lastHurtTimestamp == pLivingEntity.getLastHurtMobTimestamp();
     }
 }

@@ -103,7 +103,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
         player.startUsingItem(hand);
 
         if (level instanceof ServerLevel serverLevel) {
-            player.addEffect(new MobEffectInstance(MobEffectRegistry.SHADOW_VEIL, 20 * 3, 0, false, true));
+            player.addEffect(new MobEffectInstance(MobEffectRegistry.SCULK_VEIL, 20 * 3, 0, false, true));
             triggerAnim(player, GeoItem.getOrAssignId(itemStack, serverLevel), CONTROLLER_NAME, ANIM_USE);
         }
         
@@ -144,9 +144,11 @@ public class EnderEchoingCore extends Item implements GeoItem {
     }
     public @NotNull ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity livingEntity) {
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel && livingEntity instanceof Player player) {
+
             // 再次检查玩家是否有未保存数据的末影珍珠
             if (!player.getInventory().hasAnyMatching(itemStack ->
                     itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
+                player.addEffect(new MobEffectInstance(MobEffects.GLOWING,400));
                 return stack;
             }
 
@@ -155,6 +157,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
             BlockPos nearestTeleporterPos = manager.getNearestTeleporter(serverLevel, player.blockPosition());
 
             if (nearestTeleporterPos == null) {
+                player.addEffect(new MobEffectInstance(MobEffects.GLOWING,400));
                 return stack;
             }
 
@@ -174,14 +177,12 @@ public class EnderEchoingCore extends Item implements GeoItem {
             // 设置冷却时间
             player.getCooldowns().addCooldown(this, Config.ENDER_ECHOING_CORE_COOLDOWN.get());
         }
-
         if (level.isClientSide() && livingEntity instanceof Player player && !player.isUsingItem()) {
             if (player instanceof AbstractClientPlayer clientPlayer) {
                 AnimationStack playerAnim = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
                 playerAnim.removeLayer(42);
             }
         }
-
         return stack;
     }
 

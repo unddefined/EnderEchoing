@@ -33,5 +33,6 @@
   "effect.enderechoing.deafness": "失聪",
   "effect.enderechoing.stagger": "踉跄",
   "effect.enderechoing.attack_scattered": "攻击失调",
-  "effect.enderechoing.shadow_veil": "影匿"
+  "effect.enderechoing.sculk_veil": "影匿",
+  "item.enderechoing.ender_echoing_core.no_teleporter": "No teleporter found!"
 }
