@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.client.model.EnderEchoicResonatorModel;
-import com.unddefined.enderechoing.client.renderer.EchoResponse;
 import com.unddefined.enderechoing.client.renderer.layer.EnderEchoicResonatorLayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -22,8 +21,6 @@ public class EnderEchoicResonatorRenderer extends GeoBlockRenderer<EnderEchoicRe
                                MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight,
                                int packedOverlay, int colour) {
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
-        float gameTimes = animatable.getLevel().getGameTime();
-        EchoResponse.render(poseStack, bufferSource, 0, 1.3, 0, partialTick, gameTimes, packedLight);
 
     }
 }

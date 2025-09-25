@@ -4,6 +4,7 @@ import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.network.packet.InfrasoundParticlePacket;
 import com.unddefined.enderechoing.network.packet.ItemRenamePacket;
 import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
+import com.unddefined.enderechoing.network.packet.SyncTeleportersPacket;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -36,6 +37,13 @@ public class ModNetwork {
                 InfrasoundParticlePacket.TYPE,
                 InfrasoundParticlePacket.STREAM_CODEC,
                 InfrasoundParticlePacket::handle
+        );
+        
+        // 注册传送器位置同步数据包
+        registrar.playToClient(
+                SyncTeleportersPacket.TYPE,
+                SyncTeleportersPacket.STREAM_CODEC,
+                SyncTeleportersPacket::handle
         );
     }
 }
