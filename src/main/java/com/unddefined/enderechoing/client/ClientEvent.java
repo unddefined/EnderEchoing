@@ -31,6 +31,7 @@ public class ClientEvent {
     public static boolean EffectAdded = false;
     public static int countdownTicks = 0;
     public static boolean isCounting = false;
+    public static boolean EchoSoundingExtraRender = false;
     // 存储从服务端同步过来的传送器位置
     private static List<BlockPos> syncedTeleporterPositions = new ArrayList<>();
 
@@ -45,14 +46,19 @@ public class ClientEvent {
         if (EchoSoundingPos == null) return;
         PoseStack PoseStack = new PoseStack();
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        var PartialTicks = event.getPartialTick().getGameTimeDeltaTicks();
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 
         Level level = Minecraft.getInstance().level;
         if (level == null) return;
+        if (EchoSoundingExtraRender) {
+            EchoSounding.render(PoseStack, bufferSource, 0, -1, 0,
+                    PartialTicks, countdownTicks - 20, 0xF000F0);
+        }
         if (countdownTicks > 20) {
             //渲染EchoSounding
             EchoSounding.render(PoseStack, bufferSource, 0, -1, 0,
-                    event.getPartialTick().getGameTimeDeltaTicks(), countdownTicks - 20, 0xF000F0);
+                    PartialTicks, countdownTicks - 20, 0xF000F0);
         }
         if (countdownTicks > 120) {
             // 渲染EchoResponse
@@ -67,8 +73,7 @@ public class ClientEvent {
                             blockPos.x - camera.getPosition().x,
                             blockPos.y - camera.getPosition().y + 1,
                             blockPos.z - camera.getPosition().z,
-                            event.getPartialTick().getGameTimeDeltaTicks(),
-                            countdownTicks - 160, 0xF000F0 // full brightness
+                            PartialTicks, countdownTicks - 160, 0xF000F0 // full brightness
                     );
                 }
             }
@@ -97,7 +102,7 @@ public class ClientEvent {
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (isStepOn) isCounting = true;
-        if (EchoSoundingPos == null) isCounting = false;
+        if (EchoSoundingPos == null) {isCounting = false;EchoSoundingExtraRender = false;}
         countdownTicks = isCounting ? countdownTicks + 1 : 0;
         if (!isStepOn || EchoSoundingPos == null) return;
         if (!new AABB(EchoSoundingPos).inflate(0.6).contains(event.getEntity().blockPosition().getCenter())) {

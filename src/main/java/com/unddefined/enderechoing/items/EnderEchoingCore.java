@@ -98,10 +98,23 @@ public class EnderEchoingCore extends Item implements GeoItem {
         if (player.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(itemStack);
         // 检查玩家是否发光，如果发光则无法使用
         if (player.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
+        // 添加玩家动画
+        if (level.isClientSide()) {
+            if (player instanceof AbstractClientPlayer clientPlayer) {
+                AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
+                animationStack.removeLayer(42);
 
+                ModifierLayer<IAnimation> playerAnimation = new ModifierLayer<>();
+                playerAnimation.setAnimation(PlayerAnimationRegistry
+                        .getAnimation(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoing_core.player.use"))
+                        .playAnimation());
+                animationStack.addAnimLayer(42, playerAnimation);
+            }
+        }
+        // 渲染传送特效
         ClientEvent.EchoSoundingPos = player.blockPosition();
         ClientEvent.isCounting = true;
-        // 渲染传送特效
+        ClientEvent.EchoSoundingExtraRender = true;
         MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
         if (manager != null && manager.hasTeleporters()) {
             // 创建同步数据包
@@ -117,26 +130,13 @@ public class EnderEchoingCore extends Item implements GeoItem {
             return InteractionResultHolder.fail(itemStack);
         }
 
-        player.startUsingItem(hand);
         // 添加动画
         if (level instanceof ServerLevel serverLevel) {
             player.addEffect(new MobEffectInstance(MobEffectRegistry.SCULK_VEIL, 20 * 3, 0, false, true));
             triggerAnim(player, GeoItem.getOrAssignId(itemStack, serverLevel), CONTROLLER_NAME, ANIM_USE);
         }
-        if (level.isClientSide()) {
-            if (player instanceof AbstractClientPlayer clientPlayer) {
-                AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
-                // 移除之前的动画层（如果存在）
-                animationStack.removeLayer(42);
+        player.startUsingItem(hand);
 
-                // 添加新的动画层
-                ModifierLayer<IAnimation> playerAnimation = new ModifierLayer<>();
-                playerAnimation.setAnimation(PlayerAnimationRegistry
-                        .getAnimation(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoing_core.player.use"))
-                        .playAnimation());
-                animationStack.addAnimLayer(42, playerAnimation);
-            }
-        }
 
         return InteractionResultHolder.consume(itemStack);
     }

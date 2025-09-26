@@ -18,7 +18,6 @@ public class EchoSounding {
 
         float offset = 2f; // 每个波纹错开起始时间
         float age = (gameTime - offset) % 60f; // 周期性扩散
-        if (age < 0) age += 60f;
 
         float scale2 = 0.2f + age / 2f; // 控制半径增大
         float alpha = Math.max(0f, 1f - age / 60f); // 随半径增大透明度逐渐减小
