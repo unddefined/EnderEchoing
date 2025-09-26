@@ -2,11 +2,16 @@ package com.unddefined.enderechoing.blocks;
 
 import com.mojang.serialization.MapCodec;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
+import com.unddefined.enderechoing.client.ClientEvent;
+import com.unddefined.enderechoing.network.packet.SyncTeleportersPacket;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
-import com.unddefined.enderechoing.util.TeleporterManager;
+import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -22,9 +27,12 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+
+import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 
 public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
 
@@ -38,6 +46,11 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
                 .pushReaction(PushReaction.DESTROY)
                 .lightLevel(state -> 3)
         );
+    }
+
+    @Nullable
+    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> typeA, BlockEntityType<E> typeB, BlockEntityTicker<? super E> ticker) {
+        return typeA == typeB ? (BlockEntityTicker<A>) ticker : null;
     }
 
     @Override
@@ -70,7 +83,7 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
         super.onPlace(state, level, pos, oldState, isMoving);
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
-            TeleporterManager.get(level).addTeleporter(serverLevel, pos);
+            MarkedPositionsManager.getTeleporters(level).addTeleporter(serverLevel, pos);
         }
     }
 
@@ -78,24 +91,34 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         super.onRemove(state, level, pos, newState, isMoving);
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
-            TeleporterManager.get(level).removeTeleporter(serverLevel, pos);
+            MarkedPositionsManager.getTeleporters(level).removeTeleporter(serverLevel, pos);
         }
     }
 
-//    @Override
-//    public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
-//
-//    }
+    @Override
+    public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
+        if (entity.isCurrentlyGlowing()) return;
+        // 渲染传送特效
+        ClientEvent.TeleportFrom = pos;
+        ClientEvent.TeleportReady = true;
+        MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
+        if (manager != null && manager.hasTeleporters()) {
+            // 创建同步数据包
+            SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getTeleporterPositions(level));
+            // 向在线玩家发送数据包
+            if (entity instanceof ServerPlayer player) {
+                player.addEffect(new MobEffectInstance(SCULK_VEIL, 300));
+                PacketDistributor.sendToPlayer(player, packet);
+            }
+        }
+
+    }
 
     //region Ticker
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
         return createTickerHelper(blockEntityType, BlockEntityRegistry.ENDER_ECHOIC_RESONATOR.get(), EnderEchoicResonatorBlockEntity::tick);
-    }
-    @Nullable
-    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> typeA, BlockEntityType<E> typeB, BlockEntityTicker<? super E> ticker) {
-        return typeA == typeB ? (BlockEntityTicker<A>) ticker : null;
     }
     //endregion
 }

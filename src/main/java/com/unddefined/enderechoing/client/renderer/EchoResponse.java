@@ -49,7 +49,10 @@ public class EchoResponse {
         double deltaZ = blockPos.z - cameraPos.z();
         double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
         // 让波纹在屏幕上的大小基本恒定
-        float scale = (float) (Math.sqrt(distance)/2.7f);
+        double screenHeight =(double) Minecraft.getInstance().getWindow().getHeight()/90;
+        double fov = Minecraft.getInstance().options.fov().get().doubleValue();
+        double fovMultiplier = 2.0D * Math.tan(Math.toRadians(fov / 2.0D));
+        float scale = (float) (distance/screenHeight/fovMultiplier);
         if (scale < 1) scale = 1.0f;
         poseStack.scale(scale, scale, scale);
         // 应用相机朝向

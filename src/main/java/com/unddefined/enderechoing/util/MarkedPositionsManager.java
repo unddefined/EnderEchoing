@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -129,7 +130,7 @@ public class MarkedPositionsManager extends SavedData {
         markedPositions.removeIf(entry -> entry.dimensionLocation.equals(dimension) && entry.pos.equals(pos) && entry.name.equals(name));
         setDirty();
     }
-    public BlockPos getNearestTeleporter(ServerLevel level, BlockPos fromPos) {
+    public List<BlockPos> getNearestTeleporter(Level level, BlockPos fromPos) {
         String dimension = level.dimension().location().toString();
         BlockPos nearestPos = null;
         double nearestDistance = Double.MAX_VALUE;
@@ -145,7 +146,7 @@ public class MarkedPositionsManager extends SavedData {
             }
         }
 
-        return nearestPos;
+        return Collections.singletonList(nearestPos);
     }
 
     public List<BlockPos> getTeleporterPositions(Level level) {

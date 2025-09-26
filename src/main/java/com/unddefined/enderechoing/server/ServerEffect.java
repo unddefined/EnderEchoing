@@ -1,9 +1,6 @@
 package com.unddefined.enderechoing.server;
 
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.network.packet.SyncTeleportersPacket;
-import com.unddefined.enderechoing.util.MarkedPositionsManager;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,8 +11,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Objects;
 
@@ -28,32 +23,6 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED
 
 @EventBusSubscriber(modid = EnderEchoing.MODID)
 public class ServerEffect {
-    // 用于跟踪同步间隔
-    private static int syncTimer = 100;
-    private static final int SYNC_INTERVAL = 100; // 20秒
-
-    @SubscribeEvent
-    public static void onServerTick(ServerTickEvent.Post event) {
-        syncTimer++;
-        if (syncTimer >= SYNC_INTERVAL) {
-            syncTimer = 0;
-            //TODO:改为手动调用
-
-            // 获取主世界
-            ServerLevel overworld = event.getServer().getLevel(net.minecraft.world.level.Level.OVERWORLD);
-            if (overworld != null) {
-                // 获取传送器管理器
-                MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(overworld);
-                if (manager != null && manager.hasTeleporters()) {
-                    // 创建同步数据包
-                    SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getTeleporterPositions(overworld));
-
-                    // 向所有在线玩家发送数据包
-                    PacketDistributor.sendToAllPlayers(packet);
-                }
-            }
-        }
-    }
 
     @SubscribeEvent
     public static void onExpireEffect(MobEffectEvent.Expired event) {
