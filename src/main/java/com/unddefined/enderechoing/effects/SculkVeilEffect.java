@@ -48,7 +48,6 @@ public class SculkVeilEffect extends MobEffect {
         livingEntity.addEffect(effects[firstEffectIndex]);
         livingEntity.addEffect(effects[secondEffectIndex]);
 
-        // 添加黑暗效果
         livingEntity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300));
 
         var targetingCondition = TargetingConditions.forCombat().ignoreLineOfSight().

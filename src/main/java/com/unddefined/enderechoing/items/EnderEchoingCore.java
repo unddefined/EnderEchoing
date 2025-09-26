@@ -94,27 +94,29 @@ public class EnderEchoingCore extends Item implements GeoItem {
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-        ClientEvent.TeleportReady = true;
+        // 检查是否在冷却中
+        if (player.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(itemStack);
+        // 检查玩家是否发光，如果发光则无法使用
+        if (player.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
 
+        ClientEvent.EchoSoundingPos = player.blockPosition();
+        ClientEvent.isCounting = true;
         // 渲染传送特效
         MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
         if (manager != null && manager.hasTeleporters()) {
             // 创建同步数据包
-            SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getNearestTeleporter(level,player.blockPosition()));
+            SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getNearestTeleporter(level, player.blockPosition()));
             // 向在线玩家发送数据包
             if (player instanceof ServerPlayer splayer) {
-                splayer.addEffect(new MobEffectInstance(SCULK_VEIL, 300));
+                splayer.addEffect(new MobEffectInstance(SCULK_VEIL, 100));
                 PacketDistributor.sendToPlayer(splayer, packet);
             }
-        }
-        // 检查是否在冷却中
-        if (player.getCooldowns().isOnCooldown(this)) {
+        } else {
+            ClientEvent.EchoSoundingPos = null;
+            player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 400));
             return InteractionResultHolder.fail(itemStack);
         }
-        // 检查玩家是否发光，如果发光则无法使用
-        if (player.isCurrentlyGlowing()) {
-            return InteractionResultHolder.fail(itemStack);
-        }
+
         player.startUsingItem(hand);
         // 添加动画
         if (level instanceof ServerLevel serverLevel) {
@@ -126,7 +128,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
                 // 移除之前的动画层（如果存在）
                 animationStack.removeLayer(42);
-                
+
                 // 添加新的动画层
                 ModifierLayer<IAnimation> playerAnimation = new ModifierLayer<>();
                 playerAnimation.setAnimation(PlayerAnimationRegistry
@@ -143,7 +145,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
     public void releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int timeLeft) {
         // 当玩家释放使用物品时，移除动画层
         super.releaseUsing(stack, level, livingEntity, timeLeft);
-        ClientEvent.TeleportReady = false;
+        ClientEvent.EchoSoundingPos = null;
         if (level.isClientSide() && livingEntity instanceof AbstractClientPlayer clientPlayer) {
             AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
             animationStack.removeLayer(42);
@@ -151,17 +153,18 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel && livingEntity instanceof Player player) {
             stopTriggeredAnim(player, GeoItem.getOrAssignId(stack, serverLevel), CONTROLLER_NAME, null);
-            player.addEffect(new MobEffectInstance(MobEffects.GLOWING,400));
+            player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 400));
 
         }
     }
+
     public @NotNull ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity livingEntity) {
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel && livingEntity instanceof Player player) {
             // 再次检查玩家是否有未保存数据的末影珍珠
             if (!player.getInventory().hasAnyMatching(itemStack ->
                     itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
-                player.addEffect(new MobEffectInstance(MobEffects.GLOWING,400));
-                ClientEvent.TeleportReady = false;
+                player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
+                ClientEvent.EchoSoundingPos = null;
                 return stack;
             }
 
@@ -170,15 +173,15 @@ public class EnderEchoingCore extends Item implements GeoItem {
             var nearestTeleporterPos = manager.getNearestTeleporter(serverLevel, player.blockPosition());
 
             if (nearestTeleporterPos == null) {
-                player.addEffect(new MobEffectInstance(MobEffects.GLOWING,400));
-                ClientEvent.TeleportReady = false;
+                player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
+                ClientEvent.EchoSoundingPos = null;
                 return stack;
             }
 
             // 消耗一个没有保存数据的珍珠
-            player.getInventory().clearOrCountMatchingItems(itemStack -> 
-                            itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && 
-                            itemStack.get(CUSTOM_NAME) == null,
+            player.getInventory().clearOrCountMatchingItems(itemStack ->
+                            itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() &&
+                                    itemStack.get(CUSTOM_NAME) == null,
                     1, player.inventoryMenu.getCraftSlots());
 
             // 传送玩家到最近的传送器位置
@@ -186,8 +189,8 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 var pos = nearestTeleporterPos.getFirst();
                 serverPlayer.teleportTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
                 level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
-                ClientEvent.TeleportReady = false;
-                player.addEffect(new MobEffectInstance(MobEffects.GLOWING,300));
+                ClientEvent.EchoSoundingPos = null;
+                player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
             }
             // 设置冷却时间
             player.getCooldowns().addCooldown(this, Config.ENDER_ECHOING_CORE_COOLDOWN.get());

@@ -35,7 +35,6 @@ import java.util.List;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 
 public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
-
     public EnderEchoicResonatorBlock() {
         super(Properties.of()
                 .noOcclusion()
@@ -99,15 +98,17 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
         if (entity.isCurrentlyGlowing()) return;
         // 渲染传送特效
-        ClientEvent.TeleportFrom = pos;
-        ClientEvent.TeleportReady = true;
+        ClientEvent.EchoSoundingPos = pos;
+        ClientEvent.isStepOn = true;
+
         MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
         if (manager != null && manager.hasTeleporters()) {
             // 创建同步数据包
             SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getTeleporterPositions(level));
             // 向在线玩家发送数据包
             if (entity instanceof ServerPlayer player) {
-                player.addEffect(new MobEffectInstance(SCULK_VEIL, 300));
+                if (!ClientEvent.EffectAdded) player.addEffect(new MobEffectInstance(SCULK_VEIL, 300));
+                ClientEvent.EffectAdded = true;
                 PacketDistributor.sendToPlayer(player, packet);
             }
         }

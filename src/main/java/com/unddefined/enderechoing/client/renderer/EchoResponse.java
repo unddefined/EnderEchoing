@@ -12,9 +12,7 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 public class EchoResponse {
     public static final RenderType WAVE_RENDER_TYPE = RenderType.create(
@@ -34,25 +32,20 @@ public class EchoResponse {
                     .setOverlayState(RenderStateShard.OVERLAY)
                     .createCompositeState(true)
     );
-    public static void render(PoseStack poseStack,
-                              MultiBufferSource bufferSource,
-                              double centerX, double centerY, double centerZ, Vec3 blockPos,
+
+    public static void render(PoseStack poseStack, MultiBufferSource bufferSource,
+                              double centerX, double centerY, double centerZ,
                               float partialTicks, float gameTimes, int packedLight) {
         poseStack.pushPose();
         poseStack.translate(centerX, centerY, centerZ);
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 
-        // 计算特效相对于相机的位置
-        Vector3f cameraPos = camera.getPosition().toVector3f();
-        double deltaX = blockPos.x - cameraPos.x();
-        double deltaY = blockPos.y - cameraPos.y();
-        double deltaZ = blockPos.z - cameraPos.z();
-        double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+        double distance = Math.sqrt(centerX * centerX + centerY * centerY + centerZ * centerZ);
         // 让波纹在屏幕上的大小基本恒定
-        double screenHeight =(double) Minecraft.getInstance().getWindow().getHeight()/90;
+        double screenHeight = (double) Minecraft.getInstance().getWindow().getHeight() % 60;
         double fov = Minecraft.getInstance().options.fov().get().doubleValue();
         double fovMultiplier = 2.0D * Math.tan(Math.toRadians(fov / 2.0D));
-        float scale = (float) (distance/screenHeight/fovMultiplier);
+        float scale = (float) (distance / screenHeight / fovMultiplier);
         if (scale < 1) scale = 1.0f;
         poseStack.scale(scale, scale, scale);
         // 应用相机朝向
@@ -60,15 +53,13 @@ public class EchoResponse {
         poseStack.mulPose(Axis.XN.rotationDegrees(-camera.getXRot()));
         // 当前时间（每波纹起始时刻不同）
         float gameTime = gameTimes + partialTicks;
-
         // 渲染三个波纹
         for (int i = 0; i < 3; i++) {
             float offset = i * 30f; // 每个波纹错开起始时间
-            float age = (gameTime - offset) % 45f; // 周期性扩散
-            if (age < 0) age += 60f;
+            float age = (gameTime - offset) % 60f; // 周期性扩散
 
-            float scale2 = 0.2f + age / 30f; // 控制半径增大
-            float alpha = Math.max(0f, 1f - age / 30f); // 随半径增大透明度逐渐减小
+            float scale2 = 0.2f + age / 54f; // 控制半径增大
+            float alpha = Math.max(0f, 1f - age / 60f); // 随半径增大透明度逐渐减小
 
             poseStack.pushPose();
             poseStack.scale(scale2, scale2, 0); // 缩放波纹平面

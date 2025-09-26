@@ -82,4 +82,5 @@ public class ServerEffect {
             entity.removeEffect(SCULK_VEIL);
         }
     }
+
 }

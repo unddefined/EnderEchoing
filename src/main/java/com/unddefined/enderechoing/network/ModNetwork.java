@@ -1,10 +1,7 @@
 package com.unddefined.enderechoing.network;
 
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.network.packet.InfrasoundParticlePacket;
-import com.unddefined.enderechoing.network.packet.ItemRenamePacket;
-import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
-import com.unddefined.enderechoing.network.packet.SyncTeleportersPacket;
+import com.unddefined.enderechoing.network.packet.*;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -44,6 +41,13 @@ public class ModNetwork {
                 SyncTeleportersPacket.TYPE,
                 SyncTeleportersPacket.STREAM_CODEC,
                 SyncTeleportersPacket::handle
+        );
+
+        // 注册添加效果数据包
+        registrar.playToServer(
+                AddEffectPacket.TYPE,
+                AddEffectPacket.STREAM_CODEC,
+                AddEffectPacket::handle
         );
     }
 }
