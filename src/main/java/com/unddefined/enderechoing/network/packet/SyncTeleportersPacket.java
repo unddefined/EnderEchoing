@@ -1,7 +1,7 @@
 package com.unddefined.enderechoing.network.packet;
 
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.client.ClientEvent;
+import com.unddefined.enderechoing.client.renderer.EchoRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -39,7 +39,7 @@ public record SyncTeleportersPacket(List<BlockPos> teleporterPositions) implemen
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
             // 在客户端处理同步数据
-            ClientEvent.updateTeleporterPositions(teleporterPositions);
+            EchoRenderer.updateTeleporterPositions(teleporterPositions);
         });
     }
 

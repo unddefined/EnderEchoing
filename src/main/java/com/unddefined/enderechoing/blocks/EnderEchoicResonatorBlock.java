@@ -2,7 +2,7 @@ package com.unddefined.enderechoing.blocks;
 
 import com.mojang.serialization.MapCodec;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
-import com.unddefined.enderechoing.client.ClientEvent;
+import com.unddefined.enderechoing.client.renderer.EchoRenderer;
 import com.unddefined.enderechoing.network.packet.SyncTeleportersPacket;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
@@ -35,6 +35,7 @@ import java.util.List;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 
 public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
+    private static int temptick = 0;
     public EnderEchoicResonatorBlock() {
         super(Properties.of()
                 .noOcclusion()
@@ -97,18 +98,17 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     @Override
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
         if (entity.isCurrentlyGlowing()) return;
+        if(temptick > 0) temptick--;
         // 渲染传送特效
-        ClientEvent.EchoSoundingPos = pos;
-        ClientEvent.isStepOn = true;
-
+        EchoRenderer.EchoSoundingPos = pos;
         MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
         if (manager != null && manager.hasTeleporters()) {
             // 创建同步数据包
             SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getTeleporterPositions(level));
             // 向在线玩家发送数据包
-            if (entity instanceof ServerPlayer player) {
-                if (!ClientEvent.EffectAdded) player.addEffect(new MobEffectInstance(SCULK_VEIL, 300));
-                ClientEvent.EffectAdded = true;
+            if (entity instanceof ServerPlayer player && temptick == 0) {
+                player.addEffect(new MobEffectInstance(SCULK_VEIL, 40));
+                temptick = 80;
                 PacketDistributor.sendToPlayer(player, packet);
             }
         }

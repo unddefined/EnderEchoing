@@ -77,4 +77,14 @@ public class    EnderEchoingClient {
             }
         }
     }
+//    @SubscribeEvent
+//    public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
+//        // 为玩家渲染器添加影匿渲染层（有bug）
+//        event.getSkins().forEach((skin) -> {
+//            EntityRenderer<? extends Player> playerRenderer = event.getSkin(skin);
+//            if (playerRenderer instanceof PlayerRenderer renderer) {
+//                renderer.addLayer(new SculkVeilLayer(renderer));
+//            }
+//        });
+//    }
 }

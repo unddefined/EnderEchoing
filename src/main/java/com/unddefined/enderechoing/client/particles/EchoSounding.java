@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.client.renderer;
+package com.unddefined.enderechoing.client.particles;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

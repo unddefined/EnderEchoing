@@ -1,8 +1,8 @@
 package com.unddefined.enderechoing.items;
 
 import com.unddefined.enderechoing.Config;
-import com.unddefined.enderechoing.client.ClientEvent;
 import com.unddefined.enderechoing.client.model.EnderEchoingCoreModel;
+import com.unddefined.enderechoing.client.renderer.EchoRenderer;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer;
 import com.unddefined.enderechoing.network.packet.SyncTeleportersPacket;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
@@ -112,20 +112,19 @@ public class EnderEchoingCore extends Item implements GeoItem {
             }
         }
         // 渲染传送特效
-        ClientEvent.EchoSoundingPos = player.blockPosition();
-        ClientEvent.isCounting = true;
-        ClientEvent.EchoSoundingExtraRender = true;
+        EchoRenderer.EchoSoundingPos = player.blockPosition();
+        EchoRenderer.EchoSoundingExtraRender = true;
         MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
         if (manager != null && manager.hasTeleporters()) {
             // 创建同步数据包
             SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getNearestTeleporter(level, player.blockPosition()));
             // 向在线玩家发送数据包
             if (player instanceof ServerPlayer splayer) {
-                splayer.addEffect(new MobEffectInstance(SCULK_VEIL, 100));
+                splayer.addEffect(new MobEffectInstance(SCULK_VEIL, 20));
                 PacketDistributor.sendToPlayer(splayer, packet);
             }
         } else {
-            ClientEvent.EchoSoundingPos = null;
+            EchoRenderer.EchoSoundingPos = null;
             player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 400));
             return InteractionResultHolder.fail(itemStack);
         }
@@ -145,7 +144,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
     public void releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int timeLeft) {
         // 当玩家释放使用物品时，移除动画层
         super.releaseUsing(stack, level, livingEntity, timeLeft);
-        ClientEvent.EchoSoundingPos = null;
+        EchoRenderer.EchoSoundingPos = null;
         if (level.isClientSide() && livingEntity instanceof AbstractClientPlayer clientPlayer) {
             AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
             animationStack.removeLayer(42);
@@ -164,7 +163,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
             if (!player.getInventory().hasAnyMatching(itemStack ->
                     itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
                 player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
-                ClientEvent.EchoSoundingPos = null;
+                EchoRenderer.EchoSoundingPos = null;
                 return stack;
             }
 
@@ -174,7 +173,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
             if (nearestTeleporterPos == null) {
                 player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
-                ClientEvent.EchoSoundingPos = null;
+                EchoRenderer.EchoSoundingPos = null;
                 return stack;
             }
 
@@ -189,7 +188,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 var pos = nearestTeleporterPos.getFirst();
                 serverPlayer.teleportTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
                 level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
-                ClientEvent.EchoSoundingPos = null;
+                EchoRenderer.EchoSoundingPos = null;
                 player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
             }
             // 设置冷却时间

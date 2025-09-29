@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.client.renderer;
+package com.unddefined.enderechoing.client.particles;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -13,6 +13,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class EchoResponse {
     public static final RenderType WAVE_RENDER_TYPE = RenderType.create(
@@ -32,10 +36,11 @@ public class EchoResponse {
                     .setOverlayState(RenderStateShard.OVERLAY)
                     .createCompositeState(true)
     );
+    private static final List<Float> activeWaves = new ArrayList<>();
 
     public static void render(PoseStack poseStack, MultiBufferSource bufferSource,
                               double centerX, double centerY, double centerZ,
-                              float partialTicks, float gameTimes, int packedLight) {
+                              float ticks, boolean isCountingDown, int packedLight) {
         poseStack.pushPose();
         poseStack.translate(centerX, centerY, centerZ);
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
@@ -52,18 +57,23 @@ public class EchoResponse {
         poseStack.mulPose(Axis.YN.rotationDegrees(camera.getYRot()));
         poseStack.mulPose(Axis.XN.rotationDegrees(-camera.getXRot()));
         // 当前时间（每波纹起始时刻不同）
-        float gameTime = gameTimes + partialTicks;
-        // 渲染三个波纹
-        for (int i = 0; i < 3; i++) {
-            float offset = i * 30f; // 每个波纹错开起始时间
-            float age = (gameTime - offset) % 60f; // 周期性扩散
 
+        // 每隔30tick生成一个新的波纹
+        if (!isCountingDown && ticks % 30 == 0) activeWaves.add(ticks);
+        Iterator<Float> it = activeWaves.iterator();
+
+        // 渲染三个波纹
+        while (it.hasNext()) {
+            float offset = it.next();
+            float age = ticks - offset; // 周期性扩散
+            if (age > 120) {
+                it.remove(); // 生命周期结束
+                continue;
+            }
             float scale2 = 0.2f + age / 54f; // 控制半径增大
             float alpha = Math.max(0f, 1f - age / 60f); // 随半径增大透明度逐渐减小
-
             poseStack.pushPose();
             poseStack.scale(scale2, scale2, 0); // 缩放波纹平面
-
             VertexConsumer vc = bufferSource.getBuffer(WAVE_RENDER_TYPE);
             Matrix4f mat = poseStack.last().pose();
             int alphaInt = (int) (alpha * 255);
