@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class EchoResponse {
             VertexFormat.Mode.QUADS,
             1536,
             false,
-            true,
+            false,
             RenderType.CompositeState.builder()
                     .setShaderState(RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
                     .setTextureState(new RenderStateShard.TextureStateShard(ResourceLocation.fromNamespaceAndPath("enderechoing", "textures/misc/wave.png"), false, false))
@@ -39,24 +40,32 @@ public class EchoResponse {
     private static final List<Float> activeWaves = new ArrayList<>();
 
     public static void render(PoseStack poseStack, MultiBufferSource bufferSource,
-                              double centerX, double centerY, double centerZ,
-                              float ticks, boolean isCountingDown, int packedLight) {
-        poseStack.pushPose();
-        poseStack.translate(centerX, centerY, centerZ);
+                              Vec3 blockPos, float ticks, boolean isCountingDown, int packedLight) {
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        double screenHeight = Minecraft.getInstance().getWindow().getHeight();
+        double offX = blockPos.x - camera.getPosition().x;
+        double offY = blockPos.y - camera.getPosition().y;
+        double offZ = blockPos.z - camera.getPosition().z;
+        double distance = Math.sqrt(offX * offX + offY * offY + offZ * offZ);
+        if (distance > 250000.0D) {
+            double offScaler = 250000.0D / distance;
+            offX *= offScaler;
+            offY *= offScaler;
+            offZ *= offScaler;
+        }
 
-        double distance = Math.sqrt(centerX * centerX + centerY * centerY + centerZ * centerZ);
-        // 让波纹在屏幕上的大小基本恒定
-        double screenHeight = (double) Minecraft.getInstance().getWindow().getHeight() % 60;
         double fov = Minecraft.getInstance().options.fov().get().doubleValue();
         double fovMultiplier = 2.0D * Math.tan(Math.toRadians(fov / 2.0D));
-        float scale = (float) (distance / screenHeight / fovMultiplier);
-        if (scale < 1) scale = 1.0f;
-        poseStack.scale(scale, scale, scale);
-        // 应用相机朝向
-        poseStack.mulPose(Axis.YN.rotationDegrees(camera.getYRot()));
-        poseStack.mulPose(Axis.XN.rotationDegrees(-camera.getXRot()));
-        // 当前时间（每波纹起始时刻不同）
+        float screenScale = (float) (distance / screenHeight / fovMultiplier * 160);
+        if (screenScale < 1) screenScale = 1.0f;
+
+        poseStack.pushPose();
+        poseStack.translate(offX, offY + 1, offZ);
+        // apply camera-facing rotation so the quad faces the camera
+        poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
+        poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        // scale to screen-constant size
+        poseStack.scale(screenScale, screenScale, 0);
 
         // 每隔30tick生成一个新的波纹
         if (!isCountingDown && ticks % 30 == 0) activeWaves.add(ticks);
@@ -89,6 +98,7 @@ public class EchoResponse {
                     .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0f, 1f, 0f);
             poseStack.popPose();
         }
+        // pop world pose for quad drawing
         poseStack.popPose();
     }
 }
