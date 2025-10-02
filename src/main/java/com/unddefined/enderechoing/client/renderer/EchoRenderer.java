@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
@@ -33,6 +34,7 @@ public class EchoRenderer {
     public static Matrix4f ProjectionMatrix = null;
     private static int countTicks = 0;
     private static int countdownTicks = 60;
+    private static int teleportTicks = 60;
     private static boolean isCounting = false;
     private static Matrix4f ModelViewMatrix = null;
     private static Player player = null;
@@ -72,11 +74,16 @@ public class EchoRenderer {
                 if (pos.equals(EchoSoundingPos)) continue;
                 if (new AABB(Camera.getBlockPosition()).inflate(4096).contains(Vec3.atCenterOf(pos))) {
                     Vec3 blockPos = Vec3.atCenterOf(pos);
-                    var isElementHovered = EchoResponse.render(worldPoseStack, bufferSource, blockPos, countTicks - 150,
+                    var isElementHovered = EchoResponse.render(worldPoseStack, bufferSource, blockPos, countTicks - 160,
                             countdownTicks < 59);
                     if (isElementHovered && !player.isCurrentlyGlowing()) {
-                        player.teleportTo(blockPos.x, blockPos.y, blockPos.z);
-                        countdownTicks--;
+                        event.getLevelRenderer().addParticle(ParticleTypes.SONIC_BOOM, false, blockPos.x, blockPos.y + 1, blockPos.z, blockPos.x, blockPos.y + 1, blockPos.z);
+                        if (++teleportTicks > 40) {
+                            player.teleportTo(blockPos.x, blockPos.y, blockPos.z);
+//                            PacketDistributor.sendToServer(new AddEffectPacket(MobEffects.GLOWING, 600));
+                            teleportTicks = 0;
+
+                        }
                     }
                 }
             }
@@ -108,14 +115,15 @@ public class EchoRenderer {
         countTicks = isCounting ? countTicks + 1 : 0;
         if (countdownTicks == 0) {
             isCounting = false;
+            EchoResponse.activeWaves.clear();
             return;
         }
         countdownTicks--;
         if (EchoSoundingPos == null) return;
         if (!new AABB(EchoSoundingPos).inflate(0.6).contains(event.getEntity().blockPosition().getCenter())) {
             // 玩家离开了方块，重置状态
-            EchoSoundingPos = null;
             PacketDistributor.sendToServer(new AddEffectPacket(MobEffects.GLOWING, 600));
+            EchoSoundingPos = null;
             EchoSoundingExtraRender = false;
         }
 

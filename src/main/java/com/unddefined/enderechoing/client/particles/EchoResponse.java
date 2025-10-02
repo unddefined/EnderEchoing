@@ -40,10 +40,10 @@ public class EchoResponse {
                     .setOverlayState(RenderStateShard.OVERLAY)
                     .createCompositeState(true)
     );
-    private static final List<Float> activeWaves = new ArrayList<>();
+    public static final List<Integer> activeWaves = new ArrayList<>();
 
     public static boolean render(PoseStack poseStack, MultiBufferSource bufferSource,
-                              Vec3 blockPos, float ticks, boolean isCountingDown) {
+                                 Vec3 blockPos, int ticks, boolean isCountingDown) {
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         double screenHeight = Minecraft.getInstance().getWindow().getHeight();
         double offX = blockPos.x - camera.getPosition().x;
@@ -74,13 +74,13 @@ public class EchoResponse {
         poseStack.scale(screenScale, screenScale, 0);
 
         // 每隔30tick生成一个新的波纹
-        if (!isCountingDown && ticks % 30 == 0) activeWaves.add(ticks);
-        Iterator<Float> it = activeWaves.iterator();
+        if (ticks < 0 && ticks % 30 == 0) activeWaves.add(-ticks);
+        else if (!isCountingDown && ticks % 30 == 0) activeWaves.add(ticks);
+        Iterator<Integer> it = activeWaves.iterator();
 
         // 渲染三个波纹
         while (it.hasNext()) {
-            float offset = it.next();
-            float age = ticks - offset; // 周期性扩散
+            int age = ticks - it.next(); // 周期性扩散
             if (age > 120) {
                 it.remove(); // 生命周期结束
                 continue;

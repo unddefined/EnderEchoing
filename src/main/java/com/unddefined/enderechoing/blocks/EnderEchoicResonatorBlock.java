@@ -100,13 +100,13 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         if (entity.isCurrentlyGlowing()) return;
         if(temptick > 0) temptick--;
         // 渲染传送特效
-        EchoRenderer.EchoSoundingPos = pos;
         MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
         if (manager != null && manager.hasTeleporters()) {
             // 创建同步数据包
             SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getTeleporterPositions(level));
             // 向在线玩家发送数据包
             if (entity instanceof ServerPlayer player && temptick == 0) {
+                EchoRenderer.EchoSoundingPos = pos;
                 player.addEffect(new MobEffectInstance(SCULK_VEIL, 40));
                 temptick = 80;
                 PacketDistributor.sendToPlayer(player, packet);
