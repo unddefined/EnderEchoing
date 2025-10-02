@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -29,10 +30,12 @@ import java.util.List;
 public class EchoRenderer {
     public static BlockPos EchoSoundingPos = null;
     public static boolean EchoSoundingExtraRender = false;
+    public static Matrix4f ProjectionMatrix = null;
     private static int countTicks = 0;
     private static int countdownTicks = 60;
     private static boolean isCounting = false;
     private static Matrix4f ModelViewMatrix = null;
+    private static Player player = null;
     // 存储从服务端同步过来的传送器位置
     private static List<BlockPos> syncedTeleporterPositions = new ArrayList<>();
 
@@ -69,10 +72,15 @@ public class EchoRenderer {
                 if (pos.equals(EchoSoundingPos)) continue;
                 if (new AABB(Camera.getBlockPosition()).inflate(4096).contains(Vec3.atCenterOf(pos))) {
                     Vec3 blockPos = Vec3.atCenterOf(pos);
-                    EchoResponse.render(worldPoseStack, bufferSource, blockPos, countTicks - 150,
-                            countdownTicks < 59, LightTexture.FULL_BRIGHT);
+                    var isElementHovered = EchoResponse.render(worldPoseStack, bufferSource, blockPos, countTicks - 150,
+                            countdownTicks < 59);
+                    if (isElementHovered && !player.isCurrentlyGlowing()) {
+                        player.teleportTo(blockPos.x, blockPos.y, blockPos.z);
+                        countdownTicks--;
+                    }
                 }
             }
+
         }
         worldPoseStack.popPose();
         bufferSource.endBatch();
@@ -84,6 +92,7 @@ public class EchoRenderer {
     public static void handleRenderSolidBlocks(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS) return;
         ModelViewMatrix = event.getModelViewMatrix();
+        ProjectionMatrix = event.getProjectionMatrix();
     }
 
     @SubscribeEvent
@@ -91,6 +100,7 @@ public class EchoRenderer {
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
+        player = event.getEntity();
         if (EchoSoundingPos != null) {
             isCounting = true;
             countdownTicks = 60;

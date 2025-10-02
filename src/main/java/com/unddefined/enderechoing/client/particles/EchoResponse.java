@@ -14,10 +14,13 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static net.minecraft.client.renderer.LightTexture.FULL_BRIGHT;
 
 public class EchoResponse {
     public static final RenderType WAVE_RENDER_TYPE = RenderType.create(
@@ -28,7 +31,7 @@ public class EchoResponse {
             false,
             false,
             RenderType.CompositeState.builder()
-                    .setShaderState(RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
+                    .setShaderState(RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
                     .setTextureState(new RenderStateShard.TextureStateShard(ResourceLocation.fromNamespaceAndPath("enderechoing", "textures/misc/wave.png"), false, false))
                     .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                     .setLightmapState(RenderStateShard.LIGHTMAP)
@@ -39,12 +42,12 @@ public class EchoResponse {
     );
     private static final List<Float> activeWaves = new ArrayList<>();
 
-    public static void render(PoseStack poseStack, MultiBufferSource bufferSource,
-                              Vec3 blockPos, float ticks, boolean isCountingDown, int packedLight) {
+    public static boolean render(PoseStack poseStack, MultiBufferSource bufferSource,
+                              Vec3 blockPos, float ticks, boolean isCountingDown) {
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         double screenHeight = Minecraft.getInstance().getWindow().getHeight();
         double offX = blockPos.x - camera.getPosition().x;
-        double offY = blockPos.y - camera.getPosition().y;
+        double offY = blockPos.y - camera.getPosition().y + 1;
         double offZ = blockPos.z - camera.getPosition().z;
         double distance = Math.sqrt(offX * offX + offY * offY + offZ * offZ);
         if (distance > 250000.0D) {
@@ -58,9 +61,12 @@ public class EchoResponse {
         double fovMultiplier = 2.0D * Math.tan(Math.toRadians(fov / 2.0D));
         float screenScale = (float) (distance / screenHeight / fovMultiplier * 160);
         if (screenScale < 1) screenScale = 1.0f;
-
+        // 当玩家准星看向那个位置时高亮波纹
+        var dir = new Vector3f((float) (offX / distance), (float) (offY / distance), (float) (offZ / distance));
+        boolean isElementHovered = camera.getLookVector().dot(dir) >= 0.999f;
+        int packedLight = isElementHovered ? FULL_BRIGHT : (int) (FULL_BRIGHT * 0.6);
         poseStack.pushPose();
-        poseStack.translate(offX, offY + 1, offZ);
+        poseStack.translate(offX, offY, offZ);
         // apply camera-facing rotation so the quad faces the camera
         poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
@@ -100,5 +106,6 @@ public class EchoResponse {
         }
         // pop world pose for quad drawing
         poseStack.popPose();
+        return isElementHovered;
     }
 }
