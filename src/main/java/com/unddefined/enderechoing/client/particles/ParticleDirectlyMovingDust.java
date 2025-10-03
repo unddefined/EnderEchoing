@@ -4,8 +4,9 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
-public class DirectlyMovingDust extends TextureSheetParticle {
+public class ParticleDirectlyMovingDust extends TextureSheetParticle {
     private final SpriteSet sprites;
     private final double xStart;
     private final double yStart;
@@ -14,8 +15,8 @@ public class DirectlyMovingDust extends TextureSheetParticle {
     private final double yEnd;
     private final double zEnd;
 
-    protected DirectlyMovingDust(DirectlyMovingDustOptions options, ClientLevel level, double from_x, double from_y, double from_z,
-                                 double to_x, double to_y, double to_z, SpriteSet sprites) {
+    protected ParticleDirectlyMovingDust(DirectlyMovingDustOptions options, ClientLevel level, double from_x, double from_y, double from_z,
+                                         double to_x, double to_y, double to_z, SpriteSet sprites) {
         super(level, from_x, from_y, from_z);
         this.xStart = from_x;
         this.yStart = from_y;
@@ -67,7 +68,7 @@ public class DirectlyMovingDust extends TextureSheetParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
+    public @NotNull ParticleRenderType getRenderType() {
         return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
     }
 
@@ -83,7 +84,7 @@ public class DirectlyMovingDust extends TextureSheetParticle {
         public Particle createParticle(
                 DirectlyMovingDustOptions options, ClientLevel level,
                 double from_x, double from_y, double from_z, double to_x, double to_y, double to_z) {
-            return new DirectlyMovingDust(options, level, from_x, from_y, from_z, to_x, to_y, to_z, this.sprites);
+            return new ParticleDirectlyMovingDust(options, level, from_x, from_y, from_z, to_x, to_y, to_z, this.sprites);
         }
     }
 }

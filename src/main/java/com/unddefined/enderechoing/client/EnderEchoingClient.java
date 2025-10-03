@@ -3,7 +3,7 @@ package com.unddefined.enderechoing.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.TransparentScreen;
-import com.unddefined.enderechoing.client.particles.DirectlyMovingDust;
+import com.unddefined.enderechoing.client.particles.ParticleDirectlyMovingDust;
 import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShriekerRenderer;
 import com.unddefined.enderechoing.client.renderer.block.EnderEchoicResonatorRenderer;
 import com.unddefined.enderechoing.client.renderer.block.SculkWhisperRenderer;
@@ -62,7 +62,7 @@ public class    EnderEchoingClient {
     
     @SubscribeEvent
     public static void registerParticleProviders(RegisterParticleProvidersEvent event){
-        event.registerSpriteSet(ParticlesRegistry.DIRECT_MOVING_DUST.get(), DirectlyMovingDust.Provider::new);
+        event.registerSpriteSet(ParticlesRegistry.DIRECT_MOVING_DUST.get(), ParticleDirectlyMovingDust.Provider::new);
     }
     
     @SubscribeEvent
