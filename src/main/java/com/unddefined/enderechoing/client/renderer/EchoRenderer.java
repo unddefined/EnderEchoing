@@ -4,13 +4,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.particles.EchoResponse;
+import com.unddefined.enderechoing.client.particles.EchoResponsing;
 import com.unddefined.enderechoing.client.particles.EchoSounding;
 import com.unddefined.enderechoing.network.packet.AddEffectPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
@@ -34,10 +34,11 @@ public class EchoRenderer {
     public static Matrix4f ProjectionMatrix = null;
     private static int countTicks = 0;
     private static int countdownTicks = 60;
-    private static int teleportTicks = 60;
+    private static int teleportTicks = 0;
     private static boolean isCounting = false;
     private static Matrix4f ModelViewMatrix = null;
     private static Player player = null;
+    private static Vec3 targetPos = null;
     // 存储从服务端同步过来的传送器位置
     private static List<BlockPos> syncedTeleporterPositions = new ArrayList<>();
 
@@ -74,17 +75,17 @@ public class EchoRenderer {
                 if (pos.equals(EchoSoundingPos)) continue;
                 if (new AABB(Camera.getBlockPosition()).inflate(4096).contains(Vec3.atCenterOf(pos))) {
                     Vec3 blockPos = Vec3.atCenterOf(pos);
-                    var isElementHovered = EchoResponse.render(worldPoseStack, bufferSource, blockPos, countTicks - 160,
+                    boolean isElementHovering = EchoResponse.render(worldPoseStack, bufferSource, blockPos, countTicks - 160,
                             countdownTicks < 59);
-                    if (isElementHovered && !player.isCurrentlyGlowing()) {
-                        event.getLevelRenderer().addParticle(ParticleTypes.SONIC_BOOM, false, blockPos.x, blockPos.y + 1, blockPos.z, blockPos.x, blockPos.y + 1, blockPos.z);
+                    if (isElementHovering) targetPos = blockPos;
+                    if (isElementHovering && !player.isCurrentlyGlowing()) {
+                        EchoResponsing.render(worldPoseStack, bufferSource, blockPos, countTicks - 160);
                         if (++teleportTicks > 40) {
-                            player.teleportTo(blockPos.x, blockPos.y, blockPos.z);
-//                            PacketDistributor.sendToServer(new AddEffectPacket(MobEffects.GLOWING, 600));
+//                            player.teleportTo(blockPos.x, blockPos.y, blockPos.z);
                             teleportTicks = 0;
-
                         }
                     }
+                    if (targetPos != null && targetPos.equals(blockPos) && !isElementHovering) teleportTicks = 0;
                 }
             }
 

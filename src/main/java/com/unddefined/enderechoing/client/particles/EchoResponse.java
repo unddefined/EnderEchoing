@@ -41,6 +41,8 @@ public class EchoResponse {
                     .createCompositeState(true)
     );
     public static final List<Integer> activeWaves = new ArrayList<>();
+    private static int nTick = -31;
+    private static Vec3 targetPos = null;
 
     public static boolean render(PoseStack poseStack, MultiBufferSource bufferSource,
                                  Vec3 blockPos, int ticks, boolean isCountingDown) {
@@ -49,6 +51,8 @@ public class EchoResponse {
         double offX = blockPos.x - camera.getPosition().x;
         double offY = blockPos.y - camera.getPosition().y + 1;
         double offZ = blockPos.z - camera.getPosition().z;
+        poseStack.pushPose();
+        poseStack.translate(offX, offY, offZ);
         double distance = Math.sqrt(offX * offX + offY * offY + offZ * offZ);
         if (distance > 250000.0D) {
             double offScaler = 250000.0D / distance;
@@ -56,23 +60,28 @@ public class EchoResponse {
             offY *= offScaler;
             offZ *= offScaler;
         }
-
-        double fov = Minecraft.getInstance().options.fov().get().doubleValue();
-        double fovMultiplier = 2.0D * Math.tan(Math.toRadians(fov / 2.0D));
-        float screenScale = (float) (distance / screenHeight / fovMultiplier * 160);
-        if (screenScale < 1) screenScale = 1.0f;
-        // 当玩家准星看向那个位置时高亮波纹
-        var dir = new Vector3f((float) (offX / distance), (float) (offY / distance), (float) (offZ / distance));
-        boolean isElementHovered = camera.getLookVector().dot(dir) >= 0.999f;
-        int packedLight = isElementHovered ? FULL_BRIGHT : (int) (FULL_BRIGHT * 0.6);
-        poseStack.pushPose();
-        poseStack.translate(offX, offY, offZ);
         // apply camera-facing rotation so the quad faces the camera
         poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
         // scale to screen-constant size
+        double fov = Minecraft.getInstance().options.fov().get().doubleValue();
+        double fovMultiplier = 2.0D * Math.tan(Math.toRadians(fov / 2.0D));
+        float screenScale = (float) (distance / screenHeight / fovMultiplier * 160);
+        if (screenScale < 1) screenScale = 1.0f;
         poseStack.scale(screenScale, screenScale, 0);
-
+        // 当玩家准星看向那个位置时高亮波纹
+        var dir = new Vector3f((float) (offX / distance), (float) (offY / distance), (float) (offZ / distance));
+        boolean isElementHovering = camera.getLookVector().dot(dir) >= 0.999f;
+        int packedLight = isElementHovering ? FULL_BRIGHT : (int) (FULL_BRIGHT * 0.6);
+        if (isElementHovering) targetPos = blockPos;
+        if (isElementHovering) {
+            ticks = nTick++;
+            if (nTick == -30) {
+                activeWaves.clear();
+                activeWaves.add(-30);
+                activeWaves.add(0);
+            }
+        } else if (targetPos != null && targetPos.equals(blockPos)) nTick = -31;
         // 每隔30tick生成一个新的波纹
         if (ticks < 0 && ticks % 30 == 0) activeWaves.add(-ticks);
         else if (!isCountingDown && ticks % 30 == 0) activeWaves.add(ticks);
@@ -106,6 +115,6 @@ public class EchoResponse {
         }
         // pop world pose for quad drawing
         poseStack.popPose();
-        return isElementHovered;
+        return isElementHovering;
     }
 }
