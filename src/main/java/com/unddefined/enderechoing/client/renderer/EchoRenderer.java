@@ -9,7 +9,6 @@ import com.unddefined.enderechoing.client.particles.EchoSounding;
 import com.unddefined.enderechoing.network.packet.AddEffectPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -50,8 +49,8 @@ public class EchoRenderer {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
         if (!isCounting) return;
         int tick = countdownTicks < 59 ? countdownTicks : countTicks;
-        PoseStack PoseStack = event.getPoseStack();
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        var PoseStack = event.getPoseStack();
+        var bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         var PartialTicks = event.getPartialTick().getGameTimeDeltaTicks();
         if (Minecraft.getInstance().level == null) return;
         if (EchoSoundingExtraRender) {
@@ -64,7 +63,7 @@ public class EchoRenderer {
         }
 
         var Camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        PoseStack worldPoseStack = new PoseStack();
+        var worldPoseStack = new PoseStack();
         worldPoseStack.pushPose();
         RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().set(ModelViewMatrix);
@@ -74,14 +73,14 @@ public class EchoRenderer {
             for (BlockPos pos : syncedTeleporterPositions) {
                 if (pos.equals(EchoSoundingPos)) continue;
                 if (new AABB(Camera.getBlockPosition()).inflate(4096).contains(Vec3.atCenterOf(pos))) {
-                    Vec3 blockPos = Vec3.atCenterOf(pos);
-                    boolean isElementHovering = EchoResponse.render(worldPoseStack, bufferSource, blockPos, countTicks - 160,
+                    var blockPos = Vec3.atCenterOf(pos);
+                    boolean isElementHovering = EchoResponse.render(worldPoseStack, bufferSource, pos, countTicks - 160,
                             countdownTicks < 59);
-                    if (isElementHovering) targetPos = blockPos;
                     if (isElementHovering && !player.isCurrentlyGlowing()) {
-                        EchoResponsing.render(worldPoseStack, bufferSource, blockPos, countTicks - 160);
-                        if (++teleportTicks > 40) {
-//                            player.teleportTo(blockPos.x, blockPos.y, blockPos.z);
+                        targetPos = blockPos;
+                        EchoResponsing.render(worldPoseStack, bufferSource, blockPos, ++teleportTicks);
+                        if (teleportTicks > 53) {
+                            player.teleportTo(blockPos.x, blockPos.y, blockPos.z);
                             teleportTicks = 0;
                         }
                     }
@@ -116,7 +115,7 @@ public class EchoRenderer {
         countTicks = isCounting ? countTicks + 1 : 0;
         if (countdownTicks == 0) {
             isCounting = false;
-            EchoResponse.activeWaves.clear();
+            EchoResponse.activeWavesMap.clear();
             return;
         }
         countdownTicks--;

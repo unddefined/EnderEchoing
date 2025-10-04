@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -41,7 +42,6 @@ public class EchoResponsing {
                     .setOverlayState(RenderStateShard.OVERLAY)
                     .createCompositeState(true)
     ));
-
     public static void render(PoseStack poseStack, MultiBufferSource bufferSource,
                               Vec3 blockPos, int ticks) {
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
@@ -71,20 +71,20 @@ public class EchoResponsing {
         // 渲染SONIC_BOOM
         poseStack.pushPose();
         int frameCount = 14;
-        int frameDuration = 3;
+        int frameDuration = 4;
         int frameIndex = frameCount - 1 - (ticks / frameDuration) % frameCount;
         VertexConsumer vc = bufferSource.getBuffer(RESPONSING.apply(
                 ResourceLocation.fromNamespaceAndPath("enderechoing", "textures/misc/sonic_boom_" + frameIndex + ".png")));
-
+        int color =  FastColor.ABGR32.color(255, 140, 244, 226);
         Matrix4f mat = poseStack.last().pose();
         // 绘制一个平面 quad，包含所有必需的顶点属性
-        vc.addVertex(mat, -1f, -1f, 0f).setUv(0f, 0f).setColor(41, 223, 235, 255)
+        vc.addVertex(mat, -1f, -1f, 0f).setUv(0f, 0f).setColor(color)
                 .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(0f, 1f, 0f);
-        vc.addVertex(mat, 1f, -1f, 0f).setUv(1f, 0f).setColor(41, 223, 235, 255)
+        vc.addVertex(mat, 1f, -1f, 0f).setUv(1f, 0f).setColor(color)
                 .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(0f, 1f, 0f);
-        vc.addVertex(mat, 1f, 1f, 0f).setUv(1f, 1f).setColor(41, 223, 235, 255)
+        vc.addVertex(mat, 1f, 1f, 0f).setUv(1f, 1f).setColor(color)
                 .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(0f, 1f, 0f);
-        vc.addVertex(mat, -1f, 1f, 0f).setUv(0f, 1f).setColor(41, 223, 235, 255)
+        vc.addVertex(mat, -1f, 1f, 0f).setUv(0f, 1f).setColor(color)
                 .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(0f, 1f, 0f);
         poseStack.popPose();
 

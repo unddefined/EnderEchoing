@@ -1,10 +1,8 @@
 package com.unddefined.enderechoing.client.particles;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import org.joml.Matrix4f;
 
 public class EchoSounding {
 
@@ -24,8 +22,8 @@ public class EchoSounding {
 
         poseStack.scale(scale2, 0, scale2); // 缩放波纹平面
 
-        VertexConsumer vc = bufferSource.getBuffer(EchoResponse.WAVE_RENDER_TYPE);
-        Matrix4f mat = poseStack.last().pose();
+        var vc = bufferSource.getBuffer(EchoResponse.WAVE_RENDER_TYPE);
+        var mat = poseStack.last().pose();
         int alphaInt = (int) (alpha * 255);
 
         // 绘制一个平面 quad，包含所有必需的顶点属性
