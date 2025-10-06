@@ -27,28 +27,27 @@ public class SculkVeilEffect extends MobEffect {
         }
         // 获取当前效果实例并确保不为null
         var effectInstance = livingEntity.getEffect(MobEffectRegistry.SCULK_VEIL);
-        int duration = 60;
+        int duration = 40;
         if (effectInstance != null) duration = Math.max(duration, effectInstance.getDuration());
 
         MobEffectInstance WEAKNESS = new MobEffectInstance(MobEffects.WEAKNESS, duration);
         MobEffectInstance DIG_SLOWDOWN = new MobEffectInstance(MobEffects.DIG_SLOWDOWN, duration);
         MobEffectInstance HUNGER = new MobEffectInstance(MobEffects.HUNGER, duration);
         MobEffectInstance MOVEMENT_SLOWDOWN = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration);
-        MobEffectInstance BLINDNESS = new MobEffectInstance(MobEffects.BLINDNESS, duration);
         MobEffectInstance DEAFNESS = new MobEffectInstance(MobEffectRegistry.DEAFNESS, duration);
 
         // 确保只添加两个不同的随机效果
-        int firstEffectIndex = livingEntity.getRandom().nextInt(6);
+        int firstEffectIndex = livingEntity.getRandom().nextInt(5);
         int secondEffectIndex;
         do {
-            secondEffectIndex = livingEntity.getRandom().nextInt(6);
+            secondEffectIndex = livingEntity.getRandom().nextInt(5);
         } while (secondEffectIndex == firstEffectIndex);
 
-        MobEffectInstance[] effects = {WEAKNESS, DIG_SLOWDOWN, HUNGER, MOVEMENT_SLOWDOWN, BLINDNESS, DEAFNESS};
+        MobEffectInstance[] effects = {WEAKNESS, DIG_SLOWDOWN, HUNGER, MOVEMENT_SLOWDOWN, DEAFNESS};
         livingEntity.addEffect(effects[firstEffectIndex]);
         livingEntity.addEffect(effects[secondEffectIndex]);
 
-        livingEntity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300));
+        livingEntity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300,1));
 
         var targetingCondition = TargetingConditions.forCombat().ignoreLineOfSight().
             selector(e -> (((Mob) e).getTarget() == livingEntity));
@@ -69,7 +68,7 @@ public class SculkVeilEffect extends MobEffect {
     public boolean applyEffectTick(LivingEntity entity, int pAmplifier) {
         // 检查实体是否发光，如果发光则取消影匿效果
         return !entity.isCurrentlyGlowing();
-        //TODO: 半透明+粒子环绕
+        //TODO: 半透明+粒子环绕，增强DARKNESS效果，新增SculkVeil Fog效果
 //        pLivingEntity.setInvisible(true);
 
     }

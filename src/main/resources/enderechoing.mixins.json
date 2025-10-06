@@ -5,10 +5,12 @@
   "mixins": [
     "CatalystListenerMixin",
     "EntityMixin",
+    "FogDataAccessor",
     "MixinPlayerRenderer",
     "SculkPatchFeatureMixin"
   ],
   "client": [
+    "FogRendererMixin"
   ],
   "server": [
   ],
