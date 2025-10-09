@@ -9,26 +9,26 @@ import net.minecraft.world.level.block.state.BlockState;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 public class EnderEchoicResonatorBlockEntity extends BlockEntity implements GeoBlockEntity {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    private static final RawAnimation ANIMS = RawAnimation.begin().thenPlay("ender_echoic_resonator.common");
+    
+    // 添加动画时间跟踪
+    private float animationTime = 0;
 
     public EnderEchoicResonatorBlockEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityRegistry.ENDER_ECHOIC_RESONATOR.get(), pos, blockState);
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "Activation", 0,
-                state -> state.setAndContinue(ANIMS)));
-    }
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {}
 
     public static void tick(Level level, BlockPos pos, BlockState state, EnderEchoicResonatorBlockEntity blockEntity) {
+        // 更新动画时间
+        if (level.isClientSide) blockEntity.animationTime += 1;
+        
         //粒子效果
         if (level.isClientSide && level.getRandom().nextFloat() < 0.1) {
             level.addParticle(ParticleTypes.PORTAL,
@@ -45,5 +45,9 @@ public class EnderEchoicResonatorBlockEntity extends BlockEntity implements GeoB
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return this.cache;
     }
-
+    
+    // 提供动画时间给渲染器使用
+    public float getAnimationTime() {
+        return animationTime;
+    }
 }
