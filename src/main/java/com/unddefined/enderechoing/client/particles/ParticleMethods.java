@@ -52,14 +52,14 @@ public class ParticleMethods {
         } else {
             int particleCount = (int) (Math.PI * radius * radius * 100 + 1);
             for (int i = 0; i < particleCount; i++) {
-                // 生成球形分布的静态粒子
-                // 使用球坐标生成均匀分布的点
                 double theta = random.nextDouble() * 2 * Math.PI; // 方位角
                 double phi = Math.acos(2 * random.nextDouble() - 1); // 极角
+                // 添加半径内的随机距离，使粒子分布在整个球体内部
+                double r = radius * Math.cbrt(random.nextDouble());
 
-                double x = center.x + radius * Math.sin(phi) * Math.cos(theta);
+                double x = center.x + r * Math.sin(phi) * Math.cos(theta);
                 double y = center.y + radius * Math.cos(phi) + 0.4;
-                double z = center.z + radius * Math.sin(phi) * Math.sin(theta);
+                double z = center.z + r * Math.sin(phi) * Math.sin(theta);
 
                 // 根据位置确定粒子类型
                 float particleSelector = random.nextFloat();

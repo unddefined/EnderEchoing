@@ -26,12 +26,10 @@ public class ParticleDirectlyMovingDust extends TextureSheetParticle {
         this.zEnd = to_z;
         this.sprites = sprites;
 
-        // 设置粒子的基本属性
         this.gravity = 0;
         this.quadSize = options.size;
         this.hasPhysics = false;
         this.setLifetime(options.lifetime);
-        // 设置颜色
         this.setColor(options.red, options.green, options.blue);
         this.setSpriteFromAge(sprites);
     }
