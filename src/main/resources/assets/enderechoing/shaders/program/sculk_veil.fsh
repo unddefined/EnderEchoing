@@ -7,6 +7,7 @@ uniform mat4 InverseProjectionMatrix;
 uniform mat4 InverseModelViewMatrix;
 uniform vec3 CameraPos;
 uniform float GameTime;
+uniform int fadeIO;
 
 in vec2 texCoord;
 
@@ -135,6 +136,7 @@ vec3 flowWarp(vec3 p, float time) {
 
 void main() {
     vec3 baseColor = texture(DiffuseSampler, texCoord).rgb;
+    if (GameTime < 0) { fragColor = vec4(baseColor, 1.0); return; }
     float depth = texture(DepthSampler, texCoord).r;
     vec3 surfacePos = getWorldPos(depth, texCoord);
     float surfaceDist = length(surfacePos - CameraPos);
@@ -157,8 +159,11 @@ void main() {
     }
 
     float fogFactor = 1.0 - exp(-fogAcc * 3.);
-    float timeFade = clamp(GameTime / 40.0, 0.0, 1.0);
+    float fadeSpeed = 0.01;// 控制淡入淡出的速度
+    float timeFade = fadeIO == 0
+    ? smoothstep(0.0, 1.0, GameTime * fadeSpeed)// 淡入
+    : 1.0 - smoothstep(0.0, 1.0, GameTime * fadeSpeed);// 淡出
 
     vec3 finalColor = mix(baseColor, fogColor, fogFactor * timeFade);
-    fragColor = vec4(finalColor, 0.5);
+    fragColor = vec4(finalColor, 0.7);
 }
