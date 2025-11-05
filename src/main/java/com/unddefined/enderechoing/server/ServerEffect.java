@@ -18,8 +18,7 @@ import static com.unddefined.enderechoing.effects.AttackScatteredEffect.attack_s
 import static com.unddefined.enderechoing.effects.StaggerEffect.stagger_modifier_id;
 import static com.unddefined.enderechoing.effects.TinnitusEffect.tinnitus_modifier_id;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
-import static net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE;
-import static net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
+import static net.minecraft.world.entity.ai.attributes.Attributes.*;
 
 @EventBusSubscriber(modid = EnderEchoing.MODID)
 public class ServerEffect {
@@ -35,7 +34,7 @@ public class ServerEffect {
             Objects.requireNonNull(event.getEntity().getAttribute(MOVEMENT_SPEED)).removeModifier(stagger_modifier_id);
         }
         if (!event.getEntity().hasEffect(ATTACK_SCATTERED)) {
-            Objects.requireNonNull(event.getEntity().getAttribute(MOVEMENT_SPEED)).removeModifier(attack_scattered_modifier_id);
+            Objects.requireNonNull(event.getEntity().getAttribute(ATTACK_SPEED)).removeModifier(attack_scattered_modifier_id);
         }
     }
 

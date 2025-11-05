@@ -107,8 +107,8 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
             // 向在线玩家发送数据包
             if (entity instanceof ServerPlayer player && temptick == 0) {
                 EchoRenderer.EchoSoundingPos = pos;
-                player.addEffect(new MobEffectInstance(SCULK_VEIL, 40));
-                temptick = 80;
+                player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
+                temptick = 20;
                 PacketDistributor.sendToPlayer(player, packet);
             }
         }

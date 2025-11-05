@@ -8,6 +8,7 @@ trigger: always_on
 * 正确的包名：com.unddefined.enderechoing；错误的包名：com.undundefined.enderechoing。
 * 不主动编辑语言文件；
 * 在用户遇到问题的时候，优先检查代码可能的语法问题，然后检查逻辑问题。
+* 在解决问题的时候，先提出多种解决方案，然后由用户决定。
 * 源码库位于D:\walker-11572\EnderEchoing\source_codes\neoforge\neoforge-21.1.206-merged\net\minecraft；
 * 自动在合适的时机使用MCP工具。
 * 假如你修改了b，我把b改为B，那么你不要修改B，B可以是变量，变量名，参数，代码逻辑等。
