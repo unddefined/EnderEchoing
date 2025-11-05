@@ -50,6 +50,7 @@ public class EchoRenderer {
     @SubscribeEvent
     public static void renderEcho(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
+        if(!isCounting && !player.hasEffect(MobEffectRegistry.SCULK_VEIL)) return;
         var PartialTicks = event.getPartialTick().getGameTimeDeltaTicks();
         int tick = countdownTicks < 59 ? countdownTicks : countTicks;
         var Camera = mc.gameRenderer.getMainCamera();
