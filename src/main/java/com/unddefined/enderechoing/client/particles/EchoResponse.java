@@ -9,9 +9,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector3f;
@@ -40,22 +40,22 @@ public class EchoResponse {
                     .createCompositeState(true)
     );
 
-    public static final Map<BlockPos, List<Integer>> activeWavesMap = new HashMap<>();
+    public static final Map<Vec3, List<Integer>> activeWavesMap = new HashMap<>();
     private static int hoveringTicks = -31;
-    private static BlockPos targetPos = null;
+    private static Vec3 targetPos = null;
 
-    private static List<Integer> getActiveWavesForPosition(BlockPos pos) {
+    private static List<Integer> getActiveWavesForPosition(Vec3 pos) {
         return activeWavesMap.computeIfAbsent(pos, blockPos -> new ArrayList<>());
     }
 
     public static boolean render(PoseStack poseStack, MultiBufferSource bufferSource,
-                                 BlockPos blockPos, int ticks, boolean isCountingDown) {
+                                 Vec3 blockPos, int ticks, boolean isCountingDown) {
         var activeWaves = getActiveWavesForPosition(blockPos);
         var camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         double screenHeight = Minecraft.getInstance().getWindow().getHeight();
-        double offX = blockPos.getX() + 0.5 - camera.getPosition().x;
-        double offY = blockPos.getY() - camera.getPosition().y + 1.5;
-        double offZ = blockPos.getZ() + 0.5 - camera.getPosition().z;
+        double offX = blockPos.x - camera.getPosition().x;
+        double offY = blockPos.y - camera.getPosition().y + 1;
+        double offZ = blockPos.z - camera.getPosition().z;
         double distance = Math.sqrt(offX * offX + offY * offY + offZ * offZ);
         if (distance > 250000.0D) {
             double offScaler = 250000.0D / distance;
