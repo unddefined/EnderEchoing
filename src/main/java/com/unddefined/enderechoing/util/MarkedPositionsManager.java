@@ -157,11 +157,8 @@ public class MarkedPositionsManager extends SavedData {
                 .collect(Collectors.toList());
     }
 
-    public boolean hasTeleporters() {
-        return !teleporters.isEmpty();
-    }
+    public boolean hasTeleporters() {return !teleporters.isEmpty();}
 
-    // 内部类用于存储传送器位置和所在世界的信息
     private record Teleporters(String dimensionLocation, BlockPos pos) {
         private Teleporters(String dimensionLocation, BlockPos pos) {
             this.dimensionLocation = dimensionLocation;

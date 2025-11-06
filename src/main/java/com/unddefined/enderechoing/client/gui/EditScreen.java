@@ -1,7 +1,6 @@
 package com.unddefined.enderechoing.client.gui;
 
 import com.unddefined.enderechoing.network.packet.ItemRenamePacket;
-import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -10,8 +9,8 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class EditScreen extends Screen {
-    private EditBox nameField;
     private final Screen lastScreen;
+    private EditBox nameField;
     private Button doneButton;
     private Button cancelButton;
 
@@ -47,41 +46,30 @@ public class EditScreen extends Screen {
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
-        
+
         // 渲染标题
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 30, 0xFFFFFF);
-        
+
         // 渲染文本框提示
         this.nameField.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     private void onDone() {
         String name = this.nameField.getValue().trim();
-        String OriginalName = ItemRegistry.ENDER_ECHOING_PEARL.getRegisteredName();
-        if (!name.isEmpty()) {
-            // 发送重命名数据包到服务端
-            PacketDistributor.sendToServer(new ItemRenamePacket(name));
-        }else {
-            PacketDistributor.sendToServer(new ItemRenamePacket(OriginalName));
-        }
+
+        // 发送重命名数据包到服务端
+        PacketDistributor.sendToServer(new ItemRenamePacket(name));
+
         this.onClose();
     }
 
     @Override
-    public void onClose() {
-        this.minecraft.setScreen(this.lastScreen);
-    }
+    public void onClose() {this.minecraft.setScreen(this.lastScreen);}
 
     @Override
-    public boolean isPauseScreen() {
-        return false; // 不暂停游戏
-    }
+    public boolean isPauseScreen() {return false; }
 
-    public Button getDoneButton() {
-        return doneButton;
-    }
+    public Button getDoneButton() {return doneButton;}
 
-    public Button getCancelButton() {
-        return cancelButton;
-    }
+    public Button getCancelButton() {return cancelButton;}
 }
