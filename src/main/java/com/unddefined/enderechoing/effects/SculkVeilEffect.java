@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.effects;
 
 import com.unddefined.enderechoing.server.registry.MobEffectRegistry;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -12,13 +13,16 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 
 public class SculkVeilEffect extends MobEffect {
+    public static boolean ParticlesAdded = false;
+    private int countdownTicks = 0;
+    private int duration = 0;
     public SculkVeilEffect() {
         super(MobEffectCategory.BENEFICIAL, 0x4215441);
     }
 
     @Override
     public void onEffectAdded(LivingEntity livingEntity, int pAmplifier) {
-
+        countdownTicks = 0;
         // 检查实体是否发光，如果发光则不应用影匿效果
         if (livingEntity.isCurrentlyGlowing()) {
             // 直接移除刚刚添加的效果
@@ -27,38 +31,19 @@ public class SculkVeilEffect extends MobEffect {
         }
         // 获取当前效果实例并确保不为null
         var effectInstance = livingEntity.getEffect(MobEffectRegistry.SCULK_VEIL);
-        int duration = 40;
+
         if (effectInstance != null) duration = Math.max(duration, effectInstance.getDuration());
 
-        MobEffectInstance WEAKNESS = new MobEffectInstance(MobEffects.WEAKNESS, duration);
-        MobEffectInstance DIG_SLOWDOWN = new MobEffectInstance(MobEffects.DIG_SLOWDOWN, duration);
-        MobEffectInstance HUNGER = new MobEffectInstance(MobEffects.HUNGER, duration);
-        MobEffectInstance MOVEMENT_SLOWDOWN = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration);
-        MobEffectInstance DEAFNESS = new MobEffectInstance(MobEffectRegistry.DEAFNESS, duration);
-
-        // 确保只添加两个不同的随机效果
-        int firstEffectIndex = livingEntity.getRandom().nextInt(5);
-        int secondEffectIndex;
-        do {
-            secondEffectIndex = livingEntity.getRandom().nextInt(5);
-        } while (secondEffectIndex == firstEffectIndex);
-
-        MobEffectInstance[] effects = {WEAKNESS, DIG_SLOWDOWN, HUNGER, MOVEMENT_SLOWDOWN, DEAFNESS};
-        livingEntity.addEffect(effects[firstEffectIndex]);
-        livingEntity.addEffect(effects[secondEffectIndex]);
-
-        livingEntity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300,1));
-
         var targetingCondition = TargetingConditions.forCombat().ignoreLineOfSight().
-            selector(e -> (((Mob) e).getTarget() == livingEntity));
+                selector(e -> (((Mob) e).getTarget() == livingEntity));
 
         //remove aggro from anything targeting us
         livingEntity.level().getNearbyEntities(Mob.class, targetingCondition, livingEntity, livingEntity.getBoundingBox().inflate(40D))
-            .forEach(entityTargetingCaster -> {
-                entityTargetingCaster.setTarget(null);
-                entityTargetingCaster.targetSelector.getAvailableGoals().forEach(WrappedGoal::stop);
-                entityTargetingCaster.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
-            });
+                .forEach(entityTargetingCaster -> {
+                    entityTargetingCaster.setTarget(null);
+                    entityTargetingCaster.targetSelector.getAvailableGoals().forEach(WrappedGoal::stop);
+                    entityTargetingCaster.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+                });
     }
 
     @Override
@@ -66,10 +51,29 @@ public class SculkVeilEffect extends MobEffect {
 
     @Override
     public boolean applyEffectTick(LivingEntity entity, int pAmplifier) {
+        entity.setInvisible(true);
+        if (countdownTicks-- <= 0 && entity.level() instanceof ServerLevel) {
+            countdownTicks = duration + 40;
+            MobEffectInstance WEAKNESS = new MobEffectInstance(MobEffects.WEAKNESS, duration);
+            MobEffectInstance DIG_SLOWDOWN = new MobEffectInstance(MobEffects.DIG_SLOWDOWN, duration);
+            MobEffectInstance HUNGER = new MobEffectInstance(MobEffects.HUNGER, duration);
+            MobEffectInstance MOVEMENT_SLOWDOWN = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration);
+            MobEffectInstance DEAFNESS = new MobEffectInstance(MobEffectRegistry.DEAFNESS, duration);
+
+            // 确保只添加两个不同的随机效果
+            int firstEffectIndex = entity.getRandom().nextInt(5);
+            int secondEffectIndex;
+            do {
+                secondEffectIndex = entity.getRandom().nextInt(5);
+            } while (secondEffectIndex == firstEffectIndex);
+            MobEffectInstance[] effects = {WEAKNESS, DIG_SLOWDOWN, HUNGER, MOVEMENT_SLOWDOWN, DEAFNESS};
+            entity.addEffect(effects[firstEffectIndex]);
+            entity.addEffect(effects[secondEffectIndex]);
+            entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300, 1));
+        }
         // 检查实体是否发光，如果发光则取消影匿效果
         return !entity.isCurrentlyGlowing();
-        //TODO: 半透明+粒子环绕，增强DARKNESS效果，新增SculkVeil Fog效果
-//        pLivingEntity.setInvisible(true);
+        //TODO: 半透明
 
     }
 }
