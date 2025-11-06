@@ -6,19 +6,11 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.codec.StreamCodec;
+import org.jetbrains.annotations.NotNull;
 
-public class DirectlyMovingDustOptions implements ParticleOptions {
-    public final int lifetime;
-    public final float red, green, blue, size;
+public record DirectlyMovingDustOptions(int lifetime, float red, float green, float blue,
+                                        float size) implements ParticleOptions {
     public static final MapCodec<DirectlyMovingDustOptions> CODEC = MapCodec.unit(new DirectlyMovingDustOptions(0, 0f, 0f, 0f, 0f));
-
-    public DirectlyMovingDustOptions(int lifetime, float red, float green, float blue,float size) {
-        this.lifetime = lifetime;
-        this.red = red;
-        this.green = green;
-        this.blue = blue;
-        this.size = size;
-    }
 
     public static final StreamCodec<ByteBuf, DirectlyMovingDustOptions> STREAM_CODEC = StreamCodec.of(
             (buf, options) -> {
@@ -32,26 +24,9 @@ public class DirectlyMovingDustOptions implements ParticleOptions {
     );
 
     @Override
-    public ParticleType<?> getType() {
+    public @NotNull ParticleType<?> getType() {
         return ParticlesRegistry.DIRECT_MOVING_DUST.get();
     }
 
     // 添加getter方法
-
-    public int lifetime() {
-        return lifetime;
-    }
-
-
-    public float red() {
-        return red;
-    }
-
-    public float green() {
-        return green;
-    }
-
-    public float blue() {
-        return blue;
-    }
 }

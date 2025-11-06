@@ -6,13 +6,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.PostPass;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.joml.Matrix4f;
 
 import java.lang.reflect.Field;
@@ -26,7 +23,6 @@ import static com.unddefined.enderechoing.client.EnderEchoingClient.sculkVeilPos
 @EventBusSubscriber(modid = EnderEchoing.MODID, value = Dist.CLIENT)
 public class SculkVeilRenderer {
     private static final Minecraft mc = Minecraft.getInstance();
-    private static Player player = null;
     private static int lastWidth = -1;
     private static int lastHeight = -1;
     public static float fadeProgress = 0.0f;
@@ -115,7 +111,4 @@ public class SculkVeilRenderer {
 
         fadeProgress = Mth.clamp(fadeProgress, 0.0f, 1.0f);
     }
-
-    @SubscribeEvent
-    public static void onPlayerTick(PlayerTickEvent.Post event) {player = event.getEntity();}
 }

@@ -27,10 +27,10 @@ public class ParticleDirectlyMovingDust extends TextureSheetParticle {
         this.sprites = sprites;
 
         this.gravity = 0;
-        this.quadSize = options.size;
+        this.quadSize = options.size();
         this.hasPhysics = false;
-        this.setLifetime(options.lifetime);
-        this.setColor(options.red, options.green, options.blue);
+        this.setLifetime(options.lifetime());
+        this.setColor(options.red(), options.green(), options.blue());
         this.setSpriteFromAge(sprites);
     }
 
@@ -71,18 +71,13 @@ public class ParticleDirectlyMovingDust extends TextureSheetParticle {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static class Provider implements ParticleProvider<DirectlyMovingDustOptions> {
-        private final SpriteSet sprites;
-
-        public Provider(SpriteSet sprites) {
-            this.sprites = sprites;
-        }
+        public record Provider(SpriteSet sprites) implements ParticleProvider<DirectlyMovingDustOptions> {
 
         @Override
-        public Particle createParticle(
-                DirectlyMovingDustOptions options, ClientLevel level,
-                double from_x, double from_y, double from_z, double to_x, double to_y, double to_z) {
-            return new ParticleDirectlyMovingDust(options, level, from_x, from_y, from_z, to_x, to_y, to_z, this.sprites);
+            public Particle createParticle(
+                    DirectlyMovingDustOptions options, ClientLevel level,
+                    double from_x, double from_y, double from_z, double to_x, double to_y, double to_z) {
+                return new ParticleDirectlyMovingDust(options, level, from_x, from_y, from_z, to_x, to_y, to_z, this.sprites);
+            }
         }
-    }
 }

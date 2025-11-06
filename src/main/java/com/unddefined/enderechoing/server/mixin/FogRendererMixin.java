@@ -17,7 +17,7 @@ public class FogRendererMixin {
                           float farPlaneDistance, float partialTick, CallbackInfo ci) {
         float endValue = effectInstance.getAmplifier() == 0 ? 15F : 7.5F;
         float f = Mth.lerp(effectInstance.getBlendFactor(entity, partialTick), farPlaneDistance, endValue);
-        FogDataAccessor accessor = (FogDataAccessor) (Object) fogData;
+        FogDataAccessor accessor = (FogDataAccessor) fogData;
         accessor.setStart(accessor.getMode() == FogRenderer.FogMode.FOG_SKY ? 0.0F : f * 0.75F);
         accessor.setEnd(f);
 

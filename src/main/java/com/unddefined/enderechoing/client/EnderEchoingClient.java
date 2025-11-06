@@ -34,7 +34,7 @@ import java.io.IOException;
 // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
 @EventBusSubscriber(modid = EnderEchoing.MODID, value = Dist.CLIENT)
 public class EnderEchoingClient {
-    private static Minecraft mc = Minecraft.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
     public static PostChain sculkVeilPostChain = null;
     private static final KeyMapping OPEN_TRANSPARENT_SCREEN = new KeyMapping(
             "key." + EnderEchoing.MODID + ".open_transparent_screen",
