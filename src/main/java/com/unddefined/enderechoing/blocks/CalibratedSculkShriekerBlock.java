@@ -26,7 +26,6 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
 import java.util.List;
 
@@ -77,72 +76,72 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new CalibratedSculkShriekerBlockEntity(pos, state);
-    }
-    
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {return new CalibratedSculkShriekerBlockEntity(pos, state);}
+
     @Override
     public RenderShape getRenderShape(BlockState state) {
         return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
-    
+
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
         if (stack.getItem() == ItemRegistry.ENDER_ECHOING_CORE.get()) {
-            if (!level.isClientSide()) {
-                // 消耗一个EnderEchoingCore物品
-                if (!player.isCreative()) stack.shrink(1);
+            // 消耗一个EnderEchoingCore物品
+            if (!player.isCreative()) stack.shrink(1);
 
-                // 将方块替换为EnderEchoicResonator
-                level.setBlock(pos, BlockRegistry.ENDER_ECHOIC_RESONATOR.get().defaultBlockState(), 3);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide());
+            // 将方块替换为EnderEchoicResonator
+            level.setBlock(pos, BlockRegistry.ENDER_ECHOIC_RESONATOR.get().defaultBlockState(), 3);
+
+            return ItemInteractionResult.SUCCESS;
         }
-        
+
         // 处理与物品槽位的交互
-        if (!level.isClientSide()) {
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof CalibratedSculkShriekerBlockEntity shreikerEntity) {
-                ItemStackHandler itemHandler = shreikerEntity.getItemHandler();
-                ItemStack itemStackInSlot = itemHandler.getStackInSlot(0);
-                
-                if (stack.isEmpty() && !itemStackInSlot.isEmpty()) {
-                    // 如果玩家手是空的，但槽位有物品，则取出物品
-                    player.setItemInHand(hand, itemStackInSlot);
-                    itemHandler.setStackInSlot(0, ItemStack.EMPTY);
-                    return ItemInteractionResult.sidedSuccess(level.isClientSide());
-                } else if (!stack.isEmpty() && itemStackInSlot.isEmpty()) {
-                    // 如果玩家手上有物品，但槽位是空的，则放入物品
-                    ItemStack insertStack = stack.copy();
-                    insertStack.setCount(1);
-                    itemHandler.setStackInSlot(0, insertStack);
-                    stack.shrink(1);
-                    return ItemInteractionResult.sidedSuccess(level.isClientSide());
-                }
+        var blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof CalibratedSculkShriekerBlockEntity shreikerEntity) {
+            var itemStackInSlot = shreikerEntity.getTheItem();
+
+            if (stack.isEmpty() && !itemStackInSlot.isEmpty()) {
+                // 如果玩家手是空的，但槽位有物品，则取出物品
+                player.setItemInHand(hand, itemStackInSlot);
+                shreikerEntity.setTheItem(ItemStack.EMPTY);
+                return ItemInteractionResult.SUCCESS;
+            } else if (!stack.isEmpty() && itemStackInSlot.isEmpty()) {
+                // 如果玩家手上有物品，但槽位是空的，则放入物品
+                shreikerEntity.setTheItem(stack.copy());
+                stack.shrink(stack.getCount());
+                return ItemInteractionResult.SUCCESS;
+            } else if (stack.getItem() == itemStackInSlot.getItem()) {
+                // 如果玩家手上有物品，槽位有物品，但物品相同，则物品数量相加
+                itemStackInSlot.setCount(itemStackInSlot.getCount() + stack.getCount());
+                stack.shrink(stack.getCount());
+                return ItemInteractionResult.SUCCESS;
+            } else {
+                // 如果玩家手上有物品，槽位有物品，但物品不同，则相互替换
+                player.setItemInHand(hand, itemStackInSlot);
+                shreikerEntity.setTheItem(stack);
+                return ItemInteractionResult.SUCCESS;
             }
         }
-        
-        return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+        return ItemInteractionResult.SUCCESS;
     }
-    
+
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity instanceof CalibratedSculkShriekerBlockEntity shreikerEntity) {
-                ItemStackHandler itemHandler = shreikerEntity.getItemHandler();
-                for (int i = 0; i < itemHandler.getSlots(); i++) {
-                    ItemStack stack = itemHandler.getStackInSlot(i);
-                    if (!stack.isEmpty()) {
-                        ItemEntity itemEntity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack);
-                        level.addFreshEntity(itemEntity);
-                    }
+                ItemStack stack = shreikerEntity.getTheItem();
+                if (!stack.isEmpty()) {
+                    ItemEntity itemEntity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack);
+                    level.addFreshEntity(itemEntity);
                 }
             }
             super.onRemove(state, level, pos, newState, isMoving);
         }
     }
+
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         return List.of(new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));

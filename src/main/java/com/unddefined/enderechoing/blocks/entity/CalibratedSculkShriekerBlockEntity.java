@@ -8,8 +8,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.ticks.ContainerSingleItem;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
@@ -20,33 +22,29 @@ import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class CalibratedSculkShriekerBlockEntity extends BlockEntity implements GeoBlockEntity {
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+public class CalibratedSculkShriekerBlockEntity extends BlockEntity implements GeoBlockEntity, ContainerSingleItem.BlockContainerSingleItem {
     private static final RawAnimation itemRenderAnimation = RawAnimation.begin().thenPlay("item");
     private static final RawAnimation rotation_to_camera = RawAnimation.begin().thenPlay("rotation_to_camera");
-
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private final ItemStackHandler itemHandler = new ItemStackHandler(1) {
         @Override
         protected void onContentsChanged(int slot) {
             super.onContentsChanged(slot);
-            // 当物品发生变化时标记需要更新
             setChanged();
-            // 通知客户端重新检查动画状态
             if (level != null && !level.isClientSide) {
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
         }
     };
 
+    public CalibratedSculkShriekerBlockEntity(BlockPos pos, BlockState blockState) {
+        super(BlockEntityRegistry.CALIBRATED_SCULK_SHRIEKER.get(), pos, blockState);
+    }
     @Override
     public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries) {return this.saveWithoutMetadata(registries);}
 
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {return ClientboundBlockEntityDataPacket.create(this);}
-
-    public CalibratedSculkShriekerBlockEntity(BlockPos pos, BlockState blockState) {
-        super(BlockEntityRegistry.CALIBRATED_SCULK_SHRIEKER.get(), pos, blockState);
-    }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
@@ -61,13 +59,7 @@ public class CalibratedSculkShriekerBlockEntity extends BlockEntity implements G
     }
 
     @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.cache;
-    }
-
-    public ItemStackHandler getItemHandler() {
-        return itemHandler;
-    }
+    public AnimatableInstanceCache getAnimatableInstanceCache() {return this.cache;}
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
@@ -80,4 +72,13 @@ public class CalibratedSculkShriekerBlockEntity extends BlockEntity implements G
         super.saveAdditional(tag, registries);
         tag.put("ItemHandler", itemHandler.serializeNBT(registries));
     }
+
+    @Override
+    public @NotNull BlockEntity getContainerBlockEntity() {return this;}
+
+    @Override
+    public @NotNull ItemStack getTheItem() {return itemHandler.getStackInSlot(0);}
+
+    @Override
+    public void setTheItem(@NotNull ItemStack item) {itemHandler.setStackInSlot(0, item);}
 }

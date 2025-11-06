@@ -18,22 +18,17 @@ import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
 import static com.unddefined.enderechoing.blocks.CalibratedSculkShriekerBlock.FACING;
 
 public class CalibratedSculkShriekerLayer extends BlockAndItemGeoLayer<CalibratedSculkShriekerBlockEntity> {
-    public CalibratedSculkShriekerLayer(GeoRenderer<CalibratedSculkShriekerBlockEntity> renderer) {
-        super(renderer);
-    }
+    public CalibratedSculkShriekerLayer(GeoRenderer<CalibratedSculkShriekerBlockEntity> renderer) {super(renderer);}
 
     @Override
     protected ItemStack getStackForBone(GeoBone bone, CalibratedSculkShriekerBlockEntity animatable) {
         // 只在特定骨骼上渲染物品
-        if (bone.getName().equals("item")) return animatable.getItemHandler().getStackInSlot(0);
-
+        if (bone.getName().equals("item")) return animatable.getTheItem();
         return null;
     }
 
     @Override
-    protected BlockState getBlockForBone(GeoBone bone, CalibratedSculkShriekerBlockEntity animatable) {
-        return null;
-    }
+    protected BlockState getBlockForBone(GeoBone bone, CalibratedSculkShriekerBlockEntity animatable) {return null;}
 
     @Override
     protected void renderStackForBone(PoseStack poseStack, GeoBone bone, ItemStack stack, CalibratedSculkShriekerBlockEntity animatable,

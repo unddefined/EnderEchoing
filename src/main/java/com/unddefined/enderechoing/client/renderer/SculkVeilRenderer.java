@@ -1,14 +1,11 @@
 package com.unddefined.enderechoing.client.renderer;
 
 import com.mojang.logging.LogUtils;
-import com.unddefined.enderechoing.EnderEchoing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.PostPass;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import org.joml.Matrix4f;
 
@@ -20,7 +17,6 @@ import java.util.Objects;
 
 import static com.unddefined.enderechoing.client.EnderEchoingClient.sculkVeilPostChain;
 
-@EventBusSubscriber(modid = EnderEchoing.MODID, value = Dist.CLIENT)
 public class SculkVeilRenderer {
     private static final Minecraft mc = Minecraft.getInstance();
     private static int lastWidth = -1;
