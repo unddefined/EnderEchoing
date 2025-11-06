@@ -4,7 +4,6 @@ import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.client.model.EnderEchoingCoreModel;
 import com.unddefined.enderechoing.client.renderer.EchoRenderer;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer;
-import com.unddefined.enderechoing.network.packet.SyncTeleportersPacket;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.server.registry.MobEffectRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
@@ -17,9 +16,6 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -30,7 +26,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
@@ -45,7 +40,6 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.function.Consumer;
 
-import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoingCore extends Item implements GeoItem {
@@ -82,22 +76,27 @@ public class EnderEchoingCore extends Item implements GeoItem {
     }
 
     @Override
-    public int getUseDuration(@NotNull ItemStack itemStack, @NotNull LivingEntity livingEntity) {
-        return 40;
-    }
+    public int getUseDuration(@NotNull ItemStack itemStack, @NotNull LivingEntity livingEntity) {return 40;}
 
     @Override
-    public @NotNull UseAnim getUseAnimation(@NotNull ItemStack stack) {
-        return UseAnim.CUSTOM;
-    }
+    public @NotNull UseAnim getUseAnimation(@NotNull ItemStack stack) {return UseAnim.CUSTOM;}
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
-        ItemStack itemStack = player.getItemInHand(hand);
+        var itemStack = player.getItemInHand(hand);
         // 检查是否在冷却中
         if (player.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(itemStack);
         // 检查玩家是否发光，如果发光则无法使用
         if (player.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
+        // 查找最近的EnderEchoicResonator方块
+        var manager = MarkedPositionsManager.getTeleporters(level);
+        if (manager == null) return InteractionResultHolder.fail(itemStack);
+        var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
+        // 检查玩家是否有未保存数据的末影回响珍珠
+        if (!player.getInventory().hasAnyMatching(item ->
+                item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null))
+            return InteractionResultHolder.fail(itemStack);
+
         // 添加玩家动画
         if (level.isClientSide()) {
             if (player instanceof AbstractClientPlayer clientPlayer) {
@@ -114,21 +113,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
         // 渲染传送特效
         EchoRenderer.EchoSoundingPos = player.blockPosition();
         EchoRenderer.EchoSoundingExtraRender = true;
-        MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
-        if (manager != null && manager.hasTeleporters()) {
-            // 创建同步数据包
-            SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getNearestTeleporter(level, player.blockPosition()));
-            // 向在线玩家发送数据包
-            if (player instanceof ServerPlayer splayer) {
-                splayer.addEffect(new MobEffectInstance(SCULK_VEIL, 20));
-                PacketDistributor.sendToPlayer(splayer, packet);
-            }
-        } else {
-            EchoRenderer.EchoSoundingPos = null;
-            player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 400));
-            return InteractionResultHolder.fail(itemStack);
-        }
-
+        EchoRenderer.targetPos = nearestTeleporterPos.getFirst().getCenter();
         // 添加动画
         if (level instanceof ServerLevel serverLevel) {
             player.addEffect(new MobEffectInstance(MobEffectRegistry.SCULK_VEIL, 20 * 3, 0, false, true));
@@ -145,6 +130,8 @@ public class EnderEchoingCore extends Item implements GeoItem {
         // 当玩家释放使用物品时，移除动画层
         super.releaseUsing(stack, level, livingEntity, timeLeft);
         EchoRenderer.EchoSoundingPos = null;
+        EchoRenderer.EchoSoundingExtraRender = false;
+        EchoRenderer.targetPos = null;
         if (level.isClientSide() && livingEntity instanceof AbstractClientPlayer clientPlayer) {
             AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
             animationStack.removeLayer(42);
@@ -158,39 +145,20 @@ public class EnderEchoingCore extends Item implements GeoItem {
     }
 
     public @NotNull ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity livingEntity) {
-        if (!level.isClientSide() && level instanceof ServerLevel serverLevel && livingEntity instanceof Player player) {
-            // 再次检查玩家是否有未保存数据的末影珍珠
+        if (!level.isClientSide() && level instanceof ServerLevel && livingEntity instanceof Player player) {
+            // 再次检查玩家是否有未保存数据的珍珠
             if (!player.getInventory().hasAnyMatching(itemStack ->
                     itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
                 player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
                 EchoRenderer.EchoSoundingPos = null;
                 return stack;
             }
-
-            // 查找最近的EnderEchoicResonator方块
-            MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
-            var nearestTeleporterPos = manager.getNearestTeleporter(serverLevel, player.blockPosition());
-
-            if (nearestTeleporterPos == null) {
-                player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
-                EchoRenderer.EchoSoundingPos = null;
-                return stack;
-            }
-
             // 消耗一个没有保存数据的珍珠
             player.getInventory().clearOrCountMatchingItems(itemStack ->
                             itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() &&
                                     itemStack.get(CUSTOM_NAME) == null,
                     1, player.inventoryMenu.getCraftSlots());
 
-            // 传送玩家到最近的传送器位置
-            if (player instanceof ServerPlayer serverPlayer) {
-                var pos = nearestTeleporterPos.getFirst();
-                serverPlayer.teleportTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
-                level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
-                EchoRenderer.EchoSoundingPos = null;
-                player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
-            }
             // 设置冷却时间
             player.getCooldowns().addCooldown(this, Config.ENDER_ECHOING_CORE_COOLDOWN.get());
         }
@@ -204,9 +172,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
     }
 
     @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
-    }
+    public AnimatableInstanceCache getAnimatableInstanceCache() {return cache;}
 
 
 }

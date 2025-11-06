@@ -13,7 +13,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 
 public class SculkVeilEffect extends MobEffect {
-    public static boolean ParticlesAdded = false;
     private int countdownTicks = 0;
     private int duration = 0;
     public SculkVeilEffect() {

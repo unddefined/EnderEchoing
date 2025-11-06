@@ -42,8 +42,7 @@ public class EchoResponsing {
                     .setOverlayState(RenderStateShard.OVERLAY)
                     .createCompositeState(true)
     ));
-    public static void render(PoseStack poseStack, MultiBufferSource bufferSource,
-                              Vec3 blockPos, int ticks) {
+    public static void render(PoseStack poseStack, MultiBufferSource bufferSource, Vec3 blockPos, int ticks) {
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         double screenHeight = Minecraft.getInstance().getWindow().getHeight();
         double offX = blockPos.x - camera.getPosition().x;

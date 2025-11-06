@@ -1,10 +1,13 @@
 package com.unddefined.enderechoing.blocks;
 
 import com.mojang.serialization.MapCodec;
+import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEntity;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.client.renderer.EchoRenderer;
+import com.unddefined.enderechoing.items.EnderEchoingPearl;
 import com.unddefined.enderechoing.network.packet.SyncTeleportersPacket;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
+import com.unddefined.enderechoing.server.registry.DataComponentsRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
@@ -36,6 +39,7 @@ import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCUL
 
 public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     private static int temptick = 0;
+
     public EnderEchoicResonatorBlock() {
         super(Properties.of()
                 .noOcclusion()
@@ -59,20 +63,14 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected MapCodec<? extends Block> codec() {
-        return null;
-    }
+    protected MapCodec<? extends Block> codec() {return null;}
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new EnderEchoicResonatorBlockEntity(pos, state);
-    }
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {return new EnderEchoicResonatorBlockEntity(pos, state);}
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
-    }
+    public RenderShape getRenderShape(BlockState state) {return RenderShape.ENTITYBLOCK_ANIMATED;}
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
@@ -98,28 +96,34 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     @Override
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
         if (entity.isCurrentlyGlowing()) return;
-        if(temptick > 0) temptick--;
+        if (temptick > 0) temptick--;
         // 渲染传送特效
         MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
-        if (manager != null && manager.hasTeleporters()) {
-            // 创建同步数据包
-            SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getTeleporterPositions(level));
-            // 向在线玩家发送数据包
-            if (entity instanceof ServerPlayer player && temptick == 0) {
-                EchoRenderer.EchoSoundingPos = pos;
-                player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
-                temptick = 30;
-                PacketDistributor.sendToPlayer(player, packet);
+        if (manager == null || !manager.hasTeleporters()) return;
+        // 创建同步数据包
+        SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getTeleporterPositions(level));
+        BlockPos targetPos = null;
+        if (level.getBlockEntity(pos.above(2)) instanceof CalibratedSculkShriekerBlockEntity blockEntity)
+            if (blockEntity.getTheItem().getItem() instanceof EnderEchoingPearl) {
+                var p = blockEntity.getTheItem().get(DataComponentsRegistry.POSITION);
+                targetPos = p == null ? null : new BlockPos(p.x(), p.y(), p.z());
             }
+        // 向在线玩家发送数据包
+        if (entity instanceof ServerPlayer player && temptick == 0) {
+            EchoRenderer.EchoSoundingPos = pos;
+            player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
+            temptick = 30;
+            if (targetPos != null){
+                EchoRenderer.EchoSoundingExtraRender = true;
+                EchoRenderer.targetPos = targetPos.getCenter();
+            }else PacketDistributor.sendToPlayer(player, packet);
         }
+
 
     }
 
-    //region Ticker
-    @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
         return createTickerHelper(blockEntityType, BlockEntityRegistry.ENDER_ECHOIC_RESONATOR.get(), EnderEchoicResonatorBlockEntity::tick);
     }
-    //endregion
 }
