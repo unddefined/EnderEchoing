@@ -2,10 +2,10 @@ package com.unddefined.enderechoing.client.renderer;
 
 import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.server.registry.MobEffectRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.PostPass;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -29,14 +29,14 @@ public class SculkVeilRenderer {
     private static Player player = null;
     private static int lastWidth = -1;
     private static int lastHeight = -1;
+    public static float fadeProgress = 0.0f;
 
-    public static void renderSculkVeil(int tick, float PartialTicks,Matrix4f M, Matrix4f P) {
-        int fadeIO = player.getEffect(MobEffectRegistry.SCULK_VEIL).getDuration() < 20 ? 1 : 0;
+    public static void renderSculkVeil(int tick, float PartialTicks, Matrix4f M, Matrix4f P) {
+        if (tick < 0) fadeProgress = 0.001f;
         var Camera = mc.gameRenderer.getMainCamera();
-
         safeResize(sculkVeilPostChain);
         sculkVeilPostChain.process(PartialTicks);
-        applyUniforms(tick, Camera.getPosition(), fadeIO, M, P);
+        applyUniforms(tick, Camera.getPosition(), M, P);
     }
 
     private static Field findPassesField() {
@@ -73,7 +73,7 @@ public class SculkVeilRenderer {
         }
     }
 
-    private static void applyUniforms(int tick, Vec3 cameraPos, int fadeIO, Matrix4f M, Matrix4f P) {
+    private static void applyUniforms(int tick, Vec3 cameraPos, Matrix4f M, Matrix4f P) {
         List<PostPass> passes = getPasses();
         if (!passes.isEmpty()) {
 
@@ -92,7 +92,7 @@ public class SculkVeilRenderer {
                 effect.safeGetUniform("InverseModelViewMatrix").set(M.invert());
                 effect.safeGetUniform("CameraPos").set(cameraPos.toVector3f());
                 effect.safeGetUniform("GameTime").set((float) tick);
-                effect.safeGetUniform("fadeIO").set(fadeIO);
+                effect.safeGetUniform("fadeProgress").set(fadeProgress);
                 effect.setSampler("DepthSampler", pass.inTarget::getDepthTextureId);
             }
         }
@@ -106,6 +106,14 @@ public class SculkVeilRenderer {
             lastWidth = w;
             lastHeight = h;
         }
+    }
+
+    public static void updateFadeProgress(boolean fadeIO, float delta) {
+        float speed = 0.007f;
+        if (fadeIO) fadeProgress += speed * delta;
+        else fadeProgress -= speed * delta;
+
+        fadeProgress = Mth.clamp(fadeProgress, 0.0f, 1.0f);
     }
 
     @SubscribeEvent

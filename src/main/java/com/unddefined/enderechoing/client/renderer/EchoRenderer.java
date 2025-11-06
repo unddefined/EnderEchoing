@@ -1,4 +1,5 @@
 package com.unddefined.enderechoing.client.renderer;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.particles.EchoResponse;
@@ -26,6 +27,8 @@ import org.joml.Matrix4f;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
+
 @EventBusSubscriber(modid = EnderEchoing.MODID, value = Dist.CLIENT)
 public class EchoRenderer {
     private static final Minecraft mc = Minecraft.getInstance();
@@ -49,9 +52,11 @@ public class EchoRenderer {
 
     @SubscribeEvent
     public static void renderEcho(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
-        if(!isCounting && !player.hasEffect(MobEffectRegistry.SCULK_VEIL)) return;
         var PartialTicks = event.getPartialTick().getGameTimeDeltaTicks();
+        SculkVeilRenderer.updateFadeProgress(player.hasEffect(SCULK_VEIL), PartialTicks);
+        if(!isCounting && SculkVeilRenderer.fadeProgress == 0f) return;
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
+
         int tick = countdownTicks < 59 ? countdownTicks : countTicks;
         var Camera = mc.gameRenderer.getMainCamera();
         var PoseStack = event.getPoseStack();
@@ -64,7 +69,7 @@ public class EchoRenderer {
         RenderSystem.applyModelViewMatrix();
 
         var originalTarget = mc.getMainRenderTarget();
-        if (player.hasEffect(MobEffectRegistry.SCULK_VEIL))
+        if (SculkVeilRenderer.fadeProgress != 0f)
             SculkVeilRenderer.renderSculkVeil(sculkveilCountTicks++, PartialTicks, ModelViewMatrix, ProjectionMatrix);
         else sculkveilCountTicks = -80;
         originalTarget.bindWrite(false);

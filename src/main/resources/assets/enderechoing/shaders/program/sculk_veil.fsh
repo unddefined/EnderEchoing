@@ -7,14 +7,13 @@ uniform mat4 InverseProjectionMatrix;
 uniform mat4 InverseModelViewMatrix;
 uniform vec3 CameraPos;
 uniform float GameTime;
-uniform int fadeIO;
+uniform float fadeProgress;
 
 in vec2 texCoord;
 
 out vec4 fragColor;
 
 const float FOG_RADIUS = 15;
-const float FOG_FADE = 4.0;
 const int   STEPS = 1;
 const float STEP_SIZE = FOG_RADIUS / float(STEPS);// 平均分布步长
 
@@ -157,13 +156,8 @@ void main() {
         fogColor *= noise;
         fogAcc += density * stepSize;
     }
-
     float fogFactor = 1.0 - exp(-fogAcc * 3.);
-    float fadeSpeed = 0.01;// 控制淡入淡出的速度
-    float timeFade = fadeIO == 0
-    ? smoothstep(0.0, 1.0, GameTime * fadeSpeed)// 淡入
-    : 1.0 - smoothstep(0.0, 1.0, GameTime * fadeSpeed);// 淡出
 
-    vec3 finalColor = mix(baseColor, fogColor, fogFactor * timeFade);
+    vec3 finalColor = mix(baseColor, fogColor, fogFactor * fadeProgress);
     fragColor = vec4(finalColor, 0.7);
 }
