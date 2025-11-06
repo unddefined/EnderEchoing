@@ -7,7 +7,7 @@ import com.unddefined.enderechoing.client.particles.EchoResponsing;
 import com.unddefined.enderechoing.client.particles.EchoSounding;
 import com.unddefined.enderechoing.effects.SculkVeilEffect;
 import com.unddefined.enderechoing.network.packet.AddEffectPacket;
-import com.unddefined.enderechoing.server.registry.MobEffectRegistry;
+import com.unddefined.enderechoing.network.packet.TeleportRequestPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
@@ -98,9 +98,8 @@ public class EchoRenderer {
                         targetPos = blockPos;
                         EchoResponsing.render(PoseStack, bufferSource, blockPos, ++teleportTicks);
                         if (teleportTicks > 53) {
-                            player.teleportTo(blockPos.x, blockPos.y, blockPos.z);
+                            PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
                             teleportTicks = 0;
-                            System.out.println("teleport");
                         }
                     }
                     if (targetPos != null && targetPos.equals(blockPos) && !isElementHovering) teleportTicks = 0;

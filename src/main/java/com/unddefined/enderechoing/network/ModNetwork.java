@@ -49,5 +49,12 @@ public class ModNetwork {
                 AddEffectPacket.STREAM_CODEC,
                 AddEffectPacket::handle
         );
+
+        // 注册传送数据包
+        registrar.playToServer(
+                TeleportRequestPacket.TYPE,
+                TeleportRequestPacket.STREAM_CODEC,
+                TeleportRequestPacket::handle
+        );
     }
 }
