@@ -97,26 +97,28 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
         if (entity.isCurrentlyGlowing()) return;
         if (temptick > 0) temptick--;
-        // 渲染传送特效
         MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
         if (manager == null || !manager.hasTeleporters()) return;
         // 创建同步数据包
         SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getTeleporterPositions(level));
         BlockPos targetPos = null;
+        //获取目的地
         if (level.getBlockEntity(pos.above(2)) instanceof CalibratedSculkShriekerBlockEntity blockEntity)
             if (blockEntity.getTheItem().getItem() instanceof EnderEchoingPearl) {
                 var p = blockEntity.getTheItem().get(DataComponentsRegistry.POSITION);
                 targetPos = p == null ? null : new BlockPos(p.x(), p.y(), p.z());
+                //排除为不可传送目标
+                manager.removeTeleporter((ServerLevel) level, pos);
             }
-        // 向在线玩家发送数据包
         if (entity instanceof ServerPlayer player && temptick == 0) {
             EchoRenderer.EchoSoundingPos = pos;
             player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
             temptick = 30;
-            if (targetPos != null){
+            // 传送
+            if (targetPos != null) {
                 EchoRenderer.EchoSoundingExtraRender = true;
                 EchoRenderer.targetPos = targetPos.getCenter();
-            }else PacketDistributor.sendToPlayer(player, packet);
+            } else PacketDistributor.sendToPlayer(player, packet);
         }
 
 
