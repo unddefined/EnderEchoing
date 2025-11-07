@@ -35,13 +35,6 @@ public class ModNetwork {
                 InfrasoundParticlePacket.STREAM_CODEC,
                 InfrasoundParticlePacket::handle
         );
-        
-        // 注册传送器位置同步数据包
-        registrar.playToClient(
-                SyncTeleportersPacket.TYPE,
-                SyncTeleportersPacket.STREAM_CODEC,
-                SyncTeleportersPacket::handle
-        );
 
         // 注册添加效果数据包
         registrar.playToServer(

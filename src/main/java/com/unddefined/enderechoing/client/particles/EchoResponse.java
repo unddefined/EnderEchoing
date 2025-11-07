@@ -5,10 +5,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
@@ -49,7 +51,7 @@ public class EchoResponse {
     }
 
     public static boolean render(PoseStack poseStack, MultiBufferSource bufferSource,
-                                 Vec3 blockPos, int ticks, boolean isCountingDown) {
+                                 Vec3 blockPos, int ticks, boolean isCountingDown, String posName) {
         var activeWaves = getActiveWavesForPosition(blockPos);
         var camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         double screenHeight = Minecraft.getInstance().getWindow().getHeight();
@@ -68,6 +70,7 @@ public class EchoResponse {
         // 应用相机朝向
         poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180));
         // 固定大小
         double fov = Minecraft.getInstance().options.fov().get().doubleValue();
         double fovMultiplier = 2.0D * Math.tan(Math.toRadians(fov / 2.0D));
@@ -118,6 +121,29 @@ public class EchoResponse {
                     .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(0f, 1f, 0f);
             vertexConsumer.addVertex(matrix4f, -1f, 1f, 0f).setUv(0f, 1f).setColor(color)
                     .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(0f, 1f, 0f);
+            poseStack.popPose();
+        }
+
+        // 渲染位置名称
+        if (posName != null && ticks > 0) {
+            poseStack.pushPose();
+            // 渲染文本
+            Font font = Minecraft.getInstance().font;
+            float textWidth = font.width(posName) / 2.0f;
+            poseStack.translate(0, -0.13f, 0);
+            poseStack.scale(0.033f, 0.033f, 0.033f);
+            font.drawInBatch(
+                    Component.literal(posName),
+                    -textWidth,
+                    0,
+                    FastColor.ABGR32.color(255, 140, 244, 226),
+                    false,
+                    poseStack.last().pose(),
+                    bufferSource,
+                    Font.DisplayMode.SEE_THROUGH,
+                    0,
+                    FULL_BRIGHT
+            );
             poseStack.popPose();
         }
         poseStack.popPose();

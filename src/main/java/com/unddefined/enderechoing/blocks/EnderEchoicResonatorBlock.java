@@ -6,7 +6,6 @@ import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity
 import com.unddefined.enderechoing.client.renderer.EchoRenderer;
 import com.unddefined.enderechoing.items.EnderEchoingPearl;
 import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
-import com.unddefined.enderechoing.network.packet.SyncTeleportersPacket;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.DataComponentsRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
@@ -105,12 +104,13 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
         if (entity.isCurrentlyGlowing()) return;
         if (temptick > 0) temptick--;
-        MarkedPositionsManager manager = MarkedPositionsManager.getTeleporters(level);
+        var manager = MarkedPositionsManager.getTeleporters(level);
         if (manager == null || !manager.hasTeleporters()) return;
-        // 创建同步数据包
-        SyncTeleportersPacket packet = new SyncTeleportersPacket(manager.getTeleporterPositions(level));
+        //获取目的地名称
+        var posList = manager.getTeleporterPositions(level);
+        EchoRenderer.MarkedPositionNames = MarkedPositionsManager.getMarkedPositions(level).getMarkedTeleportersNameMapList(posList, level);
         BlockPos targetPos = null;
-        //获取目的地
+        //获取定向目的地
         if (level.getBlockEntity(pos.above(2)) instanceof CalibratedSculkShriekerBlockEntity blockEntity)
             if (blockEntity.getTheItem().getItem() instanceof EnderEchoingPearl) {
                 var p = blockEntity.getTheItem().get(DataComponentsRegistry.POSITION);
@@ -126,7 +126,7 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
             if (targetPos != null) {
                 EchoRenderer.EchoSoundingExtraRender = true;
                 EchoRenderer.targetPos = targetPos.getCenter();
-            } else PacketDistributor.sendToPlayer(player, packet);
+            } else EchoRenderer.syncedTeleporterPositions = posList;
         }
 
 

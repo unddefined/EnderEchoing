@@ -25,6 +25,7 @@ import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 
@@ -34,6 +35,9 @@ public class EchoRenderer {
     public static BlockPos EchoSoundingPos = null;
     public static boolean EchoSoundingExtraRender = false;
     public static Vec3 targetPos = null;
+    public static List<BlockPos> syncedTeleporterPositions = new ArrayList<>();
+    public static List<Map<BlockPos, String>> MarkedPositionNames = new ArrayList<>();
+
     private static Matrix4f ProjectionMatrix = null;
     private static Matrix4f ModelViewMatrix = null;
     private static int countTicks = 0;
@@ -42,11 +46,6 @@ public class EchoRenderer {
     private static int teleportTicks = 0;
     private static boolean isCounting = false;
     private static Player player = null;
-    // 存储从服务端同步过来的传送器位置
-    private static List<BlockPos> syncedTeleporterPositions = new ArrayList<>();
-
-    // 更新传送器位置的方法
-    public static void updateTeleporterPositions(List<BlockPos> positions) {syncedTeleporterPositions = new ArrayList<>(positions);}
 
     @SubscribeEvent
     public static void renderEcho(RenderLevelStageEvent event) {
@@ -78,8 +77,8 @@ public class EchoRenderer {
             EchoSounding.render(PoseStack, bufferSource, 0, -1, 0,
                     PartialTicks, tick - 20, LightTexture.FULL_BRIGHT);
             if (targetPos != null) {
-               EchoResponse.render(PoseStack, bufferSource, targetPos, ++teleportTicks - 80, false);
-                if (teleportTicks > 60)  EchoResponsing.render(PoseStack, bufferSource, targetPos, teleportTicks);
+                EchoResponse.render(PoseStack, bufferSource, targetPos, ++teleportTicks - 80, false, null);
+                if (teleportTicks > 60) EchoResponsing.render(PoseStack, bufferSource, targetPos, teleportTicks);
                 if (teleportTicks > 110) PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
             }
         }
@@ -95,8 +94,11 @@ public class EchoRenderer {
                 if (pos.equals(EchoSoundingPos)) continue;
                 if (new AABB(Camera.getBlockPosition()).inflate(4096).contains(Vec3.atCenterOf(pos))) {
                     var blockPos = Vec3.atCenterOf(pos);
+                    // 使用网络包同步的名称
+                    String posName = MarkedPositionNames.stream().map(e -> e.get(pos))
+                            .filter(java.util.Objects::nonNull).findFirst().orElse(null);
                     boolean isElementHovering = EchoResponse.render(PoseStack, bufferSource, blockPos, countTicks - 160,
-                            countdownTicks < 59);
+                            countdownTicks < 59, posName);
                     if (isElementHovering && !player.isCurrentlyGlowing()) {
                         targetPos = blockPos;
                         EchoResponsing.render(PoseStack, bufferSource, blockPos, ++teleportTicks);
@@ -150,7 +152,5 @@ public class EchoRenderer {
             targetPos = null;
             teleportTicks = 0;
         }
-
     }
-
 }

@@ -9,33 +9,31 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class MarkedPositionsManager extends SavedData {
+    private static final String TELEPORTERS_DATA_NAME = "enderechoing_teleporters";
+    private static final String MARKED_POSITIONS_DATA_NAME = "enderechoing_marked_positions";
     // 使用线程安全的列表存储传送器位置
     private final List<Teleporters> teleporters = new CopyOnWriteArrayList<>();
     private final List<MarkedPositions> markedPositions = new CopyOnWriteArrayList<>();
 
-    private static final String TELEPORTERS_DATA_NAME = "enderechoing_teleporters";
-    private static final String MARKED_POSITIONS_DATA_NAME = "enderechoing_marked_positions";
-
     public static MarkedPositionsManager getTeleporters(Level level) {
-        if (level instanceof ServerLevel serverLevel) {
-            DimensionDataStorage storage = serverLevel.getServer().getLevel(Level.OVERWORLD).getDataStorage();
-            return storage.computeIfAbsent(new Factory<>(MarkedPositionsManager::new, (tag, provider) -> loadTeleporters(tag)), TELEPORTERS_DATA_NAME);
-        }
-        return null;
+        if (!(level instanceof ServerLevel serverLevel)) return null;
+
+        DimensionDataStorage storage = serverLevel.getServer().getLevel(Level.OVERWORLD).getDataStorage();
+        return storage.computeIfAbsent(new Factory<>(MarkedPositionsManager::new, (tag, provider) -> loadTeleporters(tag)), TELEPORTERS_DATA_NAME);
     }
+
     public static MarkedPositionsManager getMarkedPositions(Level level) {
-        if (level instanceof ServerLevel serverLevel) {
-            DimensionDataStorage storage = serverLevel.getServer().getLevel(Level.OVERWORLD).getDataStorage();
-            return storage.computeIfAbsent(new Factory<>(MarkedPositionsManager::new, (tag, provider) -> loadMarkedPositions(tag)), MARKED_POSITIONS_DATA_NAME);
-        }
-        return null;
+        if (!(level instanceof ServerLevel serverLevel)) return null;
+
+        DimensionDataStorage storage = serverLevel.getServer().getLevel(Level.OVERWORLD).getDataStorage();
+        return storage.computeIfAbsent(new Factory<>(MarkedPositionsManager::new, (tag, provider) -> loadMarkedPositions(tag)), MARKED_POSITIONS_DATA_NAME);
     }
+
     public static MarkedPositionsManager loadMarkedPositions(CompoundTag tag) {
         MarkedPositionsManager manager = new MarkedPositionsManager();
 
@@ -98,6 +96,7 @@ public class MarkedPositionsManager extends SavedData {
         teleporters.add(new Teleporters(level.dimension().location().toString(), pos));
         setDirty();
     }
+
     public void setMarkedPosition(ServerLevel level, BlockPos pos, String name, int addORdecrease) {
         String dimension = level.dimension().location().toString();
         boolean found = false;
@@ -118,18 +117,21 @@ public class MarkedPositionsManager extends SavedData {
         // 移除数量为0的标记位置
         markedPositions.removeIf(entry -> entry.amountOfmarkers <= 0);
     }
+
     public void removeTeleporter(ServerLevel level, BlockPos pos) {
         // 移除传送器位置
         String dimension = level.dimension().location().toString();
         teleporters.removeIf(entry -> entry.dimensionLocation.equals(dimension) && entry.pos.equals(pos));
         setDirty();
     }
+
     public void removeMarkedPosition(ServerLevel level, BlockPos pos, String name) {
         // 移除标记位置
         String dimension = level.dimension().location().toString();
         markedPositions.removeIf(entry -> entry.dimensionLocation.equals(dimension) && entry.pos.equals(pos) && entry.name.equals(name));
         setDirty();
     }
+
     public List<BlockPos> getNearestTeleporter(Level level, BlockPos fromPos) {
         String dimension = level.dimension().location().toString();
         BlockPos nearestPos = null;
@@ -158,6 +160,20 @@ public class MarkedPositionsManager extends SavedData {
     }
 
     public boolean hasTeleporters() {return !teleporters.isEmpty();}
+
+    public List<Map<BlockPos, String>> getMarkedTeleportersNameMapList(List<BlockPos> posList, Level level) {
+        var currentDimension = level.dimension().location().toString();
+        List<Map<BlockPos, String>> M = new ArrayList<>();
+        for (BlockPos P : posList) {
+            Map<BlockPos, String> resultMap = new HashMap<>();
+            markedPositions.stream()
+                    .filter(entry -> entry.dimensionLocation.equals(currentDimension))
+                    .filter(entry -> entry.pos.equals(P))
+                    .forEach(entry -> resultMap.put(entry.pos, entry.name));
+            M.add(resultMap);
+        }
+        return M;
+    }
 
     private record Teleporters(String dimensionLocation, BlockPos pos) {
         private Teleporters(String dimensionLocation, BlockPos pos) {
