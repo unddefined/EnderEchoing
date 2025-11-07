@@ -5,6 +5,7 @@ import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEnt
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.client.renderer.EchoRenderer;
 import com.unddefined.enderechoing.items.EnderEchoingPearl;
+import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import com.unddefined.enderechoing.network.packet.SyncTeleportersPacket;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.DataComponentsRegistry;
@@ -36,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
+import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     private static int temptick = 0;
@@ -79,9 +81,15 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
 
     @Override
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
-        super.onPlace(state, level, pos, oldState, isMoving);
         if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
             MarkedPositionsManager.getTeleporters(level).addTeleporter(serverLevel, pos);
+            //用一个珍珠记下并命名传送器的位置
+            var player = level.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 4.0, false);
+            if (player != null && player.getInventory().hasAnyMatching(itemStack ->
+                    itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
+                PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket());
+                EnderEchoingPearl.ResonatorPosition = pos;
+            }
         }
     }
 

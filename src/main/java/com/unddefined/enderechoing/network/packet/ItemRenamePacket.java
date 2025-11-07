@@ -27,7 +27,6 @@ public record ItemRenamePacket(String name) implements CustomPacketPayload {
             if (context.player() instanceof ServerPlayer player) {
                 ItemStack stack = player.getMainHandItem();
                 var level = player.level();
-                if (!(stack.getItem() instanceof EnderEchoingPearl)) return;
                 EnderEchoingPearl.handleSetDataRequest(player, name, stack, level);
             }
         });

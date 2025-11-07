@@ -2,6 +2,7 @@ package com.unddefined.enderechoing.items;
 
 import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import com.unddefined.enderechoing.server.DataComponents.PositionData;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -20,19 +21,36 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import java.util.List;
 
 import static com.unddefined.enderechoing.server.registry.DataComponentsRegistry.POSITION;
+import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoingPearl extends Item {
+    public static BlockPos ResonatorPosition = null;
+
     public EnderEchoingPearl(Properties properties) {super(properties.stacksTo(8));}
 
-    public static void handleSetDataRequest(ServerPlayer player, String name, ItemStack stack, Level level) {
+    public static void handleSetDataRequest(ServerPlayer player, String name, ItemStack handStack, Level level) {
         var Name = name.isEmpty() ? Component.translatable("item.enderechoing.ender_echoing_pearl").getString() : name;
-        stack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
-        player.sendSystemMessage(Component.translatable("item.enderechoing.ender_echoing_pearl.named", name));
         var playerPos = player.blockPosition();
-        var location = new PositionData(playerPos.getX(), playerPos.getY(), playerPos.getZ(), level.dimension().location().toString());
+        var pearl = new ItemStack(ItemRegistry.ENDER_ECHOING_PEARL.get());
+        pearl.set(CUSTOM_NAME, null);
         player.setExperiencePoints(player.totalExperience - 80);
-        stack.set(POSITION.get(), location);
-        MarkedPositionsManager.getMarkedPositions(level).setMarkedPosition((ServerLevel) level, playerPos, Name, stack.getCount());
+
+        if (handStack.getItem() instanceof EnderEchoingPearl) {
+            handStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
+            handStack.set(POSITION.get(), new PositionData(playerPos.getX(), playerPos.getY(), playerPos.getZ(), level.dimension().location().toString()));
+            MarkedPositionsManager.getMarkedPositions(level).setMarkedPosition((ServerLevel) level, playerPos, Name, handStack.getCount());
+            player.sendSystemMessage(Component.translatable("item.enderechoing.ender_echoing_pearl.named", Name));
+        } else if (!player.getInventory().hasAnyMatching(i -> i == pearl)) {
+            //用一个珍珠记下并命名传送器的位置
+            var pearlStack = player.getInventory().getItem(player.getInventory().findSlotMatchingItem(pearl));
+            var CopyStack = pearlStack.copyWithCount(1);
+            CopyStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
+            CopyStack.set(POSITION.get(), new PositionData(ResonatorPosition.getX(), ResonatorPosition.getY(), ResonatorPosition.getZ(), level.dimension().location().toString()));
+            player.getInventory().add(CopyStack);
+            pearlStack.shrink(1);
+            MarkedPositionsManager.getMarkedPositions(level).setMarkedPosition((ServerLevel) level, ResonatorPosition, Name, 1);
+            player.sendSystemMessage(Component.translatable("item.enderechoing.ender_echoing_pearl.named", Name));
+        }
     }
 
     @Override
