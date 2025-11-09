@@ -9,7 +9,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -161,18 +164,14 @@ public class MarkedPositionsManager extends SavedData {
 
     public boolean hasTeleporters() {return !teleporters.isEmpty();}
 
-    public List<Map<BlockPos, String>> getMarkedTeleportersNameMapList(List<BlockPos> posList, Level level) {
+    public Map<BlockPos, String> getMarkedTeleportersNameMapList(List<BlockPos> posList, Level level) {
         var currentDimension = level.dimension().location().toString();
-        List<Map<BlockPos, String>> M = new ArrayList<>();
-        for (BlockPos P : posList) {
-            Map<BlockPos, String> resultMap = new HashMap<>();
-            markedPositions.stream()
-                    .filter(entry -> entry.dimensionLocation.equals(currentDimension))
+        Map<BlockPos, String> resultMap = new HashMap<>();
+        for (BlockPos P : posList)
+            markedPositions.stream().filter(entry -> entry.dimensionLocation.equals(currentDimension))
                     .filter(entry -> entry.pos.equals(P))
                     .forEach(entry -> resultMap.put(entry.pos, entry.name));
-            M.add(resultMap);
-        }
-        return M;
+        return resultMap;
     }
 
     private record Teleporters(String dimensionLocation, BlockPos pos) {

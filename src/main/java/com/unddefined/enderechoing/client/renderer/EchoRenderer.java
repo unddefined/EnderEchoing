@@ -38,7 +38,7 @@ public class EchoRenderer {
     public static boolean EchoSoundingExtraRender = false;
     public static Vec3 targetPos = null;
     public static List<BlockPos> syncedTeleporterPositions = new ArrayList<>();
-    public static List<Map<BlockPos, String>> MarkedPositionNames = new ArrayList<>();
+    public static Map<BlockPos, String> MarkedPositionNames = new HashMap<>();
     private static Matrix4f ProjectionMatrix = null;
     private static Matrix4f ModelViewMatrix = null;
     private static int countTicks = 0;
@@ -47,7 +47,6 @@ public class EchoRenderer {
     private static int teleportTicks = 0;
     private static boolean isCounting = false;
     private static Player player = null;
-    private static boolean shiftPosCalculated = false;
 
     @SubscribeEvent
     public static void renderEcho(RenderLevelStageEvent event) {
@@ -97,8 +96,7 @@ public class EchoRenderer {
                 if (pos.equals(EchoSoundingPos)) continue;
                 if (!new AABB(Camera.getBlockPosition()).inflate(4096).contains(Vec3.atCenterOf(pos))) continue;
                 var blockPos = Vec3.atCenterOf(pos);
-                String posName = MarkedPositionNames.stream().map(e -> e.get(pos))
-                        .filter(java.util.Objects::nonNull).findFirst().orElse(null);
+                String posName = MarkedPositionNames.getOrDefault(pos, null);
                 // 使用 Shift 键触发随机偏移，以避免多个传送点渲染重叠
                 if (player.isShiftKeyDown() && !shiftPosMap.containsKey(blockPos))
                     shiftPosMap.put(blockPos, blockPos.add(0, mc.level.random.nextInt(6) - 3, 0));

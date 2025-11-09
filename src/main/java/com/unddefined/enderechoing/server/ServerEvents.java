@@ -89,7 +89,7 @@ public class ServerEvents {
     public static void onItemTossEvent(ItemTossEvent event) {
         ItemStack stack = event.getEntity().getItem();
         if (stack.getItem() instanceof EnderEchoingPearl p && p.components().get(DataComponents.CUSTOM_NAME) != null) {
-            event.setCanceled(true); // 阻止掉落
+            event.setCanceled(true);
             event.getPlayer().getInventory().add(stack);
         }
     }
