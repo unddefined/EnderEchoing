@@ -1,14 +1,18 @@
 package com.unddefined.enderechoing.server;
 
 import com.unddefined.enderechoing.EnderEchoing;
+import com.unddefined.enderechoing.items.EnderEchoingPearl;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
@@ -21,8 +25,7 @@ import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
 import static net.minecraft.world.entity.ai.attributes.Attributes.*;
 
 @EventBusSubscriber(modid = EnderEchoing.MODID)
-public class ServerEffect {
-
+public class ServerEvents {
     @SubscribeEvent
     public static void onExpireEffect(MobEffectEvent.Expired event) {
         if (!event.getEntity().hasEffect(TINNITUS)) {
@@ -82,4 +85,12 @@ public class ServerEffect {
         }
     }
 
+    @SubscribeEvent
+    public static void onItemTossEvent(ItemTossEvent event) {
+        ItemStack stack = event.getEntity().getItem();
+        if (stack.getItem() instanceof EnderEchoingPearl p && p.components().get(DataComponents.CUSTOM_NAME) != null) {
+            event.setCanceled(true); // 阻止掉落
+            event.getPlayer().getInventory().add(stack);
+        }
+    }
 }
