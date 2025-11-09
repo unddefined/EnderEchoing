@@ -24,6 +24,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,12 +33,12 @@ import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCUL
 @EventBusSubscriber(modid = EnderEchoing.MODID, value = Dist.CLIENT)
 public class EchoRenderer {
     private static final Minecraft mc = Minecraft.getInstance();
+    private static final Map<Vec3, Vec3> shiftPosMap = new HashMap<>();
     public static BlockPos EchoSoundingPos = null;
     public static boolean EchoSoundingExtraRender = false;
     public static Vec3 targetPos = null;
     public static List<BlockPos> syncedTeleporterPositions = new ArrayList<>();
     public static List<Map<BlockPos, String>> MarkedPositionNames = new ArrayList<>();
-
     private static Matrix4f ProjectionMatrix = null;
     private static Matrix4f ModelViewMatrix = null;
     private static int countTicks = 0;
@@ -46,6 +47,7 @@ public class EchoRenderer {
     private static int teleportTicks = 0;
     private static boolean isCounting = false;
     private static Player player = null;
+    private static boolean shiftPosCalculated = false;
 
     @SubscribeEvent
     public static void renderEcho(RenderLevelStageEvent event) {
@@ -90,26 +92,28 @@ public class EchoRenderer {
 
         if (countTicks > 120) {
             // 渲染EchoResponse
+
             for (BlockPos pos : syncedTeleporterPositions) {
                 if (pos.equals(EchoSoundingPos)) continue;
-                if (new AABB(Camera.getBlockPosition()).inflate(4096).contains(Vec3.atCenterOf(pos))) {
-                    var blockPos = Vec3.atCenterOf(pos);
-                    // 使用网络包同步的名称
-                    String posName = MarkedPositionNames.stream().map(e -> e.get(pos))
-                            .filter(java.util.Objects::nonNull).findFirst().orElse(null);
-                    boolean isElementHovering = EchoResponse.render(PoseStack, bufferSource, blockPos, countTicks - 160,
-                            countdownTicks < 59, posName);
-                    if (isElementHovering && !player.isCurrentlyGlowing()) {
-                        targetPos = blockPos;
-                        EchoResponsing.render(PoseStack, bufferSource, blockPos, ++teleportTicks);
-                        if (teleportTicks > 53) {
-                            PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
-                        }
+                if (!new AABB(Camera.getBlockPosition()).inflate(4096).contains(Vec3.atCenterOf(pos))) continue;
+                var blockPos = Vec3.atCenterOf(pos);
+                String posName = MarkedPositionNames.stream().map(e -> e.get(pos))
+                        .filter(java.util.Objects::nonNull).findFirst().orElse(null);
+                // 使用 Shift 键触发随机偏移，以避免多个传送点渲染重叠
+                if (player.isShiftKeyDown() && !shiftPosMap.containsKey(blockPos))
+                    shiftPosMap.put(blockPos, blockPos.add(0, mc.level.random.nextInt(6) - 3, 0));
+                Vec3 shiftPos = shiftPosMap.getOrDefault(blockPos, blockPos);
+                boolean isElementHovering = EchoResponse.render(PoseStack, bufferSource, shiftPos, countTicks - 160,
+                        countdownTicks < 59, posName);
+                if (isElementHovering && !player.isCurrentlyGlowing()) {
+                    targetPos = blockPos;
+                    EchoResponsing.render(PoseStack, bufferSource, blockPos, ++teleportTicks);
+                    if (teleportTicks > 53) {
+                        PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
                     }
-                    if (targetPos != null && targetPos.equals(blockPos) && !isElementHovering) teleportTicks = 0;
                 }
+                if (targetPos != null && targetPos.equals(blockPos) && !isElementHovering) teleportTicks = 0;
             }
-
         }
 
         bufferSource.endBatch();
@@ -132,6 +136,7 @@ public class EchoRenderer {
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         player = event.getEntity();
+        if (!player.isShiftKeyDown() && !shiftPosMap.isEmpty()) shiftPosMap.clear();
         if (EchoSoundingPos != null) {
             isCounting = true;
             countdownTicks = 60;
