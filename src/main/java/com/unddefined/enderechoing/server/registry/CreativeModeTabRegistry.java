@@ -22,6 +22,7 @@ public class CreativeModeTabRegistry {
             .displayItems((parameters, output) -> {
                 output.accept(ItemRegistry.ENDER_ECHOIC_RESONATOR_ITEM.get());
                 output.accept(ItemRegistry.ENDER_ECHOING_CORE.get());
+                output.accept(ItemRegistry.ENDER_ECHO_RESONATE_BOX.get());
                 output.accept(ItemRegistry.ECHO_DRUSE.get());
                 output.accept(ItemRegistry.ENDER_ECHOING_PEARL.get());
                 output.accept(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get());

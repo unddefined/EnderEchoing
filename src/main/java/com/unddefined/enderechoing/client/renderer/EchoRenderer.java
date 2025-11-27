@@ -47,7 +47,7 @@ public class EchoRenderer {
     private static int teleportTicks = 0;
     private static boolean isCounting = false;
     private static Player player = null;
-
+    //TODO:兼容iris
     @SubscribeEvent
     public static void renderEcho(RenderLevelStageEvent event) {
         var PartialTicks = event.getPartialTick().getGameTimeDeltaTicks();
@@ -91,7 +91,6 @@ public class EchoRenderer {
 
         if (countTicks > 120) {
             // 渲染EchoResponse
-
             for (BlockPos pos : syncedTeleporterPositions) {
                 if (pos.equals(EchoSoundingPos)) continue;
                 if (!new AABB(Camera.getBlockPosition()).inflate(4096).contains(Vec3.atCenterOf(pos))) continue;

@@ -10,9 +10,7 @@ public class EnderEchoingCoreModel extends DefaultedItemGeoModel<EnderEchoingCor
     private final ResourceLocation texturePath = buildFormattedTexturePath(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoing_core"));
     private final ResourceLocation animationPath = buildFormattedAnimationPath(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoing_core"));
 
-    public EnderEchoingCoreModel() {
-        super(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoing_core"));
-    }
+    public EnderEchoingCoreModel() {super(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoing_core"));}
 
     @Override
     public ResourceLocation getModelResource(EnderEchoingCore animatable) {
@@ -30,7 +28,5 @@ public class EnderEchoingCoreModel extends DefaultedItemGeoModel<EnderEchoingCor
     }
     
     @Override
-    public RenderType getRenderType(EnderEchoingCore animatable, ResourceLocation texture) {
-        return RenderType.entityTranslucent(texture);
-    }
+    public RenderType getRenderType(EnderEchoingCore animatable, ResourceLocation texture) {return RenderType.entityTranslucent(texture);}
 }

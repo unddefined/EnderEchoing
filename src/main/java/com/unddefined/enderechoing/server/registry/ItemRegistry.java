@@ -2,6 +2,7 @@ package com.unddefined.enderechoing.server.registry;
 
 import com.unddefined.enderechoing.blocks.EchoDruseBlock;
 import com.unddefined.enderechoing.items.EchoDruse;
+import com.unddefined.enderechoing.items.EnderEchoResonateBox;
 import com.unddefined.enderechoing.items.EnderEchoingCore;
 import com.unddefined.enderechoing.items.EnderEchoingPearl;
 import net.minecraft.world.item.BlockItem;
@@ -14,6 +15,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public class ItemRegistry {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems("enderechoing");
     public static final DeferredItem<Item> ENDER_ECHOING_CORE = ITEMS.registerItem("ender_echoing_core", EnderEchoingCore::new);
+    public static final DeferredItem<Item> ENDER_ECHO_RESONATE_BOX = ITEMS.registerItem("ender_echo_resonate_box", EnderEchoResonateBox::new);
     public static final DeferredItem<Item> ECHO_DRUSE = ITEMS.registerItem("echo_druse", EchoDruse::new);
     public static final DeferredItem<Item> ENDER_ECHOING_PEARL = ITEMS.registerItem("ender_echoing_pearl", EnderEchoingPearl::new);
 
