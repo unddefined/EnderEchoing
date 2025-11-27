@@ -7,8 +7,8 @@
     64
   ],
   "textures": {
-    "0": "enderechoing:item/ender_echo_resonate_box",
-    "particle": "enderechoing:item/ender_echo_resonate_box"
+    "0": "enderechoing:item/ender_echo_tune_chamber",
+    "particle": "enderechoing:item/ender_echo_tune_chamber"
   },
   "display": {
     "thirdperson_righthand": {

@@ -3,7 +3,7 @@
 	"minecraft:geometry": [
 		{
 			"description": {
-				"identifier": "geometry.ender_echo_resonate_box",
+				"identifier": "geometry.ender_echo_tune_chamber",
 				"texture_width": 64,
 				"texture_height": 64,
 				"visible_bounds_width": 2,
