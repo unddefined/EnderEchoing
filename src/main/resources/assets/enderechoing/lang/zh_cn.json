@@ -1,5 +1,6 @@
 {
   "block.enderechoing.ender_echoic_resonator": "末影回响谐振器",
+  "block.enderechoing.ender_echo_tuner": "末影回响调谐器",
   "block.enderechoing.ender_echoic_resonator.tooltip": "Place in the world and use Ender Echoing Core to teleport to it!",
   "block.enderechoing.ender_echoic_resonator.placed": "Ender Echoic Resonator placed! You can now teleport to this location.",
   "block.enderechoing.ender_echoic_resonator.removed": "Ender Echoic Resonator removed!",
@@ -8,7 +9,7 @@
   "block.enderechoing.calibrated_sculk_shrieker": "校频幽匿尖啸体",
   "block.enderechoing.sculk_whisper": "幽匿低鸣体 ",
   "item.enderechoing.ender_echoing_core": "末影回响核心",
-  "item.ender_echo_tune_chamber": "末影回响调谐腔",
+  "item.enderechoing.ender_echo_tune_chamber": "末影回响调谐腔",
   "item.enderechoing.echo_druse": "回响晶簇",
   "item.enderechoing.echo_druse_stage1": "回响晶簇",
   "item.enderechoing.echo_druse_stage2": "回响晶簇",

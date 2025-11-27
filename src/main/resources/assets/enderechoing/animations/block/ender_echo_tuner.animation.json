@@ -1,0 +1,19 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"common": {
+			"loop": true,
+			"bones": {
+				"box": {
+					"rotation": {
+						"vector": ["math.sin(query.anim_time * 30) * 120", 0, "math.cos(query.anim_time * 30) * 90"]
+					},
+					"position": {
+						"vector": [0, "math.sin(query.anim_time * 120) * 1", 0]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

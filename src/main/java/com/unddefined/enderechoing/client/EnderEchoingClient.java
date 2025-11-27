@@ -5,6 +5,7 @@ import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.TransparentScreen;
 import com.unddefined.enderechoing.client.particles.ParticleDirectlyMovingDust;
 import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShriekerRenderer;
+import com.unddefined.enderechoing.client.renderer.block.EnderEchoTunerRenderer;
 import com.unddefined.enderechoing.client.renderer.block.EnderEchoicResonatorRenderer;
 import com.unddefined.enderechoing.client.renderer.block.SculkWhisperRenderer;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
@@ -68,6 +69,8 @@ public class EnderEchoingClient {
                 context -> new CalibratedSculkShriekerRenderer()));
         event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.SCULK_WHISPER.get(),
                 context -> new SculkWhisperRenderer()));
+        event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHO_TUNER.get(),
+                context -> new EnderEchoTunerRenderer()));
     }
 
     @SubscribeEvent

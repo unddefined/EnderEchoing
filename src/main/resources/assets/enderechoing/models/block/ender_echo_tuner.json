@@ -6,7 +6,7 @@
     32
   ],
   "textures": {
-    "2": "enderechoing:block/calibrated_sculk_shrieker",
-    "particle": "enderechoing:block/calibrated_sculk_shrieker"
+    "0": "enderechoing:block/ender_echo_tuner",
+    "particle": "enderechoing:block/ender_echo_tuner"
   }
 }

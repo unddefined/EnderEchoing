@@ -21,6 +21,7 @@ public class CreativeModeTabRegistry {
             .icon(() -> ItemRegistry.ENDER_ECHOING_CORE.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(ItemRegistry.ENDER_ECHOIC_RESONATOR_ITEM.get());
+                output.accept(ItemRegistry.ENDER_ECHO_TUNER_ITEM.get());
                 output.accept(ItemRegistry.ENDER_ECHOING_CORE.get());
                 output.accept(ItemRegistry.ENDER_ECHO_TUNE_CHAMBER.get());
                 output.accept(ItemRegistry.ECHO_DRUSE.get());

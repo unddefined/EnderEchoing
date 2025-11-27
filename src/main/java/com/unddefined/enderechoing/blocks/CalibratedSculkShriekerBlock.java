@@ -53,9 +53,7 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
-    }
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {builder.add(FACING);}
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
@@ -79,9 +77,7 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {return new CalibratedSculkShriekerBlockEntity(pos, state);}
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
-    }
+    public RenderShape getRenderShape(BlockState state) {return RenderShape.ENTITYBLOCK_ANIMATED;}
 
 
     @Override
@@ -96,7 +92,11 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
 
             return ItemInteractionResult.SUCCESS;
         }
-
+        if (stack.getItem() == ItemRegistry.ENDER_ECHO_TUNE_CHAMBER.get()) {
+            if (!player.isCreative()) stack.shrink(1);
+            level.setBlock(pos, BlockRegistry.ENDER_ECHO_TUNER.get().defaultBlockState(), 3);
+            return ItemInteractionResult.SUCCESS;
+        }
         // 处理与物品槽位的交互
         var blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof CalibratedSculkShriekerBlockEntity shreikerEntity) {
@@ -156,8 +156,6 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
-        return List.of(new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));
-    }
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {return List.of(new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));}
 
 }

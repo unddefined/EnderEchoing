@@ -1,9 +1,6 @@
 package com.unddefined.enderechoing.server.registry;
 
-import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEntity;
-import com.unddefined.enderechoing.blocks.entity.EchoDruseBlockEntity;
-import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
-import com.unddefined.enderechoing.blocks.entity.SculkWhisperBlockEntity;
+import com.unddefined.enderechoing.blocks.entity.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -17,7 +14,13 @@ public class BlockEntityRegistry {
                     EnderEchoicResonatorBlockEntity::new,
                     BlockRegistry.ENDER_ECHOIC_RESONATOR.get()
             ).build(null));
-            
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderEchoTunerBlockEntity>> ENDER_ECHO_TUNER =
+            BLOCK_ENTITY_TYPES.register("ender_echo_tuner_blockentity", () -> BlockEntityType.Builder.of(
+                    EnderEchoTunerBlockEntity::new,
+                    BlockRegistry.ENDER_ECHO_TUNER.get()
+            ).build(null));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CalibratedSculkShriekerBlockEntity>> CALIBRATED_SCULK_SHRIEKER =
             BLOCK_ENTITY_TYPES.register("calibrated_sculk_shrieker_blockentity", () -> BlockEntityType.Builder.of(
                     CalibratedSculkShriekerBlockEntity::new,

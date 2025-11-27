@@ -49,7 +49,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     public EnderEchoingCore(Properties properties) {
-        super(properties.stacksTo(1));
+        super(properties.stacksTo(2));
         SingletonGeoAnimatable.registerSyncedAnimatable(this);
     }
 

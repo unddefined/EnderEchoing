@@ -1,5 +1,6 @@
 {
   "block.enderechoing.ender_echoic_resonator": "Ender echoic Resonator",
+  "block.enderechoing.ender_echo_tuner": "Ender Echo Tuner",
   "block.enderechoing.ender_echoic_resonator.tooltip": "Place in the world and use Ender Echoing Core to teleport to it!",
   "block.enderechoing.ender_echoic_resonator.placed": "Ender Echoic Resonator placed! You can now teleport to this location.",
   "block.enderechoing.ender_echoic_resonator.removed": "Ender Echoic Resonator removed!",
@@ -8,7 +9,7 @@
   "block.enderechoing.calibrated_sculk_shrieker": "Calibrated Sculk Shrieker",
   "block.enderechoing.sculk_whisper": "Sculk Whisper",
   "item.enderechoing.ender_echoing_core": "Ender echoing core",
-  "item.ender_echo_tune_chamber": "Ender Echo Tune Chamber",
+  "item.enderechoing.ender_echo_tune_chamber": "Ender Echo Tune Chamber",
   "item.enderechoing.echo_druse": "Echo Druse",
   "item.enderechoing.echo_druse_stage1": "Echo Druse",
   "item.enderechoing.echo_druse_stage2": "Echo Druse",

@@ -44,7 +44,6 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     public EnderEchoicResonatorBlock() {
         super(Properties.of()
                 .noOcclusion()
-                .noTerrainParticles()
                 .sound(SoundType.SCULK_SHRIEKER)
                 .explosionResistance(1000.0F)
                 .destroyTime(1.5F)
