@@ -4,6 +4,7 @@ import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.client.model.EnderEchoingCoreModel;
 import com.unddefined.enderechoing.client.renderer.EchoRenderer;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer;
+import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.server.registry.MobEffectRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
@@ -16,6 +17,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -26,6 +28,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
@@ -84,43 +87,48 @@ public class EnderEchoingCore extends Item implements GeoItem {
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
         var itemStack = player.getItemInHand(hand);
-        // 检查是否在冷却中
-        if (player.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(itemStack);
-        // 检查玩家是否发光，如果发光则无法使用
-        if (player.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
-        // 查找最近的EnderEchoicResonator方块
-        var manager = MarkedPositionsManager.getTeleporters(level);
-        if (manager == null) return InteractionResultHolder.fail(itemStack);
-        var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
-        // 检查玩家是否有未保存数据的末影回响珍珠
-        if (!player.getInventory().hasAnyMatching(item ->
-                item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null))
-            return InteractionResultHolder.fail(itemStack);
+        if (!player.isShiftKeyDown()) {
+            // 检查是否在冷却中
+            if (player.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(itemStack);
+            // 检查玩家是否发光，如果发光则无法使用
+            if (player.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
+            // 查找最近的EnderEchoicResonator方块
+            var manager = MarkedPositionsManager.getTeleporters(level);
+            if (manager == null) return InteractionResultHolder.fail(itemStack);
+            var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
+            // 检查玩家是否有未保存数据的末影回响珍珠
+            if (!player.getInventory().hasAnyMatching(item ->
+                    item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null))
+                return InteractionResultHolder.fail(itemStack);
 
-        // 添加玩家动画
-        if (level.isClientSide()) {
-            if (player instanceof AbstractClientPlayer clientPlayer) {
-                AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
-                animationStack.removeLayer(42);
+            // 添加玩家动画
+            if (level.isClientSide()) {
+                if (player instanceof AbstractClientPlayer clientPlayer) {
+                    AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
+                    animationStack.removeLayer(42);
 
-                ModifierLayer<IAnimation> playerAnimation = new ModifierLayer<>();
-                playerAnimation.setAnimation(PlayerAnimationRegistry
-                        .getAnimation(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoing_core.player.use"))
-                        .playAnimation());
-                animationStack.addAnimLayer(42, playerAnimation);
+                    ModifierLayer<IAnimation> playerAnimation = new ModifierLayer<>();
+                    playerAnimation.setAnimation(PlayerAnimationRegistry
+                            .getAnimation(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echoing_core.player.use"))
+                            .playAnimation());
+                    animationStack.addAnimLayer(42, playerAnimation);
+                }
             }
+            // 渲染传送特效
+            EchoRenderer.EchoSoundingPos = player.blockPosition();
+            EchoRenderer.EchoSoundingExtraRender = true;
+            EchoRenderer.targetPos = nearestTeleporterPos.getFirst().getCenter();
+            // 添加动画
+            if (level instanceof ServerLevel serverLevel) {
+                player.addEffect(new MobEffectInstance(MobEffectRegistry.SCULK_VEIL, 20 * 3, 0, false, true));
+                triggerAnim(player, GeoItem.getOrAssignId(itemStack, serverLevel), CONTROLLER_NAME, ANIM_USE);
+            }
+            player.startUsingItem(hand);
+        } else if (player.getInventory().hasAnyMatching(stack ->
+                stack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && stack.get(CUSTOM_NAME) == null)) {
+            PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket());
+            EnderEchoingPearl.targetPosition = player.blockPosition();
         }
-        // 渲染传送特效
-        EchoRenderer.EchoSoundingPos = player.blockPosition();
-        EchoRenderer.EchoSoundingExtraRender = true;
-        EchoRenderer.targetPos = nearestTeleporterPos.getFirst().getCenter();
-        // 添加动画
-        if (level instanceof ServerLevel serverLevel) {
-            player.addEffect(new MobEffectInstance(MobEffectRegistry.SCULK_VEIL, 20 * 3, 0, false, true));
-            triggerAnim(player, GeoItem.getOrAssignId(itemStack, serverLevel), CONTROLLER_NAME, ANIM_USE);
-        }
-        player.startUsingItem(hand);
-
 
         return InteractionResultHolder.consume(itemStack);
     }

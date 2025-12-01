@@ -114,8 +114,6 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
             if (blockEntity.getTheItem().getItem() instanceof EnderEchoingPearl) {
                 var p = blockEntity.getTheItem().get(DataComponentsRegistry.POSITION);
                 targetPos = p == null ? null : new BlockPos(p.x(), p.y(), p.z());
-                //排除为不可传送目标
-                manager.removeTeleporter((ServerLevel) level, pos);
             }
         if (entity instanceof ServerPlayer player && temptick == 0) {
             EchoRenderer.EchoSoundingPos = pos;

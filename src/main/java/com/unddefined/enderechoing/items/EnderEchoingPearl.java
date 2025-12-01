@@ -36,11 +36,12 @@ public class EnderEchoingPearl extends Item {
         player.setExperiencePoints(player.totalExperience - 80);
 
         if (handStack.getItem() instanceof EnderEchoingPearl) {
+            //pearl.use()标记
             handStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
             handStack.set(POSITION.get(), new PositionData(playerPos.getX(), playerPos.getY(), playerPos.getZ(), level.dimension().location().toString()));
             MarkedPositionsManager.getMarkedPositions(level).addMarkedPosition((ServerLevel) level, playerPos, Name);
-        } else if (!player.getInventory().hasAnyMatching(i -> i == pearl)) {
-            //用一个珍珠记下并命名传送器的位置
+        } else {
+            //非pearl.use()标记
             var pearlStack = player.getInventory().getItem(player.getInventory().findSlotMatchingItem(pearl));
             var CopyStack = pearlStack.copyWithCount(1);
             CopyStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
