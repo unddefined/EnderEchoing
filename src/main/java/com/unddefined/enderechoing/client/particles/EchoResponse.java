@@ -16,6 +16,7 @@ import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -54,32 +55,34 @@ public class EchoResponse {
                                  Vec3 blockPos, int ticks, boolean isCountingDown, String posName) {
         var activeWaves = getActiveWavesForPosition(blockPos);
         var camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        double screenHeight = Minecraft.getInstance().getWindow().getHeight();
         double offX = blockPos.x - camera.getPosition().x;
         double offY = blockPos.y - camera.getPosition().y + 1;
         double offZ = blockPos.z - camera.getPosition().z;
         double distance = Math.sqrt(offX * offX + offY * offY + offZ * offZ);
-        if (distance > 250000.0D) {
-            double offScaler = 250000.0D / distance;
-            offX *= offScaler;
-            offY *= offScaler;
-            offZ *= offScaler;
-        }
+        // 把渲染点拉到相机前 128 米以内，避免 float 精度坍塌造成“中心消失/边缘能显示”的裁剪现象。
+        final double MAX_RENDER_DISTANCE = 128;
+        final double MIN_RENDER_DISTANCE = 2.0;
+        double renderDistance;
+        var dir = new Vector3d(offX, offY, offZ).normalize();
+        renderDistance = Math.min(distance, MAX_RENDER_DISTANCE);
+        renderDistance = Math.max(renderDistance, MIN_RENDER_DISTANCE);
+        double rx = dir.x * renderDistance;
+        double ry = dir.y * renderDistance;
+        double rz = dir.z * renderDistance;
         poseStack.pushPose();
-        poseStack.translate(offX, offY, offZ);
+        poseStack.translate((float) rx, (float) ry, (float) rz);
+
         // 应用相机朝向
         poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
         poseStack.mulPose(Axis.ZP.rotationDegrees(180));
         // 固定大小
-        double fov = Minecraft.getInstance().options.fov().get().doubleValue();
-        double fovMultiplier = 2.0D * Math.tan(Math.toRadians(fov / 2.0D));
-        float screenScale = (float) (distance / screenHeight / fovMultiplier * 160);
-        if (screenScale < 1) screenScale = 1.0f;
-        poseStack.scale(screenScale, screenScale, 0);
-        // 当玩家准星看向那个位置时高亮波纹，并使得波纹由大变小
-        var dir = new Vector3f((float) (offX / distance), (float) (offY / distance), (float) (offZ / distance));
-        boolean isElementHovering = camera.getLookVector().dot(dir) >= 0.999f;
+        float screenScale = 0.06f * (float) Math.min(distance, MAX_RENDER_DISTANCE);
+        if (screenScale < 1f) screenScale = 1f;
+        poseStack.scale(screenScale, screenScale, 1f);
+        // 当玩家准星看向那个位置时1高亮波纹，并使得波纹由大变小
+        var dir2 = new Vector3f((float) (offX / distance), (float) (offY / distance), (float) (offZ / distance));
+        boolean isElementHovering = camera.getLookVector().dot(dir2) >= 0.999f;
         if (isElementHovering) {
             targetPos = blockPos;
             ticks = hoveringTicks++;

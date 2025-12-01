@@ -47,6 +47,7 @@ public class EchoRenderer {
     private static int teleportTicks = 0;
     private static boolean isCounting = false;
     private static Player player = null;
+
     //TODO:兼容iris
     @SubscribeEvent
     public static void renderEcho(RenderLevelStageEvent event) {
@@ -59,9 +60,6 @@ public class EchoRenderer {
         var Camera = mc.gameRenderer.getMainCamera();
         var PoseStack = event.getPoseStack();
         var bufferSource = mc.renderBuffers().bufferSource();
-        var projectionMatrixBU = RenderSystem.getProjectionMatrix();
-        var vertexSortingBU = RenderSystem.getVertexSorting();
-        RenderSystem.getProjectionMatrix().set(ProjectionMatrix);
         RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().set(ModelViewMatrix);
         RenderSystem.applyModelViewMatrix();
@@ -77,6 +75,7 @@ public class EchoRenderer {
         if (EchoSoundingExtraRender) {
             EchoSounding.render(PoseStack, bufferSource, 0, -1, 0,
                     PartialTicks, tick - 20, LightTexture.FULL_BRIGHT);
+            //定向传送
             if (targetPos != null) {
                 EchoResponse.render(PoseStack, bufferSource, targetPos, ++teleportTicks - 80, false, null);
                 if (teleportTicks > 60) EchoResponsing.render(PoseStack, bufferSource, targetPos, teleportTicks);
@@ -97,17 +96,17 @@ public class EchoRenderer {
                 var blockPos = Vec3.atCenterOf(pos);
                 String posName = MarkedPositionNames.getOrDefault(pos, null);
                 // 使用 Shift 键触发随机偏移，以避免多个传送点渲染重叠
-                if (player.isShiftKeyDown() && !shiftPosMap.containsKey(blockPos))
-                    shiftPosMap.put(blockPos, blockPos.add(0, mc.level.random.nextInt(6) - 3, 0));
+                if (player.isShiftKeyDown() && !shiftPosMap.containsKey(blockPos) && EchoSoundingPos != null) {
+                    int shiftInt = Math.max(pos.distManhattan(EchoSoundingPos), 6);
+                    shiftPosMap.put(blockPos, blockPos.add(0, mc.level.random.nextInt(shiftInt) - (double) shiftInt / 2, 0));
+                }
                 Vec3 shiftPos = shiftPosMap.getOrDefault(blockPos, blockPos);
                 boolean isElementHovering = EchoResponse.render(PoseStack, bufferSource, shiftPos, countTicks - 160,
                         countdownTicks < 59, posName);
                 if (isElementHovering && !player.isCurrentlyGlowing()) {
                     targetPos = blockPos;
                     EchoResponsing.render(PoseStack, bufferSource, blockPos, ++teleportTicks);
-                    if (teleportTicks > 53) {
-                        PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
-                    }
+                    if (teleportTicks > 53) PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
                 }
                 if (targetPos != null && targetPos.equals(blockPos) && !isElementHovering) teleportTicks = 0;
             }
@@ -116,7 +115,6 @@ public class EchoRenderer {
         bufferSource.endBatch();
         RenderSystem.getModelViewStack().popMatrix();
         RenderSystem.applyModelViewMatrix();
-        RenderSystem.setProjectionMatrix(projectionMatrixBU, vertexSortingBU);
         RenderSystem.enableDepthTest();
     }
 
