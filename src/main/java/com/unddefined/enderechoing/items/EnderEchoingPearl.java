@@ -24,7 +24,7 @@ import static com.unddefined.enderechoing.server.registry.DataComponentsRegistry
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoingPearl extends Item {
-    public static BlockPos ResonatorPosition = null;
+    public static BlockPos targetPosition = null;
 
     public EnderEchoingPearl(Properties properties) {super(properties.stacksTo(8));}
 
@@ -38,18 +38,16 @@ public class EnderEchoingPearl extends Item {
         if (handStack.getItem() instanceof EnderEchoingPearl) {
             handStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
             handStack.set(POSITION.get(), new PositionData(playerPos.getX(), playerPos.getY(), playerPos.getZ(), level.dimension().location().toString()));
-            MarkedPositionsManager.getMarkedPositions(level).setMarkedPosition((ServerLevel) level, playerPos, Name, handStack.getCount());
-            player.sendSystemMessage(Component.translatable("item.enderechoing.ender_echoing_pearl.named", Name));
+            MarkedPositionsManager.getMarkedPositions(level).addMarkedPosition((ServerLevel) level, playerPos, Name);
         } else if (!player.getInventory().hasAnyMatching(i -> i == pearl)) {
             //用一个珍珠记下并命名传送器的位置
             var pearlStack = player.getInventory().getItem(player.getInventory().findSlotMatchingItem(pearl));
             var CopyStack = pearlStack.copyWithCount(1);
             CopyStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
-            CopyStack.set(POSITION.get(), new PositionData(ResonatorPosition.getX(), ResonatorPosition.getY(), ResonatorPosition.getZ(), level.dimension().location().toString()));
+            CopyStack.set(POSITION.get(), new PositionData(targetPosition.getX(), targetPosition.getY(), targetPosition.getZ(), level.dimension().location().toString()));
             player.getInventory().add(CopyStack);
             pearlStack.shrink(1);
-            MarkedPositionsManager.getMarkedPositions(level).setMarkedPosition((ServerLevel) level, ResonatorPosition, Name, 1);
-            player.sendSystemMessage(Component.translatable("item.enderechoing.ender_echoing_pearl.named", Name));
+            MarkedPositionsManager.getMarkedPositions(level).addMarkedPosition((ServerLevel) level, targetPosition, Name);
         }
     }
 
@@ -61,13 +59,14 @@ public class EnderEchoingPearl extends Item {
 
         if (player.isShiftKeyDown() && positionData != null) {
             var playerPos = new BlockPos(positionData.x(), positionData.y(), positionData.z());
-            MarkedPositionsManager.getMarkedPositions(level).setMarkedPosition((ServerLevel) level, playerPos,
-                    itemStack.get(DataComponents.CUSTOM_NAME).toString(), -itemStack.getCount());
+            MarkedPositionsManager.getMarkedPositions(level).removeMarkedPosition((ServerLevel) level, playerPos,
+                    itemStack.get(DataComponents.CUSTOM_NAME).toString());
 
             itemStack.remove(POSITION.get());
             itemStack.remove(DataComponents.CUSTOM_NAME);
             return InteractionResultHolder.success(itemStack);
         }
+
         if (positionData == null) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket());
 
         return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());

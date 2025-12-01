@@ -86,7 +86,7 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
             if (player != null && player.getInventory().hasAnyMatching(itemStack ->
                     itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
                 PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket());
-                EnderEchoingPearl.ResonatorPosition = pos;
+                EnderEchoingPearl.targetPosition = pos;
             }
         }
     }

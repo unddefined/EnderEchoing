@@ -46,10 +46,8 @@ public class MarkedPositionsManager extends SavedData {
             String dimension = entryTag.getString("dimension");
             BlockPos pos = BlockPos.of(entryTag.getLong("pos"));
             String name = entryTag.getString("name");
-            int amountOfmarkers = entryTag.getInt("amountOfmarkers");
-
             // 我们需要在实际使用时再关联ServerLevel
-            manager.markedPositions.add(new MarkedPositions(dimension, pos, name, amountOfmarkers));
+            manager.markedPositions.add(new MarkedPositions(dimension, pos, name));
         }
         return manager;
     }
@@ -87,7 +85,6 @@ public class MarkedPositionsManager extends SavedData {
             entryTag.putString("dimension", entry.dimensionLocation);
             entryTag.putLong("pos", entry.pos.asLong());
             entryTag.putString("name", entry.name);
-            entryTag.putInt("amountOfmarkers", entry.amountOfmarkers);
             MarkedPositionslist.add(entryTag);
         }
         tag.put("marked_positions", MarkedPositionslist);
@@ -100,25 +97,16 @@ public class MarkedPositionsManager extends SavedData {
         setDirty();
     }
 
-    public void setMarkedPosition(ServerLevel level, BlockPos pos, String name, int addORdecrease) {
+    public void addMarkedPosition(ServerLevel level, BlockPos pos, String name) {
         String dimension = level.dimension().location().toString();
-        boolean found = false;
-        for (int i = 0; i < markedPositions.size(); i++) {
-            MarkedPositions entry = markedPositions.get(i);
+        for (MarkedPositions entry : markedPositions) {
             if (entry.dimensionLocation.equals(dimension) && entry.pos.equals(pos) && entry.name.equals(name)) {
-                int newAmount = entry.amountOfmarkers + addORdecrease;
-                markedPositions.set(i, new MarkedPositions(entry.dimensionLocation, entry.pos, entry.name, newAmount));
-                found = true;
                 setDirty();
-                break;
+                return;
             }
-        }
-        if (!found && addORdecrease > 0) {
-            markedPositions.add(new MarkedPositions(level.dimension().location().toString(), pos, name, addORdecrease));
+            markedPositions.add(new MarkedPositions(level.dimension().location().toString(), pos, name));
             setDirty();
         }
-        // 移除数量为0的标记位置
-        markedPositions.removeIf(entry -> entry.amountOfmarkers <= 0);
     }
 
     public void removeTeleporter(ServerLevel level, BlockPos pos) {
@@ -181,12 +169,11 @@ public class MarkedPositionsManager extends SavedData {
         }
     }
 
-    private record MarkedPositions(String dimensionLocation, BlockPos pos, String name, int amountOfmarkers) {
-        private MarkedPositions(String dimensionLocation, BlockPos pos, String name, int amountOfmarkers) {
+    private record MarkedPositions(String dimensionLocation, BlockPos pos, String name) {
+        private MarkedPositions(String dimensionLocation, BlockPos pos, String name) {
             this.dimensionLocation = dimensionLocation;
             this.pos = pos.immutable();
             this.name = name;
-            this.amountOfmarkers = amountOfmarkers;
 
         }
     }
