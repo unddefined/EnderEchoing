@@ -1,7 +1,9 @@
 package com.unddefined.enderechoing.blocks.entity;
 
+import com.unddefined.enderechoing.blocks.EnderEchoTunerBlock;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -23,16 +25,15 @@ public class EnderEchoTunerBlockEntity extends BlockEntity implements GeoBlockEn
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, EnderEchoTunerBlockEntity blockEntity) {
+        float offset = state.getValue(EnderEchoTunerBlock.FACING) == Direction.DOWN ? 0.7f : 0;
 
         //粒子效果
-        if (level.isClientSide && level.getRandom().nextFloat() < 0.1) {
+        if (level.isClientSide && level.getRandom().nextFloat() < 0.15) {
             level.addParticle(ParticleTypes.ENCHANT,
                     pos.getX() + Math.clamp(level.random.nextDouble(), 0.2, 0.8),
-                    pos.getY() + 1.5,
+                    pos.getY() + 1.1 - offset,
                     pos.getZ() + Math.clamp(level.random.nextDouble(), 0.2, 0.8),
-                    (level.random.nextDouble() - 0.5),
-                    -level.random.nextDouble(),
-                    (level.random.nextDouble() - 0.5));
+                    0, 0, 0);
         }
     }
 

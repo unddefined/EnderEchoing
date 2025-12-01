@@ -83,13 +83,10 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
+        // 方块转换
         if (stack.getItem() == ItemRegistry.ENDER_ECHOING_CORE.get()) {
-            // 消耗一个EnderEchoingCore物品
             if (!player.isCreative()) stack.shrink(1);
-
-            // 将方块替换为EnderEchoicResonator
             level.setBlock(pos, BlockRegistry.ENDER_ECHOIC_RESONATOR.get().defaultBlockState(), 3);
-
             return ItemInteractionResult.SUCCESS;
         }
         if (stack.getItem() == ItemRegistry.ENDER_ECHO_TUNE_CHAMBER.get()) {

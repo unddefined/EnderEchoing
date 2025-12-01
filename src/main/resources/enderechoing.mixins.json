@@ -5,6 +5,7 @@
   "mixins": [
     "CatalystListenerMixin",
     "EntityMixin",
+    "FlyTowardsPositionParticleMixin",
     "FogDataAccessor",
     "MixinPlayerRenderer",
     "SculkPatchFeatureMixin"

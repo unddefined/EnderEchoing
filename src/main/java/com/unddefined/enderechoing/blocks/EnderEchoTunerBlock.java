@@ -4,7 +4,9 @@ import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -15,6 +17,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -25,6 +29,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class EnderEchoTunerBlock extends Block implements EntityBlock {
+    public static final DirectionProperty FACING = DirectionProperty.create("facing", Direction.values());
+    protected static final VoxelShape SHAPE_UP = Shapes.or(Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(6.0D, 14.0D, 6.0D, 10.0D, 16.0D, 10.0D));
+    protected static final VoxelShape SHAPE_DOWN = Block.box(0.0D, 8.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+
     public EnderEchoTunerBlock() {
         super(Properties.of()
                 .noOcclusion()
@@ -42,10 +50,20 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
     }
 
     @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {builder.add(FACING);}
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        Direction direction = context.getNearestLookingDirection().getOpposite();
+        return this.defaultBlockState().setValue(FACING, direction);
+    }
+
+    @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        var SHAPE_BASE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D);
-        var SHAPE_TOP = Block.box(6.0D, 14.0D, 6.0D, 10.0D, 16.0D, 10.0D);
-        return Shapes.or(SHAPE_BASE, SHAPE_TOP);
+        return switch (state.getValue(FACING)) {
+            case UP, SOUTH, NORTH, WEST, EAST -> SHAPE_UP;
+            case DOWN -> SHAPE_DOWN;
+        };
     }
 
     @Override

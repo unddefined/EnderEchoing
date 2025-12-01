@@ -1,6 +1,21 @@
 {
   "variants": {
-    "": {
+    "facing=north": {
+      "model": "enderechoing:block/ender_echo_tuner"
+    },
+    "facing=south": {
+      "model": "enderechoing:block/ender_echo_tuner"
+    },
+    "facing=east": {
+      "model": "enderechoing:block/ender_echo_tuner"
+    },
+    "facing=west": {
+      "model": "enderechoing:block/ender_echo_tuner"
+    },
+    "facing=up": {
+      "model": "enderechoing:block/ender_echo_tuner"
+    },
+    "facing=down": {
       "model": "enderechoing:block/ender_echo_tuner"
     }
   }
