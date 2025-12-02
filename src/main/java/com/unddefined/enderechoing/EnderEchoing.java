@@ -26,9 +26,10 @@ public class EnderEchoing {
         BlockEntityRegistry.BLOCK_ENTITY_TYPES.register(modEventBus);
         CreativeModeTabRegistry.CREATIVE_MODE_TABS.register(modEventBus);
         MobEffectRegistry.MOB_EFFECTS.register(modEventBus);
-        DataComponentsRegistry.REGISTRAR.register(modEventBus);
         ModSoundEvents.SOUND_EVENTS.register(modEventBus);
         ParticlesRegistry.PARTICLE_TYPES.register(modEventBus);
+        DataRegistry.COMPONENT_TYPES.register(modEventBus);
+        DataRegistry.ATTACHMENT_TYPES.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 

@@ -1,6 +1,13 @@
 package com.unddefined.enderechoing.server;
 
 import com.unddefined.enderechoing.EnderEchoing;
+import com.unddefined.enderechoing.blocks.EnderEchoicResonatorBlock;
+import com.unddefined.enderechoing.items.EnderEchoingPearl;
+import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
+import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -11,6 +18,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Objects;
 
@@ -18,6 +27,7 @@ import static com.unddefined.enderechoing.effects.AttackScatteredEffect.attack_s
 import static com.unddefined.enderechoing.effects.StaggerEffect.stagger_modifier_id;
 import static com.unddefined.enderechoing.effects.TinnitusEffect.tinnitus_modifier_id;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
+import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 import static net.minecraft.world.entity.ai.attributes.Attributes.*;
 
 @EventBusSubscriber(modid = EnderEchoing.MODID)
@@ -80,4 +90,20 @@ public class ServerEvents {
             entity.removeEffect(SCULK_VEIL);
         }
     }
+
+    @SubscribeEvent
+    public static void onBlockPlaced(BlockEvent.EntityPlaceEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (!(event.getPlacedBlock().getBlock() instanceof EnderEchoicResonatorBlock block)) return;
+        var level = (ServerLevel) player.level();
+        var pos = event.getPos();
+        MarkedPositionsManager.getManager(player).addTeleporter(level, pos);
+        //用一个珍珠记下并命名传送器的位置
+        if (player.getInventory().hasAnyMatching(itemStack ->
+                itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
+            PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket());
+            EnderEchoingPearl.targetPosition = pos;
+        }
+    }
+
 }

@@ -20,7 +20,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
-import static com.unddefined.enderechoing.server.registry.DataComponentsRegistry.POSITION;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.POSITION;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoingPearl extends Item {
@@ -39,7 +39,7 @@ public class EnderEchoingPearl extends Item {
             //pearl.use()标记
             handStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
             handStack.set(POSITION.get(), new PositionData(playerPos.getX(), playerPos.getY(), playerPos.getZ(), level.dimension().location().toString()));
-            MarkedPositionsManager.getMarkedPositions(level).addMarkedPosition((ServerLevel) level, playerPos, Name);
+            MarkedPositionsManager.getManager(player).addMarkedPosition((ServerLevel) level, playerPos, Name);
         } else {
             //非pearl.use()标记
             var pearlStack = player.getInventory().getItem(player.getInventory().findSlotMatchingItem(pearl));
@@ -48,7 +48,7 @@ public class EnderEchoingPearl extends Item {
             CopyStack.set(POSITION.get(), new PositionData(targetPosition.getX(), targetPosition.getY(), targetPosition.getZ(), level.dimension().location().toString()));
             player.getInventory().add(CopyStack);
             pearlStack.shrink(1);
-            MarkedPositionsManager.getMarkedPositions(level).addMarkedPosition((ServerLevel) level, targetPosition, Name);
+            MarkedPositionsManager.getManager(player).addMarkedPosition((ServerLevel) level, targetPosition, Name);
         }
     }
 
@@ -60,7 +60,7 @@ public class EnderEchoingPearl extends Item {
 
         if (player.isShiftKeyDown() && positionData != null) {
             var playerPos = new BlockPos(positionData.x(), positionData.y(), positionData.z());
-            MarkedPositionsManager.getMarkedPositions(level).removeMarkedPosition((ServerLevel) level, playerPos,
+            MarkedPositionsManager.getManager(player).removeMarkedPosition((ServerLevel) level, playerPos,
                     itemStack.get(DataComponents.CUSTOM_NAME).toString());
 
             itemStack.remove(POSITION.get());

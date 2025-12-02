@@ -5,13 +5,11 @@ import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEnt
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.client.renderer.EchoRenderer;
 import com.unddefined.enderechoing.items.EnderEchoingPearl;
-import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
-import com.unddefined.enderechoing.server.registry.DataComponentsRegistry;
+import com.unddefined.enderechoing.server.registry.DataRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -30,13 +28,11 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
-import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     private static int temptick = 0;
@@ -78,44 +74,23 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
-        if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
-            MarkedPositionsManager.getTeleporters(level).addTeleporter(serverLevel, pos);
-            //用一个珍珠记下并命名传送器的位置
-            var player = level.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 4.0, false);
-            if (player != null && player.getInventory().hasAnyMatching(itemStack ->
-                    itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
-                PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket());
-                EnderEchoingPearl.targetPosition = pos;
-            }
-        }
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        super.onRemove(state, level, pos, newState, isMoving);
-        if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
-            MarkedPositionsManager.getTeleporters(level).removeTeleporter(serverLevel, pos);
-        }
-    }
-
-    @Override
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
+        if(!(entity instanceof ServerPlayer player))return;
         if (entity.isCurrentlyGlowing()) return;
         if (temptick > 0) temptick--;
-        var manager = MarkedPositionsManager.getTeleporters(level);
-        if (manager == null || !manager.hasTeleporters()) return;
+        var manager = MarkedPositionsManager.getManager(player);
+        if (!manager.hasTeleporters()) return;
         //获取目的地名称
         var posList = manager.getTeleporterPositions(level);
-        EchoRenderer.MarkedPositionNames = MarkedPositionsManager.getMarkedPositions(level).getMarkedTeleportersNameMapList(posList, level);
+        EchoRenderer.MarkedPositionNames = manager.getMarkedTeleportersMap(posList, level);
         BlockPos targetPos = null;
         //获取定向目的地
         if (level.getBlockEntity(pos.above(2)) instanceof CalibratedSculkShriekerBlockEntity blockEntity)
             if (blockEntity.getTheItem().getItem() instanceof EnderEchoingPearl) {
-                var p = blockEntity.getTheItem().get(DataComponentsRegistry.POSITION);
+                var p = blockEntity.getTheItem().get(DataRegistry.POSITION);
                 targetPos = p == null ? null : new BlockPos(p.x(), p.y(), p.z());
             }
-        if (entity instanceof ServerPlayer player && temptick == 0) {
+        if (temptick == 0) {
             EchoRenderer.EchoSoundingPos = pos;
             player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
             temptick = 30;

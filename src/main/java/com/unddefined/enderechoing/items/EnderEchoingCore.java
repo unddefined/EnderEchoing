@@ -93,8 +93,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
             // 检查玩家是否发光，如果发光则无法使用
             if (player.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
             // 查找最近的EnderEchoicResonator方块
-            var manager = MarkedPositionsManager.getTeleporters(level);
-            if (manager == null) return InteractionResultHolder.fail(itemStack);
+            var manager = MarkedPositionsManager.getManager(player);
             var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
             // 检查玩家是否有未保存数据的末影回响珍珠
             if (!player.getInventory().hasAnyMatching(item ->
