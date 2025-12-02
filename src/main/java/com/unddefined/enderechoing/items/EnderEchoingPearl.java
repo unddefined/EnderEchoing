@@ -27,7 +27,7 @@ public class EnderEchoingPearl extends Item {
 
     public EnderEchoingPearl(Properties properties) {super(properties.stacksTo(8));}
 
-    public static void handleSetDataRequest(ServerPlayer player, String name, ItemStack handStack, Level level) {
+    public static void handleSetDataRequest(ServerPlayer player, String name, ItemStack handStack, Level level, String icon) {
         var Name = name.isEmpty() ? Component.translatable("item.enderechoing.ender_echoing_pearl").getString() : name;
         var playerPos = player.blockPosition();
         var pearl = new ItemStack(ItemRegistry.ENDER_ECHOING_PEARL.get());
@@ -38,7 +38,7 @@ public class EnderEchoingPearl extends Item {
             //pearl.use()标记
             handStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
             handStack.set(POSITION.get(), new PositionData(level.dimension(), playerPos));
-            MarkedPositionsManager.getManager(player).addMarkedPosition(level, playerPos, Name);
+            MarkedPositionsManager.getManager(player).addMarkedPosition(level, playerPos, Name, icon);
         } else {
             //非pearl.use()标记
             var pearlStack = player.getInventory().getItem(player.getInventory().findSlotMatchingItem(pearl));
@@ -47,7 +47,7 @@ public class EnderEchoingPearl extends Item {
             CopyStack.set(POSITION.get(), new PositionData(level.dimension(), targetPosition));
             player.getInventory().add(CopyStack);
             pearlStack.shrink(1);
-            MarkedPositionsManager.getManager(player).addMarkedPosition(level, targetPosition, Name);
+            MarkedPositionsManager.getManager(player).addMarkedPosition(level, targetPosition, Name, icon);
         }
     }
 

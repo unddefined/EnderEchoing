@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record ItemRenamePacket(String name) implements CustomPacketPayload {
+public record ItemRenamePacket(String name,String icon) implements CustomPacketPayload {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "item_rename");
     public static final Type<ItemRenamePacket> TYPE = new Type<>(ID);
     public static final StreamCodec<FriendlyByteBuf, ItemRenamePacket> STREAM_CODEC = StreamCodec.ofMember(
@@ -18,16 +18,16 @@ public record ItemRenamePacket(String name) implements CustomPacketPayload {
             ItemRenamePacket::decode
     );
 
-    public static ItemRenamePacket decode(FriendlyByteBuf buf) {return new ItemRenamePacket(buf.readUtf());}
+    public static ItemRenamePacket decode(FriendlyByteBuf buf) {return new ItemRenamePacket(buf.readUtf(),buf.readUtf());}
 
-    public void encode(FriendlyByteBuf buf) {buf.writeUtf(name);}
+    public void encode(FriendlyByteBuf buf) {buf.writeUtf(name);buf.writeUtf(icon);}
 
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
                 ItemStack stack = player.getMainHandItem();
                 var level = player.level();
-                EnderEchoingPearl.handleSetDataRequest(player, name, stack, level);
+                EnderEchoingPearl.handleSetDataRequest(player, name, stack, level, icon);
             }
         });
     }

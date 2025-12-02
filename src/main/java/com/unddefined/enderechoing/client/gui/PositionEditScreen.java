@@ -62,7 +62,7 @@ public class PositionEditScreen extends Screen {
         String name = this.nameField.getValue().trim();
 
         // 发送重命名数据包到服务端
-        PacketDistributor.sendToServer(new ItemRenamePacket(name));
+        PacketDistributor.sendToServer(new ItemRenamePacket(name, "default"));
 
         this.onClose();
     }

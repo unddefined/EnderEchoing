@@ -36,16 +36,98 @@ public record MarkedPositionsManager(List<Teleporters> teleporters,
 
     public void addTeleporter(Level level, BlockPos pos) {teleporters.add(new Teleporters(level.dimension(), pos));}
 
-    public void addMarkedPosition(Level level, BlockPos pos, String name) {
+    public void addMarkedPosition(Level level, BlockPos pos, String name, String icon) {
         for (MarkedPositions entry : markedPositions)
             if (entry.Dimension.equals(level.dimension()) && entry.pos.equals(pos) && entry.name.equals(name)) return;
 
-        markedPositions.add(new MarkedPositions(level.dimension(), pos, name));
+        markedPositions.add(new MarkedPositions(level.dimension(), pos, name, icon, markedPositions.size()));
     }
 
     public void removeMarkedPosition(ResourceKey<Level> Dimension, BlockPos pos, String name) {
         // 移除标记位置
         markedPositions.removeIf(E -> E.Dimension.equals(Dimension) && E.pos.equals(pos) && E.name.equals(name));
+
+        // 重新分配索引以避免索引重复或不连续
+        for (int i = 0; i < markedPositions.size(); i++) {
+            MarkedPositions position = markedPositions.get(i);
+            if (position.Index() != i)
+                markedPositions.set(i, new MarkedPositions(position.Dimension(), position.pos(), position.name(), position.icon(), i));
+        }
+    }
+
+    // 上移指定索引的元素
+    public boolean moveUp(int index, boolean withIcon) {
+        if (index <= 0 || index >= markedPositions.size()) return false;
+        if (!withIcon) {
+            swapElements(index, index - 1);
+            return true;
+        } else {
+            var list = getMarkedPositionsWithIcon(markedPositions.get(index).icon());
+            var X = list.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
+            var i = list.indexOf(X);
+            if (X != null && (i <= 0 || i >= list.size())) {
+                swapElements(X.Index(), list.get(i - 1).Index());
+                return true;
+            } else return false;
+        }
+    }
+
+    // 下移指定索引的元素
+    public boolean moveDown(int index, boolean withIcon) {
+        if (index < 0 || index >= markedPositions.size() - 1) return false;
+        if (!withIcon) {
+            swapElements(index, index + 1);
+            return true;
+        } else {
+            var list = getMarkedPositionsWithIcon(markedPositions.get(index).icon());
+            var X = list.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
+            var i = list.indexOf(X);
+            if (X != null && (i <= 0 || i >= list.size())) {
+                swapElements(X.Index(), list.get(i - 1).Index());
+                return true;
+            } else return false;
+        }
+    }
+
+    // 将指定索引的元素置顶
+    public boolean moveToTop(int index, boolean withIcon) {
+        if (index <= 0 || index >= markedPositions.size()) return false;
+        if (!withIcon) {
+            swapElements(index, 0);
+            return true;
+        } else {
+            var list = getMarkedPositionsWithIcon(markedPositions.get(index).icon());
+            var X = list.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
+            var i = list.indexOf(X);
+            if (X != null && (i <= 0 || i >= list.size())) {
+                swapElements(X.Index(), list.getFirst().Index());
+                return true;
+            } else return false;
+        }
+    }
+
+    // 将指定索引的元素置底
+    public boolean moveToBottom(int index, boolean withIcon) {
+        if (index < 0 || index >= markedPositions.size() - 1) return false;
+        if (!withIcon) {
+            swapElements(index, markedPositions.size() - 1);
+            return true;
+        } else {
+            var list = getMarkedPositionsWithIcon(markedPositions.get(index).icon());
+            var X = list.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
+            var i = list.indexOf(X);
+            if (X != null && (i <= 0 || i >= list.size())) {
+                swapElements(X.Index(), list.getLast().Index());
+                return true;
+            } else return false;
+        }
+    }
+
+    // 交换两个元素的位置
+    private void swapElements(int index1, int index2) {
+        MarkedPositions temp = markedPositions.get(index1);
+        markedPositions.set(index1, markedPositions.get(index2));
+        markedPositions.set(index2, temp);
     }
 
     public List<BlockPos> getNearestTeleporter(Level level, BlockPos fromPos) {
@@ -72,6 +154,10 @@ public record MarkedPositionsManager(List<Teleporters> teleporters,
                 .map(entry -> entry.pos)
                 .collect(Collectors.toList());
     }
+
+    public List<MarkedPositions> getMarkedPositionsWithIcon(String icon) {return markedPositions.stream().filter(entry -> entry.icon != null && !entry.icon.isEmpty() && entry.icon.equals(icon)).collect(Collectors.toList());}
+
+    public List<MarkedPositions> getMarkedPositions() {return new CopyOnWriteArrayList<>(markedPositions);}
 
     public boolean hasTeleporters() {return !teleporters.isEmpty();}
 
@@ -140,11 +226,13 @@ public record MarkedPositionsManager(List<Teleporters> teleporters,
         ).apply(builder, Teleporters::new));
     }
 
-    public record MarkedPositions(ResourceKey<Level> Dimension, BlockPos pos, String name) {
+    public record MarkedPositions(ResourceKey<Level> Dimension, BlockPos pos, String name, String icon, int Index) {
         public static final Codec<MarkedPositions> CODEC = RecordCodecBuilder.create(builder -> builder.group(
                 ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(MarkedPositions::Dimension),
                 BlockPos.CODEC.fieldOf("pos").forGetter(MarkedPositions::pos),
-                Codec.STRING.fieldOf("name").forGetter(MarkedPositions::name)
+                Codec.STRING.fieldOf("name").forGetter(MarkedPositions::name),
+                Codec.STRING.fieldOf("icon").forGetter(MarkedPositions::icon),
+                Codec.INT.fieldOf("Index").forGetter(MarkedPositions::Index)
         ).apply(builder, MarkedPositions::new));
     }
 }
