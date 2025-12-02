@@ -1,7 +1,7 @@
 package com.unddefined.enderechoing.blocks;
 
-import com.mojang.serialization.MapCodec;
 import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEntity;
+import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.client.renderer.EchoRenderer;
 import com.unddefined.enderechoing.items.EnderEchoingPearl;
@@ -58,9 +58,6 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         return Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D);
     }
 
-    @Override
-    protected MapCodec<? extends Block> codec() {return null;}
-
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {return new EnderEchoicResonatorBlockEntity(pos, state);}
@@ -75,7 +72,7 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
 
     @Override
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
-        if(!(entity instanceof ServerPlayer player))return;
+        if (!(entity instanceof ServerPlayer player)) return;
         if (entity.isCurrentlyGlowing()) return;
         if (temptick > 0) temptick--;
         var manager = MarkedPositionsManager.getManager(player);
@@ -84,24 +81,21 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         var posList = manager.getTeleporterPositions(level);
         EchoRenderer.MarkedPositionNames = manager.getMarkedTeleportersMap(posList, level);
         BlockPos targetPos = null;
-        //获取定向目的地
+        //获取定向目的地 TODO:跨维度传送
         if (level.getBlockEntity(pos.above(2)) instanceof CalibratedSculkShriekerBlockEntity blockEntity)
             if (blockEntity.getTheItem().getItem() instanceof EnderEchoingPearl) {
                 var p = blockEntity.getTheItem().get(DataRegistry.POSITION);
-                targetPos = p == null ? null : new BlockPos(p.x(), p.y(), p.z());
+                targetPos = (p == null || !p.Dimension().equals(level.dimension())) ? null : p.pos();
             }
         if (temptick == 0) {
             EchoRenderer.EchoSoundingPos = pos;
             player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
             temptick = 30;
-            // 传送
             if (targetPos != null) {
                 EchoRenderer.EchoSoundingExtraRender = true;
                 EchoRenderer.targetPos = targetPos.getCenter();
             } else EchoRenderer.syncedTeleporterPositions = posList;
         }
-
-
     }
 
     @Override

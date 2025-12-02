@@ -24,13 +24,10 @@ public class EchoDruseBlockEntity extends BlockEntity {
         this.growthValue = initGrowthValue();
     }
 
-    public int getGrowthValue() {
-        return growthValue;
-    }
+    public int getGrowthValue() {return growthValue;}
 
     public void setGrowthValue(int growthValue) {
         this.growthValue = Math.max(1, Math.min(growthValue, MAX_GROWTH_VALUE));
         setChanged();
-
     }
 }

@@ -37,15 +37,11 @@ public class EchoDruseBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(GROWTH_STAGE);
-    }
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {builder.add(GROWTH_STAGE);}
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new EchoDruseBlockEntity(pos, state);
-    }
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {return new EchoDruseBlockEntity(pos, state);}
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
@@ -74,9 +70,7 @@ public class EchoDruseBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected boolean isRandomlyTicking(BlockState state) {
-        return true;
-    }
+    protected boolean isRandomlyTicking(BlockState state) {return true;}
 
     @Override
     protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {

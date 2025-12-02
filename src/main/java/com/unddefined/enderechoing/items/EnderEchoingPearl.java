@@ -7,7 +7,6 @@ import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -38,17 +37,17 @@ public class EnderEchoingPearl extends Item {
         if (handStack.getItem() instanceof EnderEchoingPearl) {
             //pearl.use()标记
             handStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
-            handStack.set(POSITION.get(), new PositionData(playerPos.getX(), playerPos.getY(), playerPos.getZ(), level.dimension().location().toString()));
-            MarkedPositionsManager.getManager(player).addMarkedPosition((ServerLevel) level, playerPos, Name);
+            handStack.set(POSITION.get(), new PositionData(level.dimension(), playerPos));
+            MarkedPositionsManager.getManager(player).addMarkedPosition(level, playerPos, Name);
         } else {
             //非pearl.use()标记
             var pearlStack = player.getInventory().getItem(player.getInventory().findSlotMatchingItem(pearl));
             var CopyStack = pearlStack.copyWithCount(1);
             CopyStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
-            CopyStack.set(POSITION.get(), new PositionData(targetPosition.getX(), targetPosition.getY(), targetPosition.getZ(), level.dimension().location().toString()));
+            CopyStack.set(POSITION.get(), new PositionData(level.dimension(), targetPosition));
             player.getInventory().add(CopyStack);
             pearlStack.shrink(1);
-            MarkedPositionsManager.getManager(player).addMarkedPosition((ServerLevel) level, targetPosition, Name);
+            MarkedPositionsManager.getManager(player).addMarkedPosition(level, targetPosition, Name);
         }
     }
 
@@ -59,10 +58,7 @@ public class EnderEchoingPearl extends Item {
         if (level.isClientSide) return InteractionResultHolder.fail(itemStack);
 
         if (player.isShiftKeyDown() && positionData != null) {
-            var playerPos = new BlockPos(positionData.x(), positionData.y(), positionData.z());
-            MarkedPositionsManager.getManager(player).removeMarkedPosition((ServerLevel) level, playerPos,
-                    itemStack.get(DataComponents.CUSTOM_NAME).toString());
-
+            MarkedPositionsManager.getManager(player).removeMarkedPosition(positionData.Dimension(), positionData.pos(), itemStack.get(DataComponents.CUSTOM_NAME).toString());
             itemStack.remove(POSITION.get());
             itemStack.remove(DataComponents.CUSTOM_NAME);
             return InteractionResultHolder.success(itemStack);
@@ -75,15 +71,10 @@ public class EnderEchoingPearl extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag tooltipFlag) {
-        PositionData positionData = stack.get(POSITION.get());
-        if (positionData != null) {
-            int x = positionData.x();
-            int y = positionData.y();
-            int z = positionData.z();
-            String dimension = positionData.dimension();
-            tooltip.add(Component.translatable("item.enderechoing.ender_echoing_pearl.position", x, y, z, dimension));
-        }
-
+        var P = stack.get(POSITION.get());
+        if (P != null)
+            tooltip.add(Component.translatable("item.enderechoing.ender_echoing_pearl.position", P.pos().toShortString(),
+                    Component.translatable(P.Dimension().location().toLanguageKey())));
         super.appendHoverText(stack, context, tooltip, tooltipFlag);
     }
 }

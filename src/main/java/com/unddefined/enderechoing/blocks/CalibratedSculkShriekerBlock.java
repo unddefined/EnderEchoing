@@ -109,7 +109,7 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
                 shreikerEntity.setTheItem(stack.copy());
                 stack.shrink(stack.getCount());
                 return ItemInteractionResult.SUCCESS;
-            } else if (stack.getItem() == itemStackInSlot.getItem()) {
+            } else if (ItemStack.isSameItemSameComponents(stack, itemStackInSlot)) {
                 // 如果玩家手上有物品，槽位有物品，但物品相同，则物品数量相加
                 int max = stack.getItem().getDefaultMaxStackSize();
                 int slotCount = itemStackInSlot.getCount();
