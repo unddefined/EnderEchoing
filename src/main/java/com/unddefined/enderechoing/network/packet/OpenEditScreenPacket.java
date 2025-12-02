@@ -1,7 +1,7 @@
 package com.unddefined.enderechoing.network.packet;
 
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.client.gui.EditScreen;
+import com.unddefined.enderechoing.client.gui.PositionEditScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -17,7 +17,7 @@ public record OpenEditScreenPacket() implements CustomPacketPayload {
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
             // 在客户端打开编辑屏幕
-            Minecraft.getInstance().setScreen(new EditScreen(Minecraft.getInstance().screen));
+            Minecraft.getInstance().setScreen(new PositionEditScreen(Minecraft.getInstance().screen));
         });
     }
 

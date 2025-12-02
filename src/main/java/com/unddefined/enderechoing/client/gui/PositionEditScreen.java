@@ -8,13 +8,15 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-public class EditScreen extends Screen {
+public class PositionEditScreen extends Screen {
+    public static String fieldValue = "";
     private final Screen lastScreen;
     private EditBox nameField;
     private Button doneButton;
     private Button cancelButton;
+    private boolean CursorMoved = false;
 
-    public EditScreen(Screen lastScreen) {
+    public PositionEditScreen(Screen lastScreen) {
         super(Component.translatable("screen.enderechoing.edit_title"));
         this.lastScreen = lastScreen;
     }
@@ -24,7 +26,7 @@ public class EditScreen extends Screen {
         // 添加文本输入框
         this.nameField = new EditBox(this.font, this.width / 2 - 100, this.height / 2 - 10, 200, 20, Component.translatable("screen.enderechoing.enter_name"));
         this.nameField.setMaxLength(50); // 设置最大长度
-        this.nameField.setValue(""); // 默认为空
+        this.nameField.setValue(fieldValue);
         this.addWidget(this.nameField);
         this.setInitialFocus(this.nameField);
 
@@ -52,6 +54,8 @@ public class EditScreen extends Screen {
 
         // 渲染文本框提示
         this.nameField.render(guiGraphics, mouseX, mouseY, partialTick);
+        if (!CursorMoved) this.nameField.moveCursorTo(1, false);
+        CursorMoved = true;
     }
 
     private void onDone() {
@@ -64,10 +68,14 @@ public class EditScreen extends Screen {
     }
 
     @Override
-    public void onClose() {this.minecraft.setScreen(this.lastScreen);}
+    public void onClose() {
+        fieldValue = "";
+        CursorMoved = false;
+        this.minecraft.setScreen(this.lastScreen);
+    }
 
     @Override
-    public boolean isPauseScreen() {return false; }
+    public boolean isPauseScreen() {return false;}
 
     public Button getDoneButton() {return doneButton;}
 
