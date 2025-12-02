@@ -55,69 +55,33 @@ public record MarkedPositionsManager(List<Teleporters> teleporters,
         }
     }
 
-    // 上移指定索引的元素
-    public boolean moveUp(int index, boolean withIcon) {
+    // 上移或置顶指定索引的元素
+    public boolean moveUp(int index, boolean toTop, List<MarkedPositions> withIcon) {
         if (index <= 0 || index >= markedPositions.size()) return false;
-        if (!withIcon) {
-            swapElements(index, index - 1);
+        if (withIcon == null) {
+            swapElements(index, toTop ? index - 1 : 0);
             return true;
         } else {
-            var list = getMarkedPositionsWithIcon(markedPositions.get(index).icon());
-            var X = list.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
-            var i = list.indexOf(X);
-            if (X != null && (i <= 0 || i >= list.size())) {
-                swapElements(X.Index(), list.get(i - 1).Index());
+            var Element = withIcon.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
+            var i = withIcon.indexOf(Element);
+            if (Element != null && (i <= 0 || i >= withIcon.size())) {
+                swapElements(Element.Index(), toTop ? withIcon.getFirst().Index() : withIcon.get(i - 1).Index());
                 return true;
             } else return false;
         }
     }
 
-    // 下移指定索引的元素
-    public boolean moveDown(int index, boolean withIcon) {
+    // 下移或置底指定索引的元素
+    public boolean moveDown(int index, boolean toBottom, List<MarkedPositions> withIcon) {
         if (index < 0 || index >= markedPositions.size() - 1) return false;
-        if (!withIcon) {
-            swapElements(index, index + 1);
+        if (withIcon == null) {
+            swapElements(index, toBottom ? index + 1 : markedPositions.size() - 1);
             return true;
         } else {
-            var list = getMarkedPositionsWithIcon(markedPositions.get(index).icon());
-            var X = list.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
-            var i = list.indexOf(X);
-            if (X != null && (i <= 0 || i >= list.size())) {
-                swapElements(X.Index(), list.get(i - 1).Index());
-                return true;
-            } else return false;
-        }
-    }
-
-    // 将指定索引的元素置顶
-    public boolean moveToTop(int index, boolean withIcon) {
-        if (index <= 0 || index >= markedPositions.size()) return false;
-        if (!withIcon) {
-            swapElements(index, 0);
-            return true;
-        } else {
-            var list = getMarkedPositionsWithIcon(markedPositions.get(index).icon());
-            var X = list.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
-            var i = list.indexOf(X);
-            if (X != null && (i <= 0 || i >= list.size())) {
-                swapElements(X.Index(), list.getFirst().Index());
-                return true;
-            } else return false;
-        }
-    }
-
-    // 将指定索引的元素置底
-    public boolean moveToBottom(int index, boolean withIcon) {
-        if (index < 0 || index >= markedPositions.size() - 1) return false;
-        if (!withIcon) {
-            swapElements(index, markedPositions.size() - 1);
-            return true;
-        } else {
-            var list = getMarkedPositionsWithIcon(markedPositions.get(index).icon());
-            var X = list.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
-            var i = list.indexOf(X);
-            if (X != null && (i <= 0 || i >= list.size())) {
-                swapElements(X.Index(), list.getLast().Index());
+            var Element = withIcon.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
+            var i = withIcon.indexOf(Element);
+            if (Element != null && (i <= 0 || i >= withIcon.size())) {
+                swapElements(Element.Index(), toBottom ? withIcon.getLast().Index() : withIcon.get(i + 1).Index());
                 return true;
             } else return false;
         }
