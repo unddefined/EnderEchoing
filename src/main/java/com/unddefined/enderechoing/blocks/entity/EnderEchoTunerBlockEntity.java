@@ -5,6 +5,7 @@ import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,14 +18,21 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 public class EnderEchoTunerBlockEntity extends BlockEntity implements GeoBlockEntity {
     private static final RawAnimation common = RawAnimation.begin().thenPlay("common");
+    private static ResourceKey<Level> Dimension;
+    private static String name;
+    private static BlockPos pos;
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
+    public EnderEchoTunerBlockEntity(BlockPos pos, BlockState blockState) {super(BlockEntityRegistry.ENDER_ECHO_TUNER.get(), pos, blockState);}
 
-    public EnderEchoTunerBlockEntity(BlockPos pos, BlockState blockState) {
-        super(BlockEntityRegistry.ENDER_ECHO_TUNER.get(), pos, blockState);
+    public static void setSelectedPosition(BlockPos p, ResourceKey<Level> d, String n) {
+        pos = p;
+        Dimension = d;
+        name = n;
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, EnderEchoTunerBlockEntity blockEntity) {
+
         float offset = state.getValue(EnderEchoTunerBlock.FACING) == Direction.DOWN ? 0.7f : 0;
 
         //粒子效果
@@ -45,4 +53,9 @@ public class EnderEchoTunerBlockEntity extends BlockEntity implements GeoBlockEn
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {return this.cache;}
 
+    public ResourceKey<Level> getDimension() {return Dimension;}
+
+    public String getName() {return name;}
+
+    public BlockPos getPos() {return pos;}
 }

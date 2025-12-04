@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.network.packet;
 
 import com.unddefined.enderechoing.EnderEchoing;
+import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -28,7 +29,10 @@ public record TeleportRequestPacket(Vec3 targetPos) implements CustomPacketPaylo
         ctx.enqueueWork(() -> {
             var player = ctx.player();
             var pos = msg.targetPos;
-            if (pos != null) player.teleportTo(pos.x, pos.y, pos.z);
+            if (pos == null) return;
+            if (player.level().getBlockEntity(player.blockPosition().above(2)) instanceof EnderEchoTunerBlockEntity)
+                EnderEchoTunerBlockEntity.setSelectedPosition(null, null, null);
+            player.teleportTo(pos.x, pos.y, pos.z);
         });
     }
 

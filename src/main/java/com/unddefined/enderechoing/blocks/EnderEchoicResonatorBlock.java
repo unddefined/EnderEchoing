@@ -97,6 +97,10 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
                 var p = blockEntity.getTheItem().get(DataRegistry.POSITION);
                 targetPos = (p == null || !p.Dimension().equals(level.dimension())) ? null : p.pos();
             }
+        if (level.getBlockEntity(pos.above(2)) instanceof EnderEchoTunerBlockEntity blockEntity)
+            if (blockEntity.getDimension().equals(level.dimension()))
+                targetPos = blockEntity.getPos() == null ? null : blockEntity.getPos();
+        // 传送
         if (temptick == 0) {
             EchoRenderer.EchoSoundingPos = pos;
             player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
