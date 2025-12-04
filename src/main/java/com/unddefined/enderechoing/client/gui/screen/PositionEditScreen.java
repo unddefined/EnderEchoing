@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.client.gui;
+package com.unddefined.enderechoing.client.gui.screen;
 
 import com.unddefined.enderechoing.network.packet.ItemRenamePacket;
 import net.minecraft.client.gui.GuiGraphics;
