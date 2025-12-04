@@ -38,7 +38,6 @@ public class EnderEchoingPearl extends Item {
             //pearl.use()标记
             handStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
             handStack.set(POSITION.get(), new PositionData(level.dimension(), playerPos));
-            MarkedPositionsManager.getManager(player).addMarkedPosition(level, playerPos, Name, icon);
         } else {
             //非pearl.use()标记
             var pearlStack = player.getInventory().getItem(player.getInventory().findSlotMatchingItem(pearl));
@@ -47,7 +46,6 @@ public class EnderEchoingPearl extends Item {
             CopyStack.set(POSITION.get(), new PositionData(level.dimension(), targetPosition));
             player.getInventory().add(CopyStack);
             pearlStack.shrink(1);
-            MarkedPositionsManager.getManager(player).addMarkedPosition(level, targetPosition, Name, icon);
         }
     }
 

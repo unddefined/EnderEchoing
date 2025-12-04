@@ -32,7 +32,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
+import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     private static int temptick = 0;
@@ -79,7 +81,15 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         if (!manager.hasTeleporters()) return;
         //获取目的地名称
         var posList = manager.getTeleporterPositions(level);
-        EchoRenderer.MarkedPositionNames = manager.getMarkedTeleportersMap(posList, level);
+        if (manager.markedPositions().isEmpty()) {
+            var pearlList = player.getInventory().items.stream().filter(i -> i.is(ENDER_ECHOING_PEARL.get())).toList();
+            pearlList.forEach(itemStack -> {
+                var p = itemStack.get(DataRegistry.POSITION);
+                var n = itemStack.get(CUSTOM_NAME);
+                if (p != null && n != null && p.Dimension().equals(level.dimension()) && posList.contains(p.pos()))
+                    EchoRenderer.MarkedPositionNames.put(p.pos(), n.getString());
+            });
+        } else EchoRenderer.MarkedPositionNames = manager.getMarkedTeleportersMap(posList, level);
         BlockPos targetPos = null;
         //获取定向目的地 TODO:跨维度传送
         if (level.getBlockEntity(pos.above(2)) instanceof CalibratedSculkShriekerBlockEntity blockEntity)

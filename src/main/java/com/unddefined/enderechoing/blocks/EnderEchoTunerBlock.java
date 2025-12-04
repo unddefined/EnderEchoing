@@ -3,8 +3,12 @@ package com.unddefined.enderechoing.blocks;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
+import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -21,12 +25,18 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+
+import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.POSITION;
+import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
+import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoTunerBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = DirectionProperty.create("facing", Direction.values());
@@ -47,6 +57,23 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
     @Nullable
     protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> typeA, BlockEntityType<E> typeB, BlockEntityTicker<? super E> ticker) {
         return typeA == typeB ? (BlockEntityTicker<A>) ticker : null;
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (level.isClientSide()) return ItemInteractionResult.FAIL;
+        if (!stack.is(ENDER_ECHOING_PEARL.get())) return ItemInteractionResult.FAIL;
+        var stackPos = stack.get(POSITION);
+        int pearlAmout = player.getData(EE_PEARL_AMOUNT.get());
+        if (stackPos == null) {
+            player.setData(EE_PEARL_AMOUNT.get(), pearlAmout + stack.getCount());
+            stack.shrink(stack.getCount());
+            return ItemInteractionResult.SUCCESS;
+        }
+        var result = MarkedPositionsManager.getManager(player).addMarkedPosition(level, stackPos.pos(), stack.get(CUSTOM_NAME).getString(), "default");
+        player.setData(EE_PEARL_AMOUNT.get(), result ? 0 : stack.getCount());
+        stack.shrink(result ? 1 : pearlAmout + stack.getCount());
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override

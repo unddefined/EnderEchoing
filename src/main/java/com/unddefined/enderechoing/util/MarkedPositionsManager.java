@@ -36,11 +36,12 @@ public record MarkedPositionsManager(List<Teleporters> teleporters,
 
     public void addTeleporter(Level level, BlockPos pos) {teleporters.add(new Teleporters(level.dimension(), pos));}
 
-    public void addMarkedPosition(Level level, BlockPos pos, String name, String icon) {
+    public boolean addMarkedPosition(Level level, BlockPos pos, String name, String icon) {
         for (MarkedPositions entry : markedPositions)
-            if (entry.Dimension.equals(level.dimension()) && entry.pos.equals(pos) && entry.name.equals(name)) return;
+            if (entry.Dimension.equals(level.dimension()) && entry.pos.equals(pos)) return false;
 
         markedPositions.add(new MarkedPositions(level.dimension(), pos, name, icon, markedPositions.size()));
+        return true;
     }
 
     public void removeMarkedPosition(ResourceKey<Level> Dimension, BlockPos pos, String name) {
@@ -120,8 +121,6 @@ public record MarkedPositionsManager(List<Teleporters> teleporters,
     }
 
     public List<MarkedPositions> getMarkedPositionsWithIcon(String icon) {return markedPositions.stream().filter(entry -> entry.icon != null && !entry.icon.isEmpty() && entry.icon.equals(icon)).collect(Collectors.toList());}
-
-    public List<MarkedPositions> getMarkedPositions() {return new CopyOnWriteArrayList<>(markedPositions);}
 
     public boolean hasTeleporters() {return !teleporters.isEmpty();}
 
