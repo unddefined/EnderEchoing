@@ -27,13 +27,13 @@ import static net.minecraft.client.renderer.LightTexture.FULL_BRIGHT;
 public class EchoResponse {
     public static final RenderType WAVE_RENDER_TYPE = RenderType.create(
             "ender_echoic_wave",
-            DefaultVertexFormat.NEW_ENTITY,
+            DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
             VertexFormat.Mode.QUADS,
-            1536,
+            256,
             false,
             false,
             RenderType.CompositeState.builder()
-                    .setShaderState(RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+                    .setShaderState(RenderType.RENDERTYPE_TEXT_INTENSITY_SEE_THROUGH_SHADER)
                     .setTextureState(new RenderStateShard.TextureStateShard(ResourceLocation.fromNamespaceAndPath("enderechoing", "textures/misc/wave.png"), false, false))
                     .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                     .setLightmapState(RenderStateShard.LIGHTMAP)

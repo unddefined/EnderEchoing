@@ -54,15 +54,12 @@ public class EchoRenderer {
         var PartialTicks = event.getPartialTick().getGameTimeDeltaTicks();
         SculkVeilRenderer.updateFadeProgress(player.hasEffect(SCULK_VEIL), PartialTicks);
         if (!isCounting && SculkVeilRenderer.fadeProgress == 0f) return;
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) return;
 
         int tick = countdownTicks < 59 ? countdownTicks : countTicks;
         var Camera = mc.gameRenderer.getMainCamera();
         var PoseStack = event.getPoseStack();
         var bufferSource = mc.renderBuffers().bufferSource();
-        RenderSystem.getModelViewStack().pushMatrix();
-        RenderSystem.getModelViewStack().set(ModelViewMatrix);
-        RenderSystem.applyModelViewMatrix();
 
         var originalTarget = mc.getMainRenderTarget();
         if (SculkVeilRenderer.fadeProgress != 0f)
@@ -98,7 +95,7 @@ public class EchoRenderer {
                 // 使用 Shift 键触发随机偏移，以避免多个传送点渲染重叠
                 if (player.isShiftKeyDown() && !shiftPosMap.containsKey(blockPos) && EchoSoundingPos != null) {
                     int shiftInt = Math.max(pos.distManhattan(EchoSoundingPos), 6);
-                    shiftPosMap.put(blockPos, blockPos.add(0, mc.level.random.nextInt(shiftInt) - (double) shiftInt / 2, 0));
+                    shiftPosMap.put(blockPos, blockPos.add(0, player.getRandom().nextInt(shiftInt) - (double) shiftInt / 2, 0));
                 }
                 Vec3 shiftPos = shiftPosMap.getOrDefault(blockPos, blockPos);
                 boolean isElementHovering = EchoResponse.render(PoseStack, bufferSource, shiftPos, countTicks - 160,
@@ -113,8 +110,6 @@ public class EchoRenderer {
         }
 
         bufferSource.endBatch();
-        RenderSystem.getModelViewStack().popMatrix();
-        RenderSystem.applyModelViewMatrix();
         RenderSystem.enableDepthTest();
     }
 

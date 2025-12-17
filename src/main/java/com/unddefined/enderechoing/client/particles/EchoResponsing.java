@@ -27,13 +27,13 @@ import static net.minecraft.client.renderer.LightTexture.FULL_BRIGHT;
 public class EchoResponsing {
     private static final Function<ResourceLocation, RenderType> RESPONSING = Util.memoize((r)-> RenderType.create(
             "ender_echoic_responsing",
-            DefaultVertexFormat.NEW_ENTITY,
+            DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
             VertexFormat.Mode.QUADS,
-            1536,
+            256,
             false,
             false,
             RenderType.CompositeState.builder()
-                    .setShaderState(RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+                    .setShaderState(RenderType.RENDERTYPE_TEXT_INTENSITY_SEE_THROUGH_SHADER)
                     .setTextureState(new RenderStateShard.TextureStateShard(r, false, false))
                     .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                     .setLightmapState(RenderStateShard.LIGHTMAP)
