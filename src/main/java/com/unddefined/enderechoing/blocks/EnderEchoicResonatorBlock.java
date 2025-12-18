@@ -37,7 +37,7 @@ import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCUL
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
-    private static int temptick = 0;
+    private int temptick = 0;
 
     public EnderEchoicResonatorBlock() {
         super(Properties.of()
@@ -79,9 +79,10 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         if (temptick > 0) temptick--;
         var manager = MarkedPositionsManager.getManager(player);
         if (!manager.hasTeleporters()) return;
-        //获取目的地名称
-        var posList = manager.getTeleporterPositions(level);
-        if (manager.markedPositions().isEmpty()) {
+        if (temptick == 0) {
+            //获取目的地名称
+            var posList = manager.getTeleporterPositions(level);
+            EchoRenderer.MarkedPositionNames = manager.getMarkedTeleportersMap(posList, level);
             var pearlList = player.getInventory().items.stream().filter(i -> i.is(ENDER_ECHOING_PEARL.get())).toList();
             pearlList.forEach(itemStack -> {
                 var p = itemStack.get(DataRegistry.POSITION);
@@ -89,19 +90,18 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
                 if (p != null && n != null && p.Dimension().equals(level.dimension()) && posList.contains(p.pos()))
                     EchoRenderer.MarkedPositionNames.put(p.pos(), n.getString());
             });
-        } else EchoRenderer.MarkedPositionNames = manager.getMarkedTeleportersMap(posList, level);
-        BlockPos targetPos = null;
-        //获取定向目的地 TODO:跨维度传送
-        if (level.getBlockEntity(pos.above(2)) instanceof CalibratedSculkShriekerBlockEntity blockEntity)
-            if (blockEntity.getTheItem().getItem() instanceof EnderEchoingPearl) {
-                var p = blockEntity.getTheItem().get(DataRegistry.POSITION);
-                targetPos = (p == null || !p.Dimension().equals(level.dimension())) ? null : p.pos();
-            }
-        if (level.getBlockEntity(pos.above(2)) instanceof EnderEchoTunerBlockEntity blockEntity)
-            if (blockEntity.getDimension().equals(level.dimension()))
-                targetPos = blockEntity.getPos() == null ? null : blockEntity.getPos();
-        // 传送
-        if (temptick == 0) {
+
+            BlockPos targetPos = null;
+            //获取定向目的地 TODO:跨维度传送
+            if (level.getBlockEntity(pos.above(2)) instanceof CalibratedSculkShriekerBlockEntity blockEntity)
+                if (blockEntity.getTheItem().getItem() instanceof EnderEchoingPearl) {
+                    var p = blockEntity.getTheItem().get(DataRegistry.POSITION);
+                    targetPos = (p == null || !p.Dimension().equals(level.dimension())) ? null : p.pos();
+                }
+            if (level.getBlockEntity(pos.above(2)) instanceof EnderEchoTunerBlockEntity blockEntity)
+                if (blockEntity.getDimension() != null && blockEntity.getDimension().equals(level.dimension()))
+                    targetPos = blockEntity.getPos() == null ? null : blockEntity.getPos();
+            // 传送
             EchoRenderer.EchoSoundingPos = pos;
             player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
             temptick = 30;

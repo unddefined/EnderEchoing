@@ -33,7 +33,7 @@ public class EchoResponse {
             false,
             false,
             RenderType.CompositeState.builder()
-                    .setShaderState(RenderType.RENDERTYPE_TEXT_INTENSITY_SEE_THROUGH_SHADER)
+                    .setShaderState(RenderType.RENDERTYPE_TEXT_SEE_THROUGH_SHADER)
                     .setTextureState(new RenderStateShard.TextureStateShard(ResourceLocation.fromNamespaceAndPath("enderechoing", "textures/misc/wave.png"), false, false))
                     .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                     .setLightmapState(RenderStateShard.LIGHTMAP)
@@ -108,7 +108,7 @@ public class EchoResponse {
                 continue;
             }
             float scale2 = Math.abs(0.2f + age / 54f); // 控制半径增大
-            float alpha = Math.max(0f, 1f - age / 60f); // 随半径增大透明度逐渐减小
+            float alpha = Math.max(0f, 1f - age / 85f); // 随半径增大透明度逐渐减小
             poseStack.pushPose();
             poseStack.scale(scale2, scale2, 0); // 缩放波纹平面
             var vertexConsumer = bufferSource.getBuffer(WAVE_RENDER_TYPE);

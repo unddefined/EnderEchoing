@@ -33,7 +33,7 @@ public class EchoResponsing {
             false,
             false,
             RenderType.CompositeState.builder()
-                    .setShaderState(RenderType.RENDERTYPE_TEXT_INTENSITY_SEE_THROUGH_SHADER)
+                    .setShaderState(RenderType.RENDERTYPE_TEXT_SEE_THROUGH_SHADER)
                     .setTextureState(new RenderStateShard.TextureStateShard(r, false, false))
                     .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                     .setLightmapState(RenderStateShard.LIGHTMAP)

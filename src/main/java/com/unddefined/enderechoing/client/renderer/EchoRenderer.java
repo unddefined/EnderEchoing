@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.client.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.particles.EchoResponse;
 import com.unddefined.enderechoing.client.particles.EchoResponsing;
@@ -58,7 +59,7 @@ public class EchoRenderer {
 
         int tick = countdownTicks < 59 ? countdownTicks : countTicks;
         var Camera = mc.gameRenderer.getMainCamera();
-        var PoseStack = event.getPoseStack();
+        var PoseStack = new PoseStack();
         var bufferSource = mc.renderBuffers().bufferSource();
 
         var originalTarget = mc.getMainRenderTarget();
