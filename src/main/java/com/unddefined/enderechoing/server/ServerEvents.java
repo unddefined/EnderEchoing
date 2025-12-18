@@ -2,7 +2,6 @@ package com.unddefined.enderechoing.server;
 
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.blocks.EnderEchoicResonatorBlock;
-import com.unddefined.enderechoing.client.gui.PositionEditScreen;
 import com.unddefined.enderechoing.items.EnderEchoingPearl;
 import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
@@ -102,8 +101,7 @@ public class ServerEvents {
         //用一个珍珠记下并命名传送器的位置
         if (player.getInventory().hasAnyMatching(itemStack ->
                 itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
-            PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket());
-            PositionEditScreen.fieldValue = "><";
+            PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket("><"));
             EnderEchoingPearl.targetPosition = pos;
         }
     }

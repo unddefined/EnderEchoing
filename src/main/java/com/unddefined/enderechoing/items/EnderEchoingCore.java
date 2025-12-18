@@ -95,6 +95,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
             // 查找最近的EnderEchoicResonator方块
             var manager = MarkedPositionsManager.getManager(player);
             var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
+            if (nearestTeleporterPos.getFirst() == null) return InteractionResultHolder.fail(itemStack);
             // 检查玩家是否有未保存数据的末影回响珍珠
             if (!player.getInventory().hasAnyMatching(item ->
                     item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null))
@@ -125,7 +126,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
             player.startUsingItem(hand);
         } else if (player.getInventory().hasAnyMatching(stack ->
                 stack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && stack.get(CUSTOM_NAME) == null)) {
-            PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket());
+            if (!level.isClientSide()) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket(""));
             EnderEchoingPearl.targetPosition = player.blockPosition();
         }
 
