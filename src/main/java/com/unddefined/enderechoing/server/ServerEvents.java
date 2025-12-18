@@ -26,6 +26,7 @@ import java.util.Objects;
 import static com.unddefined.enderechoing.effects.AttackScatteredEffect.attack_scattered_modifier_id;
 import static com.unddefined.enderechoing.effects.StaggerEffect.stagger_modifier_id;
 import static com.unddefined.enderechoing.effects.TinnitusEffect.tinnitus_modifier_id;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 import static net.minecraft.world.entity.ai.attributes.Attributes.*;
@@ -100,9 +101,12 @@ public class ServerEvents {
         MarkedPositionsManager.getManager(player).addTeleporter(level, pos);
         //用一个珍珠记下并命名传送器的位置
         if (player.getInventory().hasAnyMatching(itemStack ->
-                itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
+                itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)
+                || player.getData(EE_PEARL_AMOUNT.get()) > 0
+        ) {
             PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket("><"));
             EnderEchoingPearl.targetPosition = pos;
+            player.setData(EE_PEARL_AMOUNT.get(), Math.max(player.getData(EE_PEARL_AMOUNT.get()) - 1, 0));
         }
     }
 
