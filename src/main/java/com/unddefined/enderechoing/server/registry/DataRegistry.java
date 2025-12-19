@@ -27,6 +27,6 @@ public class DataRegistry {
             "ee_pearl_amount", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT).copyOnDeath().build()
     );
     public static final Supplier<AttachmentType<IconListManager>> ICON_LIST = ATTACHMENT_TYPES.register(
-            "icon_list", () -> AttachmentType.builder(IconListManager::new).serialize(IconListManager.CODEC).copyOnDeath().build()
+            "icon_list", () -> AttachmentType.serializable(IconListManager::new).copyOnDeath().build()
     );
 }
