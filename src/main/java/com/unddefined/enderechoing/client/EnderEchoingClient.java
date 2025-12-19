@@ -1,6 +1,5 @@
 package com.unddefined.enderechoing.client;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
 import com.unddefined.enderechoing.client.particles.ParticleDirectlyMovingDust;
@@ -10,7 +9,6 @@ import com.unddefined.enderechoing.client.renderer.block.EnderEchoicResonatorRen
 import com.unddefined.enderechoing.client.renderer.block.SculkWhisperRenderer;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ParticlesRegistry;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -21,7 +19,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -39,12 +36,6 @@ import static com.unddefined.enderechoing.EnderEchoing.TUNER_MENU;
 public class EnderEchoingClient {
     private static final Minecraft mc = Minecraft.getInstance();
     public static PostChain sculkVeilPostChain = null;
-    private static final KeyMapping OPEN_TRANSPARENT_SCREEN = new KeyMapping(
-            "key." + EnderEchoing.MODID + ".open_transparent_screen",
-            InputConstants.KEY_R,
-            "key.categories." + EnderEchoing.MODID
-    );
-
 
     public EnderEchoingClient(ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.
@@ -58,7 +49,6 @@ public class EnderEchoingClient {
         event.enqueueWork(() -> {
             try {
                 sculkVeilPostChain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), mc.getMainRenderTarget(), ResourceLocation.fromNamespaceAndPath("enderechoing", "shaders/post/sculk_veil.json"));
-
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -76,11 +66,6 @@ public class EnderEchoingClient {
     }
     @SubscribeEvent
     private static void registerScreens(RegisterMenuScreensEvent event) {event.register(TUNER_MENU.get(), TunerScreen::new);}
-
-    @SubscribeEvent
-    public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
-        event.register(OPEN_TRANSPARENT_SCREEN);
-    }
 
     @SubscribeEvent
     public static void registerParticleProviders(RegisterParticleProvidersEvent event) {

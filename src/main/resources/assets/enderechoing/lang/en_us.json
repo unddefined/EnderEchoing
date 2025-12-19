@@ -1,9 +1,6 @@
 {
   "block.enderechoing.ender_echoic_resonator": "Ender echoic Resonator",
   "block.enderechoing.ender_echo_tuner": "Ender Echo Tuner",
-  "block.enderechoing.ender_echoic_resonator.tooltip": "Place in the world and use Ender Echoing Core to teleport to it!",
-  "block.enderechoing.ender_echoic_resonator.placed": "Ender Echoic Resonator placed! You can now teleport to this location.",
-  "block.enderechoing.ender_echoic_resonator.removed": "Ender Echoic Resonator removed!",
   "block.enderechoing.echo_druse_block": "Echo Druse",
   "block.enderechoing.echo_druse_block.tooltip": "Stage: %s",
   "block.enderechoing.calibrated_sculk_shrieker": "Calibrated Sculk Shrieker",
@@ -35,7 +32,6 @@
   "screen.enderechoing.lock": "Lock selected",
   "screen.enderechoing.distance": "Distance: %s",
   "key.categories.enderechoing": "Ender Echoing",
-  "key.enderechoing.open_transparent_screen": "Open Transparent Screen",
   "creativetab.enderechoing": "Ender Echoing",
   "effect.enderechoing.tinnitus": "Tinnitus",
   "effect.enderechoing.deafness": "Deafness",
