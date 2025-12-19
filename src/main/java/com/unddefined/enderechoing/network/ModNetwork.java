@@ -10,18 +10,18 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 @EventBusSubscriber(modid = EnderEchoing.MODID)
 public class ModNetwork {
     private static final String PROTOCOL_VERSION = "1.0";
-    
+
     @SubscribeEvent
     public static void register(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
-        
+
         // 注册物品重命名数据包
         registrar.playToServer(
-                ItemRenamePacket.TYPE,
-                ItemRenamePacket.STREAM_CODEC,
-                ItemRenamePacket::handle
+                PearlRenamePacket.TYPE,
+                PearlRenamePacket.STREAM_CODEC,
+                PearlRenamePacket::handle
         );
-        
+
         // 注册打开编辑屏幕数据包
         registrar.playToClient(
                 OpenEditScreenPacket.TYPE,
@@ -48,6 +48,25 @@ public class ModNetwork {
                 TeleportRequestPacket.TYPE,
                 TeleportRequestPacket.STREAM_CODEC,
                 TeleportRequestPacket::handle
+        );
+
+        registrar.playToServer(
+                SetSelectedPositionPacket.TYPE,
+                SetSelectedPositionPacket.STREAM_CODEC,
+                SetSelectedPositionPacket::handle
+        );
+
+        registrar.playToServer(
+                GivePlayerPearlPacket.TYPE,
+                GivePlayerPearlPacket.STREAM_CODEC,
+                GivePlayerPearlPacket::handle
+        );
+
+        // 注册同步Tuner数据包
+        registrar.playToServer(
+                SyncTunerPacket.TYPE,
+                SyncTunerPacket.STREAM_CODEC,
+                SyncTunerPacket::handle
         );
     }
 }
