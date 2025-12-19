@@ -86,7 +86,7 @@ public class EchoRenderer {
                     PartialTicks, tick - 20, LightTexture.FULL_BRIGHT);
         }
 
-        if (countTicks > 120) {
+        if (!EchoSoundingExtraRender && countTicks > 120) {
             // 渲染EchoResponse
             for (BlockPos pos : syncedTeleporterPositions) {
                 if (pos.equals(EchoSoundingPos)) continue;

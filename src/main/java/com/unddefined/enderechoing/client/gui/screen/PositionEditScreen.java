@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.client.gui.screen;
 
-import com.unddefined.enderechoing.network.packet.ItemRenamePacket;
+import com.unddefined.enderechoing.network.packet.PearlRenamePacket;
+import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -9,16 +10,17 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class PositionEditScreen extends Screen {
-    public static String fieldValue = "";
     private final Screen lastScreen;
+    public String fieldValue;
     private EditBox nameField;
     private Button doneButton;
     private Button cancelButton;
     private boolean CursorMoved = false;
 
-    public PositionEditScreen(Screen lastScreen) {
+    public PositionEditScreen(Screen lastScreen, String fieldValue) {
         super(Component.translatable("screen.enderechoing.edit_title"));
         this.lastScreen = lastScreen;
+        this.fieldValue = fieldValue;
     }
 
     @Override
@@ -40,11 +42,6 @@ public class PositionEditScreen extends Screen {
     }
 
     @Override
-    public void tick() {
-        // EditBox没有tick方法，移除此调用
-    }
-
-    @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -61,17 +58,20 @@ public class PositionEditScreen extends Screen {
     private void onDone() {
         String name = this.nameField.getValue().trim();
 
-        // 发送重命名数据包到服务端
-        PacketDistributor.sendToServer(new ItemRenamePacket(name, "default"));
+        if (lastScreen instanceof TunerScreen tunerScreen) {
+            var M = tunerScreen.getFocusingEntry().getMarkedPosition();
+            var newPosition = new MarkedPositionsManager.MarkedPositions(M.Dimension(), M.pos(), name, M.iconIndex());
+            tunerScreen.getMarkedPositionsCache().set(tunerScreen.getMarkedPositionsCache().indexOf(M), newPosition);
+            tunerScreen.populateWaypointList();
+        } else PacketDistributor.sendToServer(new PearlRenamePacket(name));
 
         this.onClose();
     }
 
     @Override
     public void onClose() {
-        fieldValue = "";
         CursorMoved = false;
-        this.minecraft.setScreen(this.lastScreen);
+        if (this.minecraft != null) this.minecraft.setScreen(this.lastScreen);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.unddefined.enderechoing.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.TransparentScreen;
+import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
 import com.unddefined.enderechoing.client.particles.ParticleDirectlyMovingDust;
 import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShriekerRenderer;
 import com.unddefined.enderechoing.client.renderer.block.EnderEchoTunerRenderer;
@@ -23,11 +24,14 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
 import java.io.IOException;
+
+import static com.unddefined.enderechoing.EnderEchoing.TUNER_MENU;
 
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
@@ -72,6 +76,8 @@ public class EnderEchoingClient {
         event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHO_TUNER.get(),
                 context -> new EnderEchoTunerRenderer()));
     }
+    @SubscribeEvent
+    private static void registerScreens(RegisterMenuScreensEvent event) {event.register(TUNER_MENU.get(), TunerScreen::new);}
 
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {

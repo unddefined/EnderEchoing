@@ -1,14 +1,21 @@
 package com.unddefined.enderechoing.blocks;
 
 import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
+import com.unddefined.enderechoing.menu.TunerMenu;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -29,6 +36,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -60,19 +68,42 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
     }
 
     @Override
+    public MenuProvider getMenuProvider(BlockState state, Level level, BlockPos pos) {
+        return new MenuProvider() {
+            @Override
+            public @NotNull Component getDisplayName() {return Component.translatable("menu.title.enderechoing.tunermenu");}
+
+            @Override
+            public @NotNull AbstractContainerMenu createMenu(int containerId, net.minecraft.world.entity.player.Inventory playerInventory, Player player) {
+                return new TunerMenu(containerId, playerInventory, ContainerLevelAccess.create(level, pos));
+            }
+
+            @Override
+            public void writeClientSideData(AbstractContainerMenu menu, net.minecraft.network.RegistryFriendlyByteBuf buf) {
+                if (menu instanceof TunerMenu tunerMenu) tunerMenu.writeClientSideData(buf, pos);
+            }
+        };
+    }
+
+    @Override
+    protected @NotNull InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (!level.isClientSide && player instanceof ServerPlayer P) P.openMenu(state.getMenuProvider(level, pos));
+
+        return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.isClientSide()) return ItemInteractionResult.FAIL;
+        if (stack.isEmpty()) useWithoutItem(state, level, pos, player, hitResult);
         if (!stack.is(ENDER_ECHOING_PEARL.get())) return ItemInteractionResult.FAIL;
         var stackPos = stack.get(POSITION);
         int pearlAmout = player.getData(EE_PEARL_AMOUNT.get());
-        if (stackPos == null) {
-            player.setData(EE_PEARL_AMOUNT.get(), pearlAmout + stack.getCount());
-            stack.shrink(stack.getCount());
-            return ItemInteractionResult.SUCCESS;
-        }
-        var result = MarkedPositionsManager.getManager(player).addMarkedPosition(level, stackPos.pos(), stack.get(CUSTOM_NAME).getString(), "default");
-        player.setData(EE_PEARL_AMOUNT.get(), result ? 0 : stack.getCount());
-        stack.shrink(result ? 1 : pearlAmout + stack.getCount());
+        boolean result = MarkedPositionsManager.getManager(player)
+                .addMarkedPosition(stackPos == null ? null : stackPos.Dimension(), stackPos == null ? null : stackPos.pos(), stack.get(CUSTOM_NAME) == null ? null : stack.get(CUSTOM_NAME).getString(), 0);
+        player.setData(EE_PEARL_AMOUNT.get(), pearlAmout + stack.getCount() - (result ? 1 : 0));
+        stack.shrink(stack.getCount());
+
         return ItemInteractionResult.SUCCESS;
     }
 

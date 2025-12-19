@@ -26,6 +26,14 @@
   "screen.enderechoing.enter_name": "Enter item name...",
   "screen.enderechoing.done": "Done",
   "screen.enderechoing.cancel": "Cancel",
+  "screen.enderechoing.remove": "Remove",
+  "screen.enderechoing.copy": "Copy",
+  "screen.enderechoing.rename": "Rename",
+  "screen.enderechoing.confirm_remove": "Confirm remove",
+  "screen.enderechoing.change_icon": "Change icon",
+  "screen.enderechoing.select_icon": "Select an item for icon",
+  "screen.enderechoing.lock": "Lock selected",
+  "screen.enderechoing.distance": "Distance: %s",
   "key.categories.enderechoing": "Ender Echoing",
   "key.enderechoing.open_transparent_screen": "Open Transparent Screen",
   "creativetab.enderechoing": "Ender Echoing",
@@ -33,5 +41,6 @@
   "effect.enderechoing.deafness": "Deafness",
   "effect.enderechoing.stagger": "Stagger",
   "effect.enderechoing.attack_scattered": "Attack Scattered",
-  "effect.enderechoing.sculk_veil": "Sculk Veil"
+  "effect.enderechoing.sculk_veil": "Sculk Veil",
+  "menu.title.enderechoing.tunermenu": "Ender Echo Tuner"
 }

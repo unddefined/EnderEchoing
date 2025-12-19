@@ -2,13 +2,20 @@ package com.unddefined.enderechoing;
 
 import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.client.ModSoundEvents;
+import com.unddefined.enderechoing.menu.TunerMenu;
 import com.unddefined.enderechoing.server.registry.*;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
+
+import java.util.function.Supplier;
 
 // The @Mod annotation tells the loader that this class is the main mod class.
 // The mod id is defined in mods.toml and must match the modId field below.
@@ -18,7 +25,8 @@ public class EnderEchoing {
     public static final String MODID = "enderechoing";
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
-
+    public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, MODID);
+    public static final Supplier<MenuType<TunerMenu>> TUNER_MENU = MENUS.register("tuner_menu", () -> IMenuTypeExtension.create(TunerMenu::new));
     public EnderEchoing(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
         BlockRegistry.BLOCKS.register(modEventBus);
@@ -30,6 +38,7 @@ public class EnderEchoing {
         ParticlesRegistry.PARTICLE_TYPES.register(modEventBus);
         DataRegistry.COMPONENT_TYPES.register(modEventBus);
         DataRegistry.ATTACHMENT_TYPES.register(modEventBus);
+        MENUS.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 

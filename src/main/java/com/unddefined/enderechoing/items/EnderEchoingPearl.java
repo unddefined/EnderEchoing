@@ -26,7 +26,7 @@ public class EnderEchoingPearl extends Item {
 
     public EnderEchoingPearl(Properties properties) {super(properties.stacksTo(8));}
 
-    public static void handleSetDataRequest(ServerPlayer player, String name, ItemStack handStack, Level level, String icon) {
+    public static void handleSetDataRequest(ServerPlayer player, String name, ItemStack handStack, Level level) {
         var Name = name.isEmpty() ? Component.translatable("item.enderechoing.ender_echoing_pearl").getString() : name;
         var playerPos = player.blockPosition();
         var pearl = new ItemStack(ItemRegistry.ENDER_ECHOING_PEARL.get());
@@ -55,7 +55,6 @@ public class EnderEchoingPearl extends Item {
         if (level.isClientSide) return InteractionResultHolder.fail(itemStack);
 
         if (player.isShiftKeyDown() && positionData != null) {
-            MarkedPositionsManager.getManager(player).removeMarkedPosition(positionData.Dimension(), positionData.pos(), itemStack.get(DataComponents.CUSTOM_NAME).toString());
             itemStack.remove(POSITION.get());
             itemStack.remove(DataComponents.CUSTOM_NAME);
             return InteractionResultHolder.success(itemStack);
@@ -71,7 +70,7 @@ public class EnderEchoingPearl extends Item {
         var P = stack.get(POSITION.get());
         if (P != null)
             tooltip.add(Component.translatable("item.enderechoing.ender_echoing_pearl.position", P.pos().toShortString(),
-                    Component.translatable(P.Dimension().location().toLanguageKey())));
+                    Component.translationArg(P.Dimension().location())));
         super.appendHoverText(stack, context, tooltip, tooltipFlag);
     }
 }

@@ -1,0 +1,176 @@
+package com.unddefined.enderechoing.client.gui.screen;
+
+import com.unddefined.enderechoing.client.gui.widgets.TabBar;
+import com.unddefined.enderechoing.client.gui.widgets.WaypointList;
+import com.unddefined.enderechoing.menu.TunerMenu;
+import com.unddefined.enderechoing.network.packet.SyncTunerPacket;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
+import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
+
+import java.util.List;
+
+public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
+    private final List<MarkedPositionsManager.MarkedPositions> MarkedPositionsCache;
+    public int selectedTab = 0;
+    public boolean lockTab = false;
+    private WaypointList waypointList;
+    private boolean dragging = false;
+    private TabBar tabBar;
+    private WaypointList.WaypointEntry focusingEntry;
+
+    public TunerScreen(TunerMenu menu, Inventory playerInventory, Component title) {
+        super(menu, playerInventory, title);
+        this.imageWidth = 376;
+        this.imageHeight = 302;
+        this.inventoryLabelY = this.imageHeight - 94;
+        this.MarkedPositionsCache = menu.getMarkedPositionsCache();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        selectedTab = lockTab ? selectedTab : 0;
+        int listLeft = this.width / 2 - 110;
+        int listWidth = this.width / 4 + 18;
+        int listTop = 200;
+        int listBottom = this.height - 300;
+        tabBar = new TabBar(this.width / 2 - 81, this.height - 332, this);
+        waypointList = new WaypointList(this.minecraft, listWidth, listTop, listLeft, listBottom, 24, this);
+
+        populateWaypointList();
+
+        this.addWidget(waypointList);
+    }
+
+    public void populateWaypointList() {
+        waypointList.children().clear();
+        var list = MarkedPositionsCache.stream().filter(entry -> entry.iconIndex() == selectedTab).toList();
+        list.forEach(e -> waypointList.addWaypoint(e));
+    }
+
+    @Override
+    public void onClose() {
+        PacketDistributor.sendToServer(new SyncTunerPacket(menu.getIconList(), MarkedPositionsCache, menu.ee_pearl_amount));
+        super.onClose();
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+
+        waypointList.render(guiGraphics, mouseX, mouseY, partialTick);
+
+        // 渲染waypoint列表项的tooltip，避免被列表边框截断
+        var hoveredEntry = waypointList.getEntryFromMouse(mouseX, mouseY);
+        if (hoveredEntry != null) hoveredEntry.renderTooltip(guiGraphics, mouseX + 5, mouseY + 5);
+
+        tabBar.render(guiGraphics, mouseX, mouseY, partialTick);
+
+        // 渲染标题
+        guiGraphics.drawString(this.font, this.title,
+                this.leftPos + (this.imageWidth / 2) - (this.font.width(this.title) / 2),
+                this.topPos + 6, 0xd1d6b6, false);
+
+        waypointList.getContextMenu().render(guiGraphics, mouseX, mouseY, partialTick);
+        tabBar.getContextMenu().render(guiGraphics, mouseX, mouseY, partialTick);
+        if (!dragging) return;
+        guiGraphics.renderFakeItem(new ItemStack(ItemRegistry.ENDER_ECHOING_PEARL.get()), mouseX - 8, mouseY - 8);
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (tabBar.getContextMenu().isVisible() && tabBar.getContextMenu().mouseClicked(mouseX, mouseY, button))
+            return true;
+
+        if (waypointList.getContextMenu().isVisible() && waypointList.getContextMenu().mouseClicked(mouseX, mouseY, button))
+            return true;
+
+        focusingEntry = waypointList.getEntryFromMouse(mouseX, mouseY);
+        if (focusingEntry != null && focusingEntry.mouseClicked(mouseX, mouseY, button)) return true;
+
+        if (tabBar.mouseClicked(mouseX, mouseY, button)) return true;
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (tabBar.mouseReleased(mouseX, mouseY, button)) return true;
+        if (!dragging) return true;
+        this.dragging = false;
+        if (waypointList.getSelected() == null) return true;
+        if (button != 0) return true;
+
+        var M = waypointList.getSelected().getMarkedPosition();
+        waypointList.setSelected(null);
+        // 更换图标
+        for (int i = 0; i <= 9; i++) {
+            double slotSize = 20;
+            double tx = (double) this.width / 2 - 81 - 30 + i * slotSize + (i > 0 ? 9 : 0);
+            double ty = this.height - 332;
+
+            if (!(mouseX >= tx && mouseX < tx + slotSize && mouseY >= ty && mouseY < ty + slotSize)) continue;
+
+            selectedTab = i;
+
+            var newPosition = new MarkedPositionsManager.MarkedPositions(M.Dimension(), M.pos(), M.name(), i);
+            MarkedPositionsCache.set(MarkedPositionsCache.indexOf(M), newPosition);
+            populateWaypointList();
+        }
+        // 交换位置
+        var swapEntry = waypointList.getEntryFromMouse(mouseX, mouseY);
+        if (swapEntry != null && swapEntry != focusingEntry) {
+            waypointList.swapInMainList(M, swapEntry.getMarkedPosition());
+            populateWaypointList();
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (waypointList.getContextMenu().isVisible() || tabBar.getContextMenu().isVisible()) return false;
+        if (button != 0) return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        if (tabBar.mouseDragged(mouseX, mouseY, button)) return true;
+
+        var selected = waypointList.getSelected();
+        if (selected == null) return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        if (!dragging && focusingEntry != null && focusingEntry.equals(selected)) this.dragging = true;
+
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (tabBar.keyPressed(keyCode, scanCode, modifiers)) return true;
+        if (waypointList.keyPressed(keyCode, scanCode, modifiers)) {
+            populateWaypointList();
+            return true;
+        }
+
+        if (keyCode == 262 || keyCode == 263 || keyCode == 264 || keyCode == 265) return true;
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {}
+
+    @Override
+    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
+        // 渲染GUI背景纹理
+//        guiGraphics.blit(
+//                ResourceLocation.withDefaultNamespace("gui/menu_background"),
+//                this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+    }
+
+    public WaypointList.WaypointEntry getFocusingEntry() {return focusingEntry;}
+
+    public List<MarkedPositionsManager.MarkedPositions> getMarkedPositionsCache() {return MarkedPositionsCache;}
+
+}
