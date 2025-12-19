@@ -28,6 +28,7 @@ import static net.minecraft.core.registries.BuiltInRegistries.ITEM;
 public class TunerMenu extends AbstractContainerMenu {
     private final ContainerLevelAccess access;
     public int ee_pearl_amount;
+    public int selected_tuner_tab;
     private List<ItemStack> iconList = new ArrayList<>();
     private List<MarkedPositionsManager.MarkedPositions> markedPositionsCache;
     private BlockPos tunerPos;
@@ -37,6 +38,7 @@ public class TunerMenu extends AbstractContainerMenu {
     public TunerMenu(int containerId, Inventory playerInv, ContainerLevelAccess A, FriendlyByteBuf buf) {
         super(TUNER_MENU.get(), containerId);
         this.access = A;
+        this.selected_tuner_tab = buf.readInt();
         this.ee_pearl_amount = buf.readInt();
         this.tunerPos = buf.readBlockPos();
         this.markedPositionsCache = buf.readList(MarkedPositionsManager.STREAM_CODEC);
@@ -47,6 +49,7 @@ public class TunerMenu extends AbstractContainerMenu {
         super(TUNER_MENU.get(), containerId);
         this.access = A;
         A.execute((level, pos) -> {
+            this.selected_tuner_tab = playerInv.player.getData(SELECTED_TUNER_TAB.get());
             this.ee_pearl_amount = playerInv.player.getData(EE_PEARL_AMOUNT.get());
             this.iconList = playerInv.player.getData(ICON_LIST.get()).icons();
             this.markedPositionsCache = playerInv.player.getData(DataRegistry.MARKED_POSITIONS_CACHE.get()).markedPositions();
@@ -78,6 +81,7 @@ public class TunerMenu extends AbstractContainerMenu {
     public List<MarkedPositionsManager.MarkedPositions> getMarkedPositionsCache() {return markedPositionsCache;}
 
     public void writeClientSideData(RegistryFriendlyByteBuf buf, BlockPos pos) {
+        buf.writeInt(selected_tuner_tab);
         buf.writeInt(ee_pearl_amount);
         buf.writeBlockPos(pos);
         buf.writeCollection(markedPositionsCache, MarkedPositionsManager.STREAM_CODEC);

@@ -68,5 +68,11 @@ public class ModNetwork {
                 SyncTunerDataPacket.STREAM_CODEC,
                 SyncTunerDataPacket::handle
         );
+
+        registrar.playToServer(
+                SetTunerSelectedTabPacket.TYPE,
+                SetTunerSelectedTabPacket.STREAM_CODEC,
+                SetTunerSelectedTabPacket::handle
+        );
     }
 }

@@ -30,6 +30,7 @@
   "screen.enderechoing.change_icon": "Change icon",
   "screen.enderechoing.select_icon": "Select an item for icon",
   "screen.enderechoing.lock": "Lock selected",
+  "screen.enderechoing.unlock": "Unlock selected",
   "screen.enderechoing.distance": "Distance: %s",
   "key.categories.enderechoing": "Ender Echoing",
   "creativetab.enderechoing": "Ender Echoing",

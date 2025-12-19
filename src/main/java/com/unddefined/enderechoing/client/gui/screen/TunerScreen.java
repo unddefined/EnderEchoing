@@ -18,7 +18,7 @@ import java.util.List;
 public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
     private final List<MarkedPositionsManager.MarkedPositions> MarkedPositionsCache;
     public int selectedTab = 0;
-    public boolean lockTab = false;
+
     private WaypointList waypointList;
     private boolean dragging = false;
     private TabBar tabBar;
@@ -35,7 +35,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
     @Override
     protected void init() {
         super.init();
-        selectedTab = lockTab ? selectedTab : 0;
+        selectedTab = menu.selected_tuner_tab;
         int listLeft = this.width / 2 - 110;
         int listWidth = this.width / 4 + 18;
         int listTop = 200;

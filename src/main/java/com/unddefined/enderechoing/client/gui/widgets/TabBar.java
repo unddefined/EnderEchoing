@@ -3,12 +3,14 @@ package com.unddefined.enderechoing.client.gui.widgets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.unddefined.enderechoing.client.gui.TunerMenu;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
+import com.unddefined.enderechoing.network.packet.SetTunerSelectedTabPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
 import static net.minecraft.client.gui.screens.Screen.hasShiftDown;
@@ -23,6 +25,7 @@ public class TabBar {
     private final ContextMenu contextMenu;
     private final TunerScreen screen;
     private final TunerMenu menu;
+    public boolean tabLocked = false;
     private boolean dragging = false;
     private boolean tabClicked = false;
 
@@ -32,6 +35,7 @@ public class TabBar {
         this.contextMenu = new ContextMenu();
         this.screen = screen;
         this.menu = screen.getMenu();
+        if (menu.selected_tuner_tab > 0) tabLocked = true;
     }
 
     public void render(GuiGraphics G, int mouseX, int mouseY, float partialTick) {
@@ -81,12 +85,9 @@ public class TabBar {
 
             if (!(mouseX >= tx && mouseX < tx + slotSize && mouseY >= ty && mouseY < ty + slotSize)) continue;
 
-            if (button == 0) {
-                screen.selectedTab = i;
-                tabClicked = true;
-                screen.populateWaypointList();
-                return true;
-            }
+            screen.selectedTab = i;
+            tabClicked = true;
+            screen.populateWaypointList();
 
             if (button == 1) {
                 // 右键 → 弹出菜单
@@ -95,8 +96,17 @@ public class TabBar {
                     return true;
                 }
                 contextMenu.clear();
-                contextMenu.addItem(  "screen.enderechoing.lock", () -> {
 
+                contextMenu.addItem("screen.enderechoing.lock", () -> {
+                    PacketDistributor.sendToServer(new SetTunerSelectedTabPacket(screen.selectedTab));
+                    tabLocked = true;
+                });
+
+                if (tabLocked) contextMenu.addItem("screen.enderechoing.unlock", () -> {
+                    PacketDistributor.sendToServer(new SetTunerSelectedTabPacket(0));
+                    tabLocked = false;
+                    screen.selectedTab = 0;
+                    screen.populateWaypointList();
                 });
 
                 contextMenu.addItem("screen.enderechoing.change_icon", () -> {

@@ -26,6 +26,10 @@ public class DataRegistry {
     public static final Supplier<AttachmentType<Integer>> EE_PEARL_AMOUNT = ATTACHMENT_TYPES.register(
             "ee_pearl_amount", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT).copyOnDeath().build()
     );
+    public static final Supplier<AttachmentType<Integer>> SELECTED_TUNER_TAB = ATTACHMENT_TYPES.register(
+             "selected_tuner_tab", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT).copyOnDeath().build()
+    );
+
     public static final Supplier<AttachmentType<IconListManager>> ICON_LIST = ATTACHMENT_TYPES.register(
             "icon_list", () -> AttachmentType.serializable(IconListManager::new).copyOnDeath().build()
     );
