@@ -11,6 +11,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -23,83 +26,45 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
-public record MarkedPositionsManager(List<Teleporters> teleporters,
-                                     List<MarkedPositions> markedPositions) implements INBTSerializable<Tag> {
+public record MarkedPositionsManager(List<MarkedPositionsManager.Teleporters> teleporters,
+                                     List<MarkedPositionsManager.MarkedPositions> markedPositions) implements INBTSerializable<Tag> {
+    public static final StreamCodec<FriendlyByteBuf, MarkedPositions> STREAM_CODEC = StreamCodec.composite(
+            ResourceKey.streamCodec(Registries.DIMENSION),
+            MarkedPositions::Dimension,
+            BlockPos.STREAM_CODEC,
+            MarkedPositions::pos,
+            ByteBufCodecs.STRING_UTF8,
+            MarkedPositions::name,
+            ByteBufCodecs.VAR_INT,
+            MarkedPositions::iconIndex,
+            MarkedPositions::new
+    );
+
     public MarkedPositionsManager() {this(new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>());}
 
-    public MarkedPositionsManager(List<Teleporters> teleporters, List<MarkedPositions> markedPositions) {
+    public MarkedPositionsManager(List<MarkedPositionsManager.Teleporters> teleporters, List<MarkedPositionsManager.MarkedPositions> markedPositions) {
         this.teleporters = new CopyOnWriteArrayList<>(teleporters);
         this.markedPositions = new CopyOnWriteArrayList<>(markedPositions);
     }
 
     public static MarkedPositionsManager getManager(Player player) {return player.getData(DataRegistry.MARKED_POSITIONS_CACHE.get());}
 
-    public void addTeleporter(Level level, BlockPos pos) {teleporters.add(new Teleporters(level.dimension(), pos));}
+    public void addTeleporter(Level level, BlockPos pos) {teleporters.add(new MarkedPositionsManager.Teleporters(level.dimension(), pos));}
 
-    public boolean addMarkedPosition(Level level, BlockPos pos, String name, String icon) {
-        for (MarkedPositions entry : markedPositions)
-            if (entry.Dimension.equals(level.dimension()) && entry.pos.equals(pos)) return false;
+    public boolean addMarkedPosition(ResourceKey<Level> dimension, BlockPos pos, String name, int iconIndex) {
+        if (pos == null || name == null || dimension == null) return false;
+        for (MarkedPositionsManager.MarkedPositions entry : markedPositions)
+            if (entry.Dimension.equals(dimension) && entry.pos.equals(pos)) return false;
 
-        markedPositions.add(new MarkedPositions(level.dimension(), pos, name, icon, markedPositions.size()));
+        markedPositions.add(new MarkedPositionsManager.MarkedPositions(dimension, pos, name, iconIndex));
         return true;
-    }
-
-    public void removeMarkedPosition(ResourceKey<Level> Dimension, BlockPos pos, String name) {
-        // 移除标记位置
-        markedPositions.removeIf(E -> E.Dimension.equals(Dimension) && E.pos.equals(pos) && E.name.equals(name));
-
-        // 重新分配索引以避免索引重复或不连续
-        for (int i = 0; i < markedPositions.size(); i++) {
-            MarkedPositions position = markedPositions.get(i);
-            if (position.Index() != i)
-                markedPositions.set(i, new MarkedPositions(position.Dimension(), position.pos(), position.name(), position.icon(), i));
-        }
-    }
-
-    // 上移或置顶指定索引的元素
-    public boolean moveUp(int index, boolean toTop, List<MarkedPositions> withIcon) {
-        if (index <= 0 || index >= markedPositions.size()) return false;
-        if (withIcon == null) {
-            swapElements(index, toTop ? index - 1 : 0);
-            return true;
-        } else {
-            var Element = withIcon.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
-            var i = withIcon.indexOf(Element);
-            if (Element != null && (i <= 0 || i >= withIcon.size())) {
-                swapElements(Element.Index(), toTop ? withIcon.getFirst().Index() : withIcon.get(i - 1).Index());
-                return true;
-            } else return false;
-        }
-    }
-
-    // 下移或置底指定索引的元素
-    public boolean moveDown(int index, boolean toBottom, List<MarkedPositions> withIcon) {
-        if (index < 0 || index >= markedPositions.size() - 1) return false;
-        if (withIcon == null) {
-            swapElements(index, toBottom ? index + 1 : markedPositions.size() - 1);
-            return true;
-        } else {
-            var Element = withIcon.stream().filter(e -> e.Index() == index).findFirst().orElse(null);
-            var i = withIcon.indexOf(Element);
-            if (Element != null && (i <= 0 || i >= withIcon.size())) {
-                swapElements(Element.Index(), toBottom ? withIcon.getLast().Index() : withIcon.get(i + 1).Index());
-                return true;
-            } else return false;
-        }
-    }
-
-    // 交换两个元素的位置
-    private void swapElements(int index1, int index2) {
-        MarkedPositions temp = markedPositions.get(index1);
-        markedPositions.set(index1, markedPositions.get(index2));
-        markedPositions.set(index2, temp);
     }
 
     public List<BlockPos> getNearestTeleporter(Level level, BlockPos fromPos) {
         BlockPos nearestPos = null;
         double nearestDistance = Double.MAX_VALUE;
         teleporters.removeIf(e -> e.Dimension.equals(level.dimension()) && !(level.getBlockEntity(e.pos) instanceof EnderEchoicResonatorBlockEntity));
-        for (Teleporters entry : teleporters) {
+        for (MarkedPositionsManager.Teleporters entry : teleporters) {
             // 只检查同一维度的传送器
             if (entry.Dimension.equals(level.dimension())) {
                 double distance = entry.pos.distSqr(fromPos);
@@ -120,8 +85,6 @@ public record MarkedPositionsManager(List<Teleporters> teleporters,
                 .collect(Collectors.toList());
     }
 
-    public List<MarkedPositions> getMarkedPositionsWithIcon(String icon) {return markedPositions.stream().filter(entry -> entry.icon != null && !entry.icon.isEmpty() && entry.icon.equals(icon)).collect(Collectors.toList());}
-
     public boolean hasTeleporters() {return !teleporters.isEmpty();}
 
     public Map<BlockPos, String> getMarkedTeleportersMap(List<BlockPos> posList, Level level) {
@@ -140,16 +103,16 @@ public record MarkedPositionsManager(List<Teleporters> teleporters,
 
         // Serialize teleporters list
         ListTag teleportersTag = new ListTag();
-        for (Teleporters teleporter : teleporters) {
-            teleportersTag.add(Teleporters.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), teleporter)
+        for (MarkedPositionsManager.Teleporters teleporter : teleporters) {
+            teleportersTag.add(MarkedPositionsManager.Teleporters.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), teleporter)
                     .getOrThrow(IllegalStateException::new));
         }
         tag.put("teleporters", teleportersTag);
 
         // Serialize marked positions list
         ListTag markedPositionsTag = new ListTag();
-        for (MarkedPositions markedPosition : markedPositions) {
-            markedPositionsTag.add(MarkedPositions.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), markedPosition)
+        for (MarkedPositionsManager.MarkedPositions markedPosition : markedPositions) {
+            markedPositionsTag.add(MarkedPositionsManager.MarkedPositions.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), markedPosition)
                     .getOrThrow(IllegalStateException::new));
         }
         tag.put("marked_positions", markedPositionsTag);
@@ -166,9 +129,8 @@ public record MarkedPositionsManager(List<Teleporters> teleporters,
         if (tag.contains("teleporters")) {
             ListTag teleportersTag = tag.getList("teleporters", 10); // 10 is compound tag type
             for (Tag value : teleportersTag)
-                Teleporters.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), value)
-                        .resultOrPartial(error -> {
-                        }).ifPresent(teleporters::add);
+                MarkedPositionsManager.Teleporters.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), value)
+                        .resultOrPartial(error -> {}).ifPresent(teleporters::add);
         }
 
         // Deserialize marked positions list
@@ -176,26 +138,24 @@ public record MarkedPositionsManager(List<Teleporters> teleporters,
         if (tag.contains("marked_positions")) {
             ListTag markedPositionsTag = tag.getList("marked_positions", 10); // 10 is compound tag type
             for (Tag value : markedPositionsTag)
-                MarkedPositions.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), value)
-                        .resultOrPartial(error -> {
-                        }).ifPresent(markedPositions::add);
+                MarkedPositionsManager.MarkedPositions.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), value)
+                        .resultOrPartial(error -> {}).ifPresent(markedPositions::add);
         }
     }
 
     public record Teleporters(ResourceKey<Level> Dimension, BlockPos pos) {
-        public static final Codec<Teleporters> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-                ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(Teleporters::Dimension),
-                BlockPos.CODEC.fieldOf("pos").forGetter(Teleporters::pos)
-        ).apply(builder, Teleporters::new));
+        public static final Codec<MarkedPositionsManager.Teleporters> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+                ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(MarkedPositionsManager.Teleporters::Dimension),
+                BlockPos.CODEC.fieldOf("pos").forGetter(MarkedPositionsManager.Teleporters::pos)
+        ).apply(builder, MarkedPositionsManager.Teleporters::new));
     }
 
-    public record MarkedPositions(ResourceKey<Level> Dimension, BlockPos pos, String name, String icon, int Index) {
-        public static final Codec<MarkedPositions> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-                ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(MarkedPositions::Dimension),
-                BlockPos.CODEC.fieldOf("pos").forGetter(MarkedPositions::pos),
-                Codec.STRING.fieldOf("name").forGetter(MarkedPositions::name),
-                Codec.STRING.fieldOf("icon").forGetter(MarkedPositions::icon),
-                Codec.INT.fieldOf("Index").forGetter(MarkedPositions::Index)
-        ).apply(builder, MarkedPositions::new));
+    public record MarkedPositions(ResourceKey<Level> Dimension, BlockPos pos, String name, int iconIndex) {
+        public static final Codec<MarkedPositionsManager.MarkedPositions> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+                ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(MarkedPositionsManager.MarkedPositions::Dimension),
+                BlockPos.CODEC.fieldOf("pos").forGetter(MarkedPositionsManager.MarkedPositions::pos),
+                Codec.STRING.fieldOf("name").forGetter(MarkedPositionsManager.MarkedPositions::name),
+                Codec.INT.fieldOf("icon").forGetter(MarkedPositionsManager.MarkedPositions::iconIndex)
+        ).apply(builder, MarkedPositionsManager.MarkedPositions::new));
     }
 }
