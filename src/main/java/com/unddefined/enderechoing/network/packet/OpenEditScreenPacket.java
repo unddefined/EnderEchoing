@@ -14,22 +14,12 @@ public record OpenEditScreenPacket(String fieldValue) implements CustomPacketPay
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "open_edit_screen");
     public static final Type<OpenEditScreenPacket> TYPE = new Type<>(ID);
     public static final StreamCodec<FriendlyByteBuf, OpenEditScreenPacket> STREAM_CODEC = StreamCodec.ofMember(
-            OpenEditScreenPacket::encode,
-            OpenEditScreenPacket::decode
+            (msg, buf) -> buf.writeUtf(msg.fieldValue),
+            buf -> new OpenEditScreenPacket(buf.readUtf())
     );
-    public static OpenEditScreenPacket decode(FriendlyByteBuf buf) {return new OpenEditScreenPacket(buf.readUtf());}
 
-    public void encode(FriendlyByteBuf buf) {buf.writeUtf(fieldValue);}
-
-    public void handle(IPayloadContext context) {
-        context.enqueueWork(() -> {
-            // 在客户端打开编辑屏幕
-            Minecraft.getInstance().setScreen(new PositionEditScreen(Minecraft.getInstance().screen, fieldValue));
-        });
-    }
+    public void handle(IPayloadContext c) {c.enqueueWork(() -> Minecraft.getInstance().setScreen(new PositionEditScreen(Minecraft.getInstance().screen, fieldValue)));}
 
     @Override
-    public @NotNull Type<? extends CustomPacketPayload> type() {
-        return TYPE;
-    }
+    public @NotNull Type<? extends CustomPacketPayload> type() {return TYPE;}
 }

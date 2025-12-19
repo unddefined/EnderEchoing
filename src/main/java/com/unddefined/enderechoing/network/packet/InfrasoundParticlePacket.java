@@ -15,36 +15,20 @@ public record InfrasoundParticlePacket(Vec3 center, float radius, boolean isStat
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "infrasound_particle");
     public static final Type<InfrasoundParticlePacket> TYPE = new Type<>(ID);
     public static final StreamCodec<FriendlyByteBuf, InfrasoundParticlePacket> STREAM_CODEC = StreamCodec.ofMember(
-            InfrasoundParticlePacket::encode,
-            InfrasoundParticlePacket::decode
+            ( msg, buf) -> {
+                buf.writeVec3(msg.center);
+                buf.writeFloat(msg.radius);
+                buf.writeBoolean(msg.isStatic);
+            },
+             buf -> new InfrasoundParticlePacket(buf.readVec3(), buf.readFloat(), buf.readBoolean())
     );
-
-    public void encode(FriendlyByteBuf buf) {
-        buf.writeDouble(center.x);
-        buf.writeDouble(center.y);
-        buf.writeDouble(center.z);
-        buf.writeFloat(radius);
-        buf.writeBoolean(isStatic);
-    }
-
-    public static InfrasoundParticlePacket decode(FriendlyByteBuf buf) {
-        return new InfrasoundParticlePacket(
-                new Vec3(buf.readDouble(), buf.readDouble(), buf.readDouble()),
-                buf.readFloat(), buf.readBoolean()
-        );
-    }
 
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
-            // 在客户端播放粒子效果
-            if (Minecraft.getInstance().level != null) {
-                spawnInfrasoundParticles(Minecraft.getInstance().level, center, radius, isStatic);
-            }
+            if (Minecraft.getInstance().level != null) spawnInfrasoundParticles(Minecraft.getInstance().level, center, radius, isStatic);
         });
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
-    }
+    public Type<? extends CustomPacketPayload> type() {return TYPE;}
 }
