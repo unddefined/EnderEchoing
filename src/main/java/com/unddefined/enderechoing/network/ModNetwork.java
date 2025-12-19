@@ -64,9 +64,9 @@ public class ModNetwork {
 
         // 注册同步Tuner数据包
         registrar.playToServer(
-                SyncTunerPacket.TYPE,
-                SyncTunerPacket.STREAM_CODEC,
-                SyncTunerPacket::handle
+                SyncTunerDataPacket.TYPE,
+                SyncTunerDataPacket.STREAM_CODEC,
+                SyncTunerDataPacket::handle
         );
     }
 }

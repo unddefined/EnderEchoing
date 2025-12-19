@@ -18,20 +18,20 @@ import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_
 import static com.unddefined.enderechoing.server.registry.DataRegistry.ICON_LIST;
 import static net.minecraft.network.codec.ByteBufCodecs.INT;
 
-public record SyncTunerPacket(List<ItemStack> iconList,
-                              List<MarkedPositionsManager.MarkedPositions> markedPositionsCache,
-                              int ee_pearl_amount) implements CustomPacketPayload {
-    public static final StreamCodec<RegistryFriendlyByteBuf, SyncTunerPacket> STREAM_CODEC = StreamCodec.composite(
+public record SyncTunerDataPacket(List<ItemStack> iconList,
+                                  List<MarkedPositionsManager.MarkedPositions> markedPositionsCache,
+                                  int ee_pearl_amount) implements CustomPacketPayload {
+    public static final StreamCodec<RegistryFriendlyByteBuf, SyncTunerDataPacket> STREAM_CODEC = StreamCodec.composite(
             ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()),
-            SyncTunerPacket::iconList,
+            SyncTunerDataPacket::iconList,
             MarkedPositionsManager.STREAM_CODEC.apply(ByteBufCodecs.list()),
-            SyncTunerPacket::markedPositionsCache,
+            SyncTunerDataPacket::markedPositionsCache,
             INT.cast(),
-            SyncTunerPacket::ee_pearl_amount,
-            SyncTunerPacket::new
+            SyncTunerDataPacket::ee_pearl_amount,
+            SyncTunerDataPacket::new
     );
 
-    public static final Type<SyncTunerPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "sync_icon_list"));
+    public static final Type<SyncTunerDataPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "sync_icon_list"));
 
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {

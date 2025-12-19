@@ -3,7 +3,7 @@ package com.unddefined.enderechoing.client.gui.screen;
 import com.unddefined.enderechoing.client.gui.widgets.TabBar;
 import com.unddefined.enderechoing.client.gui.widgets.WaypointList;
 import com.unddefined.enderechoing.menu.TunerMenu;
-import com.unddefined.enderechoing.network.packet.SyncTunerPacket;
+import com.unddefined.enderechoing.network.packet.SyncTunerDataPacket;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.client.gui.GuiGraphics;
@@ -56,7 +56,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     @Override
     public void onClose() {
-        PacketDistributor.sendToServer(new SyncTunerPacket(menu.getIconList(), MarkedPositionsCache, menu.ee_pearl_amount));
+        PacketDistributor.sendToServer(new SyncTunerDataPacket(menu.getIconList(), MarkedPositionsCache, menu.ee_pearl_amount));
         super.onClose();
     }
 
