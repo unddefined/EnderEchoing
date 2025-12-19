@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.menu;
+package com.unddefined.enderechoing.client.gui;
 
 import com.unddefined.enderechoing.network.packet.GivePlayerPearlPacket;
 import com.unddefined.enderechoing.network.packet.SetSelectedPositionPacket;

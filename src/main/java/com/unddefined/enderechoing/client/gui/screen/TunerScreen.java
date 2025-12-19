@@ -1,8 +1,8 @@
 package com.unddefined.enderechoing.client.gui.screen;
 
+import com.unddefined.enderechoing.client.gui.TunerMenu;
 import com.unddefined.enderechoing.client.gui.widgets.TabBar;
 import com.unddefined.enderechoing.client.gui.widgets.WaypointList;
-import com.unddefined.enderechoing.menu.TunerMenu;
 import com.unddefined.enderechoing.network.packet.SyncTunerDataPacket;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;

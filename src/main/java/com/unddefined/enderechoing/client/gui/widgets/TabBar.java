@@ -1,8 +1,8 @@
 package com.unddefined.enderechoing.client.gui.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.unddefined.enderechoing.client.gui.TunerMenu;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
-import com.unddefined.enderechoing.menu.TunerMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;

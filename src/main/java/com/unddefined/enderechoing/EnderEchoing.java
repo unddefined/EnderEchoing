@@ -2,7 +2,7 @@ package com.unddefined.enderechoing;
 
 import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.client.ModSoundEvents;
-import com.unddefined.enderechoing.menu.TunerMenu;
+import com.unddefined.enderechoing.client.gui.TunerMenu;
 import com.unddefined.enderechoing.server.registry.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;

@@ -2,7 +2,6 @@ package com.unddefined.enderechoing.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.client.gui.TransparentScreen;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
 import com.unddefined.enderechoing.client.particles.ParticleDirectlyMovingDust;
 import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShriekerRenderer;
@@ -22,7 +21,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
@@ -89,17 +87,6 @@ public class EnderEchoingClient {
         event.registerSpriteSet(ParticlesRegistry.DIRECT_MOVING_DUST.get(), ParticleDirectlyMovingDust.Provider::new);
     }
 
-    @SubscribeEvent
-    public static void onKeyInput(InputEvent.Key event) {
-        if (OPEN_TRANSPARENT_SCREEN.consumeClick()) {
-            // 获取Minecraft实例
-            // 确保玩家在游戏中且没有打开其他屏幕
-            if (mc.player != null && mc.screen == null) {
-                // 打开自定义屏幕
-                mc.setScreen(new TransparentScreen());
-            }
-        }
-    }
 //    @SubscribeEvent
 //    public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
 //        // 为玩家渲染器添加影匿渲染层（有bug）
