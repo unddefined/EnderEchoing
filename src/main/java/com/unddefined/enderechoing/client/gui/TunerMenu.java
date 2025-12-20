@@ -2,7 +2,6 @@ package com.unddefined.enderechoing.client.gui;
 
 import com.unddefined.enderechoing.network.packet.GivePlayerPearlPacket;
 import com.unddefined.enderechoing.network.packet.SetSelectedPositionPacket;
-import com.unddefined.enderechoing.server.registry.DataRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -52,7 +51,7 @@ public class TunerMenu extends AbstractContainerMenu {
             this.selected_tuner_tab = playerInv.player.getData(SELECTED_TUNER_TAB.get());
             this.ee_pearl_amount = playerInv.player.getData(EE_PEARL_AMOUNT.get());
             this.iconList = playerInv.player.getData(ICON_LIST.get()).icons();
-            this.markedPositionsCache = playerInv.player.getData(DataRegistry.MARKED_POSITIONS_CACHE.get()).markedPositions();
+            this.markedPositionsCache = playerInv.player.getData(MARKED_POSITIONS_CACHE.get()).markedPositions();
         });
     }
 

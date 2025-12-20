@@ -14,6 +14,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
 import static net.minecraft.client.gui.screens.Screen.hasShiftDown;
+import static net.minecraft.core.registries.BuiltInRegistries.ITEM;
 import static net.minecraft.world.item.Items.STONE;
 
 public class TabBar {
@@ -25,7 +26,7 @@ public class TabBar {
     private final ContextMenu contextMenu;
     private final TunerScreen screen;
     private final TunerMenu menu;
-    public boolean tabLocked = false;
+    private boolean tabLocked = false;
     private boolean dragging = false;
     private boolean tabClicked = false;
 
@@ -55,8 +56,7 @@ public class TabBar {
         RenderSystem.disableBlend();
         // 渲染右键菜单
         contextMenu.render(G, 0, 0, partialTick);
-        if (!dragging) return;
-        G.renderFakeItem(menu.getIconList().get(screen.selectedTab), mouseX - 8, mouseY - 8);
+        if (dragging) G.renderFakeItem(menu.getIconList().get(screen.selectedTab), mouseX - 8, mouseY - 8);
     }
 
     private void renderSlot(GuiGraphics guiGraphics, int x, int y, float partialTick, ItemStack stack) {
@@ -73,18 +73,17 @@ public class TabBar {
         guiGraphics.renderFakeItem(air, x, y);
         if (f > 0.0F) guiGraphics.pose().popPose();
         ItemStack fakepearl = stack.is(ENDER_ECHOING_PEARL) ? new ItemStack(STONE, menu.ee_pearl_amount) : stack;
-        guiGraphics.renderItemDecorations(Minecraft.getInstance().font, fakepearl, x, y);
+        guiGraphics.renderItemDecorations(screen.getMinecraft().font, fakepearl, x, y);
     }
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 0.7F));
         for (int i = 0; i <= 9; i++) {
             double slotSize = 20;
             double tx = x - 30 + i * slotSize + (i > 0 ? 9 : 0);
             double ty = y;
 
             if (!(mouseX >= tx && mouseX < tx + slotSize && mouseY >= ty && mouseY < ty + slotSize)) continue;
-
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 0.7F));
             screen.selectedTab = i;
             tabClicked = true;
             screen.populateWaypointList();
@@ -109,8 +108,11 @@ public class TabBar {
                     screen.populateWaypointList();
                 });
 
+                int finalI = i;
                 contextMenu.addItem("screen.enderechoing.change_icon", () -> {
-                    // 打开图标选择界面
+                    screen.changeIcon = true;
+                    screen.previousIcon = menu.getIconList().get(finalI).isEmpty() ? new ItemStack(STONE) : menu.getIconList().get(finalI);
+                    screen.nameField.setValue(ITEM.getKey(menu.getIconList().get(finalI).getItem()).toString());
                 });
 
                 contextMenu.open((int) mouseX, (int) mouseY, (idx, item) -> {

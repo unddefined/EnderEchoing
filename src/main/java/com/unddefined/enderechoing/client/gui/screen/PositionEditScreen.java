@@ -1,20 +1,21 @@
 package com.unddefined.enderechoing.client.gui.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.unddefined.enderechoing.network.packet.PearlRenamePacket;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class PositionEditScreen extends Screen {
     private final Screen lastScreen;
     public String fieldValue;
     private EditBox nameField;
-    private Button doneButton;
-    private Button cancelButton;
     private boolean CursorMoved = false;
 
     public PositionEditScreen(Screen lastScreen, String fieldValue) {
@@ -33,11 +34,11 @@ public class PositionEditScreen extends Screen {
         this.setInitialFocus(this.nameField);
 
         // 添加完成按钮
-        this.doneButton = this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.done"), (button) ->
+        this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.done"), (button) ->
                 this.onDone()).bounds(this.width / 2 - 102, this.height / 2 + 25, 100, 20).build());
 
         // 添加取消按钮
-        this.cancelButton = this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.cancel"), (button) ->
+        this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.cancel"), (button) ->
                 this.onClose()).bounds(this.width / 2 + 2, this.height / 2 + 25, 100, 20).build());
     }
 
@@ -69,6 +70,16 @@ public class PositionEditScreen extends Screen {
     }
 
     @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == InputConstants.KEY_RETURN) {
+            this.getMinecraft().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1F));
+            this.onDone();
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
     public void onClose() {
         CursorMoved = false;
         if (this.minecraft != null) this.minecraft.setScreen(this.lastScreen);
@@ -76,8 +87,4 @@ public class PositionEditScreen extends Screen {
 
     @Override
     public boolean isPauseScreen() {return false;}
-
-    public Button getDoneButton() {return doneButton;}
-
-    public Button getCancelButton() {return cancelButton;}
 }
