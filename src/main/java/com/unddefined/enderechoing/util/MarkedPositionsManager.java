@@ -2,7 +2,6 @@ package com.unddefined.enderechoing.util;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.server.registry.DataRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -63,7 +62,6 @@ public record MarkedPositionsManager(List<MarkedPositionsManager.Teleporters> te
     public List<BlockPos> getNearestTeleporter(Level level, BlockPos fromPos) {
         BlockPos nearestPos = null;
         double nearestDistance = Double.MAX_VALUE;
-        teleporters.removeIf(e -> e.Dimension.equals(level.dimension()) && !(level.getBlockEntity(e.pos) instanceof EnderEchoicResonatorBlockEntity));
         for (MarkedPositionsManager.Teleporters entry : teleporters) {
             // 只检查同一维度的传送器
             if (entry.Dimension.equals(level.dimension())) {
@@ -78,17 +76,14 @@ public record MarkedPositionsManager(List<MarkedPositionsManager.Teleporters> te
     }
 
     public List<BlockPos> getTeleporterPositions(Level level) {
-        teleporters.removeIf(e -> e.Dimension.equals(level.dimension()) && !(level.getBlockEntity(e.pos) instanceof EnderEchoicResonatorBlockEntity));
         return teleporters.stream()
                 .filter(e -> e.Dimension.equals(level.dimension()))
-                .map(entry -> entry.pos)
-                .collect(Collectors.toList());
+                .map(entry -> entry.pos).collect(Collectors.toList());
     }
 
     public boolean hasTeleporters() {return !teleporters.isEmpty();}
 
     public Map<BlockPos, String> getMarkedTeleportersMap(List<BlockPos> posList, Level level) {
-        teleporters.removeIf(e -> e.Dimension.equals(level.dimension()) && !(level.getBlockEntity(e.pos) instanceof EnderEchoicResonatorBlockEntity));
         Map<BlockPos, String> resultMap = new HashMap<>();
         for (BlockPos P : posList)
             markedPositions.stream().filter(entry -> entry.Dimension.equals(level.dimension()))
@@ -130,7 +125,8 @@ public record MarkedPositionsManager(List<MarkedPositionsManager.Teleporters> te
             ListTag teleportersTag = tag.getList("teleporters", 10); // 10 is compound tag type
             for (Tag value : teleportersTag)
                 MarkedPositionsManager.Teleporters.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), value)
-                        .resultOrPartial(error -> {}).ifPresent(teleporters::add);
+                        .resultOrPartial(error -> {
+                        }).ifPresent(teleporters::add);
         }
 
         // Deserialize marked positions list
@@ -139,7 +135,8 @@ public record MarkedPositionsManager(List<MarkedPositionsManager.Teleporters> te
             ListTag markedPositionsTag = tag.getList("marked_positions", 10); // 10 is compound tag type
             for (Tag value : markedPositionsTag)
                 MarkedPositionsManager.MarkedPositions.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), value)
-                        .resultOrPartial(error -> {}).ifPresent(markedPositions::add);
+                        .resultOrPartial(error -> {
+                        }).ifPresent(markedPositions::add);
         }
     }
 

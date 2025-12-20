@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.blocks.entity;
 
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
+import com.unddefined.enderechoing.server.registry.DataRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.level.Level;
@@ -12,23 +13,17 @@ import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 public class EnderEchoicResonatorBlockEntity extends BlockEntity implements GeoBlockEntity {
-
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    
-    // 添加动画时间跟踪
     private float animationTime = 0;
 
     public EnderEchoicResonatorBlockEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityRegistry.ENDER_ECHOIC_RESONATOR.get(), pos, blockState);
     }
 
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {}
-
     public static void tick(Level level, BlockPos pos, BlockState state, EnderEchoicResonatorBlockEntity blockEntity) {
         // 更新动画时间
         if (level.isClientSide) blockEntity.animationTime += 1;
-        
+
         //粒子效果
         if (level.isClientSide && level.getRandom().nextFloat() < 0.1) {
             level.addParticle(ParticleTypes.PORTAL,
@@ -42,12 +37,27 @@ public class EnderEchoicResonatorBlockEntity extends BlockEntity implements GeoB
     }
 
     @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.cache;
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {}
+
+    @Override
+    public void setRemoved() {
+        if (level == null || level.isClientSide || level.getServer() == null) return;
+        level.getServer().getPlayerList().getPlayers().forEach(player -> {
+            var M = player.getData(DataRegistry.MARKED_POSITIONS_CACHE.get());
+            M.teleporters().removeIf(e -> e.Dimension().equals(this.level.dimension()) && e.pos().equals(worldPosition));
+            var P = M.markedPositions().stream().filter(e -> e.Dimension().equals(this.level.dimension()) && e.pos().equals(worldPosition)).findFirst();
+            var name = P.map(positions -> positions.name().replaceAll("[><]", "")).orElse(null);
+            if (name != null && !name.isEmpty()) {
+                M.markedPositions().remove(P.get());
+                M.addMarkedPosition(player.level().dimension(), P.get().pos(), name, P.get().iconIndex());
+            }
+        });
+        super.setRemoved();
     }
-    
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {return this.cache;}
+
     // 提供动画时间给渲染器使用
-    public float getAnimationTime() {
-        return animationTime;
-    }
+    public float getAnimationTime() {return animationTime;}
 }
