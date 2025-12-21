@@ -43,6 +43,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.function.Consumer;
 
+import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_POSITION;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoingCore extends Item implements GeoItem {
@@ -127,7 +128,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
         } else if (player.getInventory().hasAnyMatching(stack ->
                 stack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && stack.get(CUSTOM_NAME) == null)) {
             if (!level.isClientSide()) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket(""));
-            EnderEchoingPearl.targetPosition = player.blockPosition();
+            player.setData(EE_PEARL_POSITION.get(), player.blockPosition());
         }
 
         return InteractionResultHolder.consume(itemStack);

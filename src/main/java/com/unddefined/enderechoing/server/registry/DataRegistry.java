@@ -5,6 +5,7 @@ import com.unddefined.enderechoing.server.DataComponents.EntityData;
 import com.unddefined.enderechoing.server.DataComponents.PositionData;
 import com.unddefined.enderechoing.util.IconListManager;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -29,8 +30,10 @@ public class DataRegistry {
     public static final Supplier<AttachmentType<Integer>> SELECTED_TUNER_TAB = ATTACHMENT_TYPES.register(
              "selected_tuner_tab", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT).copyOnDeath().build()
     );
-
     public static final Supplier<AttachmentType<IconListManager>> ICON_LIST = ATTACHMENT_TYPES.register(
             "icon_list", () -> AttachmentType.serializable(IconListManager::new).copyOnDeath().build()
+    );
+    public static final Supplier<AttachmentType<BlockPos>> EE_PEARL_POSITION = ATTACHMENT_TYPES.register(
+            "ee_pearl_position", () -> AttachmentType.builder(() -> BlockPos.ZERO).copyOnDeath().build()
     );
 }

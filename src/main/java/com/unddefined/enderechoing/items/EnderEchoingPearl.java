@@ -4,7 +4,6 @@ import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import com.unddefined.enderechoing.server.DataComponents.PositionData;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,13 +18,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
-import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
-import static com.unddefined.enderechoing.server.registry.DataRegistry.POSITION;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.*;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoingPearl extends Item {
-    public static BlockPos targetPosition = null;
-
     public EnderEchoingPearl(Properties properties) {
         super(properties.stacksTo(8));
     }
@@ -43,6 +39,7 @@ public class EnderEchoingPearl extends Item {
             handStack.set(POSITION.get(), new PositionData(level.dimension(), playerPos));
         } else {
             //非pearl.use()标记
+            var targetPosition = player.getData(EE_PEARL_POSITION.get());
             if (player.getData(EE_PEARL_AMOUNT.get()) > 0){
                 MarkedPositionsManager.getManager(player).addMarkedPosition(level.dimension(), targetPosition, name, 0);
                 return;
