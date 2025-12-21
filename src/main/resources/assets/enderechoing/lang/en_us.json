@@ -31,7 +31,7 @@
   "screen.enderechoing.select_icon": "Select an item for icon",
   "screen.enderechoing.lock": "Lock selected",
   "screen.enderechoing.unlock": "Unlock selected",
-  "screen.enderechoing.enter_registry_name": "Press F3+H to check the registry name.",
+  "screen.enderechoing.enter_registry_name": "Press F3+H to check the registry name.\nOr drag an item from JEI to here.",
   "screen.enderechoing.distance": "Distance: %sm",
   "key.categories.enderechoing": "Ender Echoing",
   "creativetab.enderechoing": "Ender Echoing",

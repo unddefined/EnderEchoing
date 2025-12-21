@@ -24,6 +24,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.unddefined.enderechoing.compat.jei.EnderEchoJeiPlugin.getItemFromJei;
 import static net.minecraft.core.registries.BuiltInRegistries.ITEM;
 
 public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
@@ -36,6 +37,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
     public boolean changeIcon = false;
     public ItemStack previousIcon;
     public EditBox nameField;
+    private ItemStack jeiItem = ItemStack.EMPTY;
     private int editBarX, editBarY;
     private WaypointList waypointList;
     private boolean dragging = false;
@@ -47,23 +49,23 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     public TunerScreen(TunerMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
-        this.imageWidth = 376;
-        this.imageHeight = 302;
-        this.inventoryLabelY = this.imageHeight - 74;
         this.MarkedPositionsCache = menu.getMarkedPositionsCache();
     }
 
     @Override
     protected void init() {
         super.init();
-        editBarX = this.width / 2 - 81 - 29;
-        editBarY = this.height / 2 - 154;
+
         selectedTab = menu.selected_tuner_tab;
-        int listLeft = this.width / 2 - 110;
+        int listLeft = this.width / 2 - 107;
         int listWidth = this.width / 4 + 18;
-        int listTop = 200;
-        int listBottom = this.height - 300;
-        tabBar = new TabBar(this.width / 2 - 81, this.height - 332, this);
+        int listTop = this.height / 2;
+        int listBottom = this.height / 3 - 25;
+        this.imageWidth = this.width;
+        this.imageHeight = this.height;
+        editBarX = listLeft + 1;
+        editBarY = this.height / 5 - 27;
+        tabBar = new TabBar(listLeft + 29, listBottom - 30, this);
         waypointList = new WaypointList(this.minecraft, listWidth, listTop, listLeft, listBottom, 24, this);
 
         populateWaypointList();
@@ -76,13 +78,13 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         this.addWidget(this.nameField);
 
         // 添加确定和取消按钮
-        ACCEPT_BUTTON = this.addRenderableWidget(new ImageButton(editBarX + 110 + 68, editBarY, 18, 18,
+        ACCEPT_BUTTON = this.addRenderableWidget(new ImageButton(editBarX + 110 + 66, editBarY, 18, 18,
                 ACCEPT_SPRITE, btn -> {
             if (!isValidString || menu.getIconList().get(selectedTab).isEmpty()) return;
             changeIcon = false;
         }));
 
-        REJECT_BUTTON = this.addRenderableWidget(new ImageButton(editBarX + 110 + 86, editBarY, 18, 18,
+        REJECT_BUTTON = this.addRenderableWidget(new ImageButton(editBarX + 110 + 84, editBarY, 18, 18,
                 REJECT_SPRITE, btn -> {
             menu.getIconList().set(selectedTab, previousIcon);
             changeIcon = false;
@@ -117,16 +119,18 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         tabBar.render(guiGraphics, mouseX, mouseY, partialTick);
 
         // 渲染标题
-        guiGraphics.drawString(this.font, this.title, this.leftPos + (this.imageWidth / 2) - (this.font.width(this.title) / 2),
-                this.topPos + 6 - (changeIcon ? 24 : 0), 0xd1d6b6, false);
+        guiGraphics.drawString(this.font, this.title, width / 2 + 2 - (this.font.width(this.title) / 2),
+                this.height / 7 + 6 - (changeIcon ? 24 : 0), 0xd1d6b6, false);
 
         waypointList.getContextMenu().render(guiGraphics, mouseX, mouseY, partialTick);
         tabBar.getContextMenu().render(guiGraphics, mouseX, mouseY, partialTick);
         if (dragging) guiGraphics.renderFakeItem(new ItemStack(ItemRegistry.ENDER_ECHOING_PEARL.get()), mouseX - 8, mouseY - 8);
+        if (changeIcon && !jeiItem.isEmpty()) guiGraphics.renderFakeItem(jeiItem, mouseX - 8, mouseY - 8);
     }
 
     @Override
     public void containerTick() {
+        imageWidth = changeIcon ? this.width / 4 : width;
         this.nameField.visible = changeIcon;
         ACCEPT_BUTTON.visible = changeIcon;
         REJECT_BUTTON.visible = changeIcon;
@@ -144,8 +148,8 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (changeIcon && !(mouseX >= editBarX && mouseX < editBarX + editBarWidth && mouseY >= editBarY && mouseY < editBarY + editBarHeight)) {
-            if (menu.getIconList().get(selectedTab).isEmpty()) menu.getIconList().set(selectedTab, previousIcon);
+        if (changeIcon && jeiItem.isEmpty() && !(mouseX >= editBarX && mouseX < editBarX + editBarWidth && mouseY >= editBarY && mouseY < editBarY + editBarHeight)) {
+            menu.getIconList().set(selectedTab, previousIcon);
             changeIcon = false;
         }
 
@@ -163,6 +167,9 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (changeIcon && !jeiItem.isEmpty() && (mouseX >= editBarX && mouseX < editBarX + editBarWidth && mouseY >= editBarY && mouseY < editBarY + editBarHeight))
+            nameField.setValue(ITEM.getKey(jeiItem.getItem()).toString());
+        jeiItem = ItemStack.EMPTY;
         if (tabBar.mouseReleased(mouseX, mouseY, button)) return true;
         if (!dragging) return true;
         this.dragging = false;
@@ -196,6 +203,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (changeIcon && jeiItem.isEmpty()) jeiItem = getItemFromJei();
         if (waypointList.getContextMenu().isVisible() || tabBar.getContextMenu().isVisible()) return false;
         if (button != 0) return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
         if (tabBar.mouseDragged(mouseX, mouseY, button)) return true;
