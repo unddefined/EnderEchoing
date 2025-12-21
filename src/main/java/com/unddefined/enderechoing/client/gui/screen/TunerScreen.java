@@ -93,8 +93,8 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     public void populateWaypointList() {
         waypointList.children().clear();
-        var list = MarkedPositionsCache.stream().filter(entry -> entry.iconIndex() == selectedTab).toList();
-        list.forEach(e -> waypointList.addWaypoint(e));
+        MarkedPositionsCache.stream().filter(entry -> entry.iconIndex() == selectedTab).toList()
+                .forEach(e -> waypointList.addWaypoint(e));
     }
 
     @Override

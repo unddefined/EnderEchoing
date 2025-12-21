@@ -12,9 +12,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
@@ -42,12 +42,12 @@ public class EchoResponsing {
                     .setOverlayState(RenderStateShard.OVERLAY)
                     .createCompositeState(true)
     ));
-    public static void render(PoseStack poseStack, MultiBufferSource bufferSource, Vec3 blockPos, int ticks) {
+    public static void render(PoseStack poseStack, MultiBufferSource bufferSource, BlockPos blockPos, int ticks) {
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         double screenHeight = Minecraft.getInstance().getWindow().getHeight();
-        double offX = blockPos.x - camera.getPosition().x;
-        double offY = blockPos.y - camera.getPosition().y + 1;
-        double offZ = blockPos.z - camera.getPosition().z;
+        double offX = blockPos.getCenter().x - camera.getPosition().x;
+        double offY = blockPos.getCenter().y - camera.getPosition().y + 1;
+        double offZ = blockPos.getCenter().z - camera.getPosition().z;
         poseStack.pushPose();
         double distance = Math.sqrt(offX * offX + offY * offY + offZ * offZ);
         if (distance > 250000.0D) {
@@ -70,7 +70,7 @@ public class EchoResponsing {
         // 渲染SONIC_BOOM
         poseStack.pushPose();
         int frameCount = 14;
-        int frameDuration = 4;
+        int frameDuration = 3;
         int frameIndex = frameCount - 1 - (ticks / frameDuration) % frameCount;
         VertexConsumer vc = bufferSource.getBuffer(RESPONSING.apply(
                 ResourceLocation.fromNamespaceAndPath("enderechoing", "textures/misc/sonic_boom_" + frameIndex + ".png")));

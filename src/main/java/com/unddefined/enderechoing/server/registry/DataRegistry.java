@@ -34,6 +34,6 @@ public class DataRegistry {
             "icon_list", () -> AttachmentType.serializable(IconListManager::new).copyOnDeath().build()
     );
     public static final Supplier<AttachmentType<BlockPos>> EE_PEARL_POSITION = ATTACHMENT_TYPES.register(
-            "ee_pearl_position", () -> AttachmentType.builder(() -> BlockPos.ZERO).copyOnDeath().build()
+            "ee_pearl_position", () -> AttachmentType.builder(() -> BlockPos.ZERO).build()
     );
 }

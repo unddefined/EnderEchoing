@@ -10,17 +10,21 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
+import static com.unddefined.enderechoing.client.renderer.EchoRenderer.EchoSoundingPos;
 import static net.minecraft.client.renderer.LightTexture.FULL_BRIGHT;
 
 @OnlyIn(Dist.CLIENT)
@@ -42,22 +46,34 @@ public class EchoResponse {
                     .setOverlayState(RenderStateShard.OVERLAY)
                     .createCompositeState(true)
     );
+    private final List<Integer> activeWaves = new ArrayList<>();
+    private final BlockPos unShiftPos;
+    public int hoveringTicks = -31;
+    public Boolean isElementHovering = false;
+    private Boolean Shifted;
+    private BlockPos blockPos;
+    private BlockPos targetPos = null;
 
-    public static final Map<Vec3, List<Integer>> activeWavesMap = new HashMap<>();
-    private static int hoveringTicks = -31;
-    private static Vec3 targetPos = null;
-
-    private static List<Integer> getActiveWavesForPosition(Vec3 pos) {
-        return activeWavesMap.computeIfAbsent(pos, blockPos -> new ArrayList<>());
+    public EchoResponse(BlockPos pos) {
+        this.blockPos = pos;
+        unShiftPos = pos;
     }
 
-    public static boolean render(PoseStack poseStack, MultiBufferSource bufferSource,
-                                 Vec3 blockPos, int ticks, boolean isCountingDown, String posName) {
-        var activeWaves = getActiveWavesForPosition(blockPos);
+    public boolean render(Player player, PoseStack poseStack, MultiBufferSource bufferSource, int ticks, boolean isCountingDown, String posName) {
+        if (player.isShiftKeyDown() && EchoSoundingPos != null && !Shifted) {
+            // 使用 Shift 键触发Y随机偏移，以避免多个传送点渲染重叠
+            int shiftInt = Math.max(blockPos.distManhattan(EchoSoundingPos), 6);
+            blockPos = new BlockPos(blockPos.above(player.getRandom().nextInt(shiftInt) - shiftInt / 2));
+            Shifted = true;
+        }
+        if (!player.isShiftKeyDown()) {
+            blockPos = unShiftPos;
+            Shifted = false;
+        }
         var camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        double offX = blockPos.x - camera.getPosition().x;
-        double offY = blockPos.y - camera.getPosition().y + 1;
-        double offZ = blockPos.z - camera.getPosition().z;
+        double offX = blockPos.getCenter().x - camera.getPosition().x;
+        double offY = blockPos.getCenter().y - camera.getPosition().y + 1;
+        double offZ = blockPos.getCenter().z - camera.getPosition().z;
         double distance = Math.sqrt(offX * offX + offY * offY + offZ * offZ);
         // 把渲染点拉到相机前 128 米以内，避免 float 精度坍塌造成“中心消失/边缘能显示”的裁剪现象。
         final double MAX_RENDER_DISTANCE = 128;
@@ -82,10 +98,10 @@ public class EchoResponse {
         poseStack.scale(screenScale, screenScale, 1f);
         // 当玩家准星看向那个位置时1高亮波纹，并使得波纹由大变小
         var dir2 = new Vector3f((float) (offX / distance), (float) (offY / distance), (float) (offZ / distance));
-        boolean isElementHovering = camera.getLookVector().dot(dir2) >= 0.999f;
+        isElementHovering = camera.getLookVector().dot(dir2) >= 0.999f;
         if (isElementHovering) {
             targetPos = blockPos;
-            ticks = hoveringTicks++;
+            ticks = hoveringTicks;
             if (hoveringTicks == -40) {
                 activeWaves.clear();
                 activeWaves.add(0);

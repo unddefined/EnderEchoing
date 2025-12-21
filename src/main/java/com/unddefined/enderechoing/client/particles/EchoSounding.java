@@ -7,10 +7,9 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 public class EchoSounding {
 
     public static void render(PoseStack poseStack, MultiBufferSource bufferSource,
-                              double centerX, double centerY, double centerZ,
                               float partialTicks, float gameTimes, int packedLight) {
         poseStack.pushPose();
-        poseStack.translate(centerX, centerY, centerZ);
+        poseStack.translate(0, -1, 0);
         // 当前时间（每波纹起始时刻不同）
         float gameTime = gameTimes + partialTicks;
 

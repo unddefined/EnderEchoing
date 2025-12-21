@@ -106,8 +106,8 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
             player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
             temptick = 30;
             if (targetPos != null) {
-                EchoRenderer.EchoSoundingExtraRender = true;
-                EchoRenderer.targetPos = targetPos.getCenter();
+                EchoRenderer.targetPreseted = true;
+                EchoRenderer.targetPos = targetPos;
             } else EchoRenderer.syncedTeleporterPositions = posList;
         }
     }

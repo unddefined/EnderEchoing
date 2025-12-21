@@ -117,8 +117,8 @@ public class EnderEchoingCore extends Item implements GeoItem {
             }
             // 渲染传送特效
             EchoRenderer.EchoSoundingPos = player.blockPosition();
-            EchoRenderer.EchoSoundingExtraRender = true;
-            EchoRenderer.targetPos = nearestTeleporterPos.getFirst().getCenter();
+            EchoRenderer.targetPreseted = true;
+            EchoRenderer.targetPos = nearestTeleporterPos.getFirst();
             // 添加动画
             if (level instanceof ServerLevel serverLevel) {
                 player.addEffect(new MobEffectInstance(MobEffectRegistry.SCULK_VEIL, 20 * 3, 0, false, true));
@@ -139,7 +139,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
         // 当玩家释放使用物品时，移除动画层
         super.releaseUsing(stack, level, livingEntity, timeLeft);
         EchoRenderer.EchoSoundingPos = null;
-        EchoRenderer.EchoSoundingExtraRender = false;
+        EchoRenderer.targetPreseted = false;
         EchoRenderer.targetPos = null;
         if (level.isClientSide() && livingEntity instanceof AbstractClientPlayer clientPlayer) {
             AnimationStack animationStack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
