@@ -81,8 +81,6 @@ public record MarkedPositionsManager(List<MarkedPositionsManager.Teleporters> te
                 .map(entry -> entry.pos).collect(Collectors.toList());
     }
 
-    public boolean hasTeleporters() {return !teleporters.isEmpty();}
-
     public Map<BlockPos, String> getMarkedTeleportersMap(List<BlockPos> posList, Level level) {
         Map<BlockPos, String> resultMap = new HashMap<>();
         for (BlockPos P : posList)

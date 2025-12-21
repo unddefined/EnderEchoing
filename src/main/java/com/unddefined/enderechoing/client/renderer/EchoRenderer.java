@@ -94,6 +94,8 @@ public class EchoRenderer {
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (EchoSoundingPos.equals(BlockPos.ZERO)) EchoSoundingPos = null;
+        if (targetPos.equals(BlockPos.ZERO)) targetPos = null;
         var player = event.getEntity();
         if (SculkVeilRenderer.fadeProgress != 0f) sculkveilCountTicks++;
         else sculkveilCountTicks = -43;

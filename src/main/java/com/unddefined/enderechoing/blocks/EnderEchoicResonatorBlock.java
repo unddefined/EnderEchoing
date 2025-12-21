@@ -3,8 +3,11 @@ package com.unddefined.enderechoing.blocks;
 import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEntity;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
-import com.unddefined.enderechoing.client.renderer.EchoRenderer;
 import com.unddefined.enderechoing.items.EnderEchoingPearl;
+import com.unddefined.enderechoing.network.packet.SendMarkedPositionNamesPacket;
+import com.unddefined.enderechoing.network.packet.SendSyncedTeleporterPositionsPacket;
+import com.unddefined.enderechoing.network.packet.SetEchoSoundingPosPacket;
+import com.unddefined.enderechoing.network.packet.SetTeleportPosPacket;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.DataRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
@@ -28,6 +31,7 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -78,18 +82,19 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         if (entity.isCurrentlyGlowing()) return;
         if (temptick > 0) temptick--;
         var manager = MarkedPositionsManager.getManager(player);
-        if (!manager.hasTeleporters()) return;
+        if (manager.teleporters().isEmpty() || manager.markedPositions().isEmpty()) return;
         if (temptick == 0) {
             //获取目的地名称
             var posList = manager.getTeleporterPositions(level);
-            EchoRenderer.MarkedPositionNames = manager.getMarkedTeleportersMap(posList, level);
+            var map = manager.getMarkedTeleportersMap(posList, level);
             var pearlList = player.getInventory().items.stream().filter(i -> i.is(ENDER_ECHOING_PEARL.get())).toList();
             pearlList.forEach(itemStack -> {
                 var p = itemStack.get(DataRegistry.POSITION);
                 var n = itemStack.get(CUSTOM_NAME);
                 if (p != null && n != null && p.Dimension().equals(level.dimension()) && posList.contains(p.pos()))
-                    EchoRenderer.MarkedPositionNames.put(p.pos(), n.getString());
+                    map.put(p.pos(), n.getString());
             });
+            if (!map.isEmpty()) PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(map));
 
             BlockPos targetPos = null;
             //获取定向目的地 TODO:跨维度传送
@@ -102,13 +107,11 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
                 if (blockEntity.getDimension() != null && blockEntity.getDimension().equals(level.dimension()))
                     targetPos = blockEntity.getPos() == null ? null : blockEntity.getPos();
             // 传送
-            EchoRenderer.EchoSoundingPos = pos;
+            PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
             player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
             temptick = 30;
-            if (targetPos != null) {
-                EchoRenderer.targetPreseted = true;
-                EchoRenderer.targetPos = targetPos;
-            } else EchoRenderer.syncedTeleporterPositions = posList;
+            if (targetPos != null) PacketDistributor.sendToPlayer(player, new SetTeleportPosPacket(targetPos, true));
+            else PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList));
         }
     }
 

@@ -74,5 +74,30 @@ public class ModNetwork {
                 SetTunerSelectedTabPacket.STREAM_CODEC,
                 SetTunerSelectedTabPacket::handle
         );
+        registrar.playToClient(
+                SetTeleportPosPacket.TYPE,
+                SetTeleportPosPacket.STREAM_CODEC,
+                SetTeleportPosPacket::handle
+        );
+        registrar.playToClient(
+                SetEchoSoundingPosPacket.TYPE,
+                SetEchoSoundingPosPacket.STREAM_CODEC,
+                SetEchoSoundingPosPacket::handle
+        );
+        registrar.playToClient(
+                SetPlayerAnimationPacket.TYPE,
+                SetPlayerAnimationPacket.STREAM_CODEC,
+                SetPlayerAnimationPacket::handle
+        );
+        registrar.playToClient(
+                SendMarkedPositionNamesPacket.TYPE,
+                SendMarkedPositionNamesPacket.STREAM_CODEC,
+                SendMarkedPositionNamesPacket::handle
+        );
+        registrar.playToClient(
+                SendSyncedTeleporterPositionsPacket.TYPE,
+                SendSyncedTeleporterPositionsPacket.STREAM_CODEC,
+                SendSyncedTeleporterPositionsPacket::handle
+        );
     }
 }
