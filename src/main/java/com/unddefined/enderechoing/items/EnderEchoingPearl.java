@@ -4,6 +4,7 @@ import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import com.unddefined.enderechoing.server.DataComponents.PositionData;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -65,7 +66,7 @@ public class EnderEchoingPearl extends Item {
             return InteractionResultHolder.success(itemStack);
         }
 
-        if (positionData == null) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket(""));
+        if (positionData == null) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket("", BlockPos.ZERO));
 
         return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
     }

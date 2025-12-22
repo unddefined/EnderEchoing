@@ -104,7 +104,7 @@ public class ServerEvents {
                 itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)
                 || player.getData(EE_PEARL_AMOUNT.get()) > 0
         ) {
-            PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket("><"));
+            PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket("><", pos));
             player.setData(EE_PEARL_POSITION.get(), pos);
             player.setData(EE_PEARL_AMOUNT.get(), Math.max(player.getData(EE_PEARL_AMOUNT.get()) - 1, 0));
         }

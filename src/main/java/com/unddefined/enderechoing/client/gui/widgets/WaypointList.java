@@ -48,7 +48,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
     public void openContextMenu(int mouseX, int mouseY, MarkedPositionsManager.MarkedPositions M, WaypointEntry entry) {
         contextMenu.clear();
 
-        contextMenu.addItem("screen.enderechoing.rename", () -> Minecraft.getInstance().setScreen(new PositionEditScreen(screen, M.name())));
+        contextMenu.addItem("screen.enderechoing.rename", () -> Minecraft.getInstance().setScreen(new PositionEditScreen(screen, M.name(), M.pos())));
 
         contextMenu.addItem("screen.enderechoing.copy", () -> {
             screen.getMenu().ee_pearl_amount--;
@@ -63,6 +63,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
                 screen.getMarkedPositionsCache().remove(M);
                 removeEntry(entry);
                 screen.getMenu().ee_pearl_amount++;
+                screen.getMenu().setSelectedPosition(null);
             });
             contextMenu.open(mouseX, mouseY, (idx, item) -> {});
         });

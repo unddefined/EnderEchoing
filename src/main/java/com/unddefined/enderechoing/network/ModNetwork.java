@@ -99,5 +99,18 @@ public class ModNetwork {
                 SendSyncedTeleporterPositionsPacket.STREAM_CODEC,
                 SendSyncedTeleporterPositionsPacket::handle
         );
+        
+        // 注册结构信息请求和回复数据包
+        registrar.playToServer(
+                RequestStructureInfoPacket.TYPE,
+                RequestStructureInfoPacket.STREAM_CODEC,
+                RequestStructureInfoPacket::handle
+        );
+        
+        registrar.playToClient(
+                ReplyStructureInfoPacket.TYPE,
+                ReplyStructureInfoPacket.STREAM_CODEC,
+                ReplyStructureInfoPacket::handle
+        );
     }
 }

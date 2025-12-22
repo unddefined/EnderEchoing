@@ -40,5 +40,9 @@
   "effect.enderechoing.stagger": "Stagger",
   "effect.enderechoing.attack_scattered": "Attack Scattered",
   "effect.enderechoing.sculk_veil": "Sculk Veil",
-  "menu.title.enderechoing.tunermenu": "Ender Echo Tuner"
+  "menu.title.enderechoing.tunermenu": "Ender Echo Tuner",
+  "screen.enderechoing.dimension": "Dimension",
+  "screen.enderechoing.biome": "Biome",
+  "screen.enderechoing.structure": "Structure",
+  "screen.enderechoing.insert_info": "Insert info"
 }

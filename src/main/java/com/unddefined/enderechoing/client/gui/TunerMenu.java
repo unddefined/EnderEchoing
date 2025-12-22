@@ -4,16 +4,14 @@ import com.unddefined.enderechoing.network.packet.GivePlayerPearlPacket;
 import com.unddefined.enderechoing.network.packet.SetSelectedPositionPacket;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -56,8 +54,7 @@ public class TunerMenu extends AbstractContainerMenu {
     }
 
     public void setSelectedPosition(MarkedPositionsManager.MarkedPositions M) {
-        var overworld = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse("overworld"));
-        if (M == null) PacketDistributor.sendToServer(new SetSelectedPositionPacket(tunerPos, BlockPos.ZERO, overworld, ""));
+        if (M == null) PacketDistributor.sendToServer(new SetSelectedPositionPacket(tunerPos, BlockPos.ZERO, Level.OVERWORLD, ""));
         else PacketDistributor.sendToServer(new SetSelectedPositionPacket(tunerPos, M.pos(), M.Dimension(), M.name()));
     }
 
