@@ -48,7 +48,7 @@ public class EchoRenderer {
     @SubscribeEvent
     public static void renderEcho(RenderLevelStageEvent event) {
         if (mc.player == null) return;
-        var PartialTicks = event.getPartialTick().getGameTimeDeltaTicks();
+        float PartialTicks = event.getPartialTick().getGameTimeDeltaTicks();
         SculkVeilRenderer.updateFadeProgress(mc.player.hasEffect(SCULK_VEIL), PartialTicks);
         if (!isCounting && SculkVeilRenderer.fadeProgress == 0f) return;
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) return;
@@ -67,7 +67,7 @@ public class EchoRenderer {
         if (targetPreseted) {
             EchoSounding.render(PoseStack, bufferSource, PartialTicks, tick - 20, LightTexture.FULL_BRIGHT);
             //定向传送
-            if (targetPos != null) {
+            if (targetPos != null && echoMap.containsKey(targetPos)) {
                 echoMap.getOrDefault(targetPos, null)
                         .render(mc.player, PoseStack, bufferSource, teleportTicks - 80, false, null);
                 if (teleportTicks > 60) EchoResponsing.render(PoseStack, bufferSource, targetPos, teleportTicks);
@@ -103,7 +103,7 @@ public class EchoRenderer {
             PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
             isTeleporting = true;
         }
-        if (targetPos != null && targetPreseted) teleportTicks++;
+        if (targetPos != null && targetPreseted){echoMap.putIfAbsent(targetPos, new EchoResponse(targetPos)); teleportTicks++;}
         echoMap.forEach((p, e) -> {
             if (e.isElementHovering) {
                 teleportTicks++;
@@ -116,11 +116,10 @@ public class EchoRenderer {
             }
             if (!targetPreseted && countTicks > 120 && targetPos != null && targetPos.equals(p) && !e.isElementHovering) teleportTicks = 0;
         });
-        if (targetPos != null) echoMap.putIfAbsent(targetPos, new EchoResponse(targetPos));
         if (EchoSoundingPos != null) {
             isCounting = true;
             countdownTicks = 60;
-            if (echoMap.isEmpty()) {
+            if (echoMap.isEmpty() && !syncedTeleporterPositions.isEmpty()) {
                 for (BlockPos pos : syncedTeleporterPositions) {
                     if (pos.equals(EchoSoundingPos)) continue;
                     if (!new AABB(player.blockPosition()).inflate(4096).contains(Vec3.atCenterOf(pos))) continue;
