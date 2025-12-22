@@ -13,7 +13,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record SetPlayerAnimationPacket() implements CustomPacketPayload {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "open_edit_screen");
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "set_player_animation");
     public static final Type<SetPlayerAnimationPacket> TYPE = new Type<>(ID);
     public static final StreamCodec<FriendlyByteBuf, SetPlayerAnimationPacket> STREAM_CODEC = StreamCodec.ofMember(
             (msg, buf) -> {}, buf -> new SetPlayerAnimationPacket()
