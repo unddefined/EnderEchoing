@@ -47,7 +47,7 @@ import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECH
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoTunerBlock extends Block implements EntityBlock {
-    public static final DirectionProperty FACING = DirectionProperty.create("facing", Direction.values());
+    public static final DirectionProperty FACING = CalibratedSculkShriekerBlock.FACING;
     protected static final VoxelShape SHAPE_UP = Shapes.or(Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(6.0D, 14.0D, 6.0D, 10.0D, 16.0D, 10.0D));
     protected static final VoxelShape SHAPE_DOWN = Block.box(0.0D, 8.0D, 0.0D, 16.0D, 16.0D, 16.0D);
 
@@ -59,7 +59,9 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
                 .destroyTime(1.5F)
                 .pushReaction(PushReaction.DESTROY)
                 .lightLevel(state -> 3)
+                .dynamicShape()
         );
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.UP));
     }
 
     @Nullable
