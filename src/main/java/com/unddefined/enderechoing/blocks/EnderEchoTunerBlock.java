@@ -89,6 +89,7 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.isClientSide()) return ItemInteractionResult.FAIL;
+        if (hand != InteractionHand.MAIN_HAND) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if (!stack.is(ENDER_ECHOING_PEARL.get())) {
             if (player instanceof ServerPlayer P) P.openMenu(state.getMenuProvider(level, pos));
             return ItemInteractionResult.SUCCESS;
