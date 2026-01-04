@@ -10,7 +10,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -88,22 +87,16 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected @NotNull InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (!level.isClientSide && player instanceof ServerPlayer P) P.openMenu(state.getMenuProvider(level, pos));
-
-        return InteractionResult.sidedSuccess(level.isClientSide);
-    }
-
-    @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.isClientSide()) return ItemInteractionResult.FAIL;
-        if (stack.isEmpty()) useWithoutItem(state, level, pos, player, hitResult);
-        if (!stack.is(ENDER_ECHOING_PEARL.get())) return ItemInteractionResult.FAIL;
+        if (!stack.is(ENDER_ECHOING_PEARL.get())) {
+            if (player instanceof ServerPlayer P) P.openMenu(state.getMenuProvider(level, pos));
+            return ItemInteractionResult.SUCCESS;
+        }
         var stackPos = stack.get(POSITION);
-        int pearlAmout = player.getData(EE_PEARL_AMOUNT.get());
-        boolean result = MarkedPositionsManager.getManager(player)
-                .addMarkedPosition(stackPos == null ? null : stackPos.Dimension(), stackPos == null ? null : stackPos.pos(), stack.get(CUSTOM_NAME) == null ? null : stack.get(CUSTOM_NAME).getString(), 0);
-        player.setData(EE_PEARL_AMOUNT.get(), pearlAmout + stack.getCount() - (result ? 1 : 0));
+        boolean result = stackPos != null && MarkedPositionsManager.getManager(player)
+                .addMarkedPosition(stackPos.Dimension(), stackPos.pos(), stack.get(CUSTOM_NAME).getString(), 0);
+        player.setData(EE_PEARL_AMOUNT.get(), player.getData(EE_PEARL_AMOUNT.get()) + stack.getCount() - (result ? 1 : 0));
         stack.shrink(stack.getCount());
 
         return ItemInteractionResult.SUCCESS;
