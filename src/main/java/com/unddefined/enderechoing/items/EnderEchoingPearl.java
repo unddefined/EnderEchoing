@@ -43,6 +43,7 @@ public class EnderEchoingPearl extends Item {
             var targetPosition = player.getData(EE_PEARL_POSITION.get());
             if (player.getData(EE_PEARL_AMOUNT.get()) > 0){
                 MarkedPositionsManager.getManager(player).addMarkedPosition(level.dimension(), targetPosition, name, 0);
+                player.setData(EE_PEARL_AMOUNT.get(), player.getData(EE_PEARL_AMOUNT.get()) - 1);
                 return;
             }
             var pearlStack = player.getInventory().getItem(player.getInventory().findSlotMatchingItem(pearl));

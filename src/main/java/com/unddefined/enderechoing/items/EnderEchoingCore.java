@@ -112,7 +112,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
             if (level instanceof ServerLevel SL) triggerAnim(player, GeoItem.getOrAssignId(itemStack, SL), CONTROLLER_NAME, ANIM_USE);
 
             player.startUsingItem(hand);
-        } else if (player.getInventory().hasAnyMatching(stack ->
+        } else if (player.getData(EE_PEARL_AMOUNT.get()) > 0 || player.getInventory().hasAnyMatching(stack ->
                 stack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && stack.get(CUSTOM_NAME) == null)) {
             if (!level.isClientSide()) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket("", player.blockPosition()));
             player.setData(EE_PEARL_POSITION.get(), player.blockPosition());
