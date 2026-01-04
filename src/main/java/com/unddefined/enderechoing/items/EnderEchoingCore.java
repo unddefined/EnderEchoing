@@ -42,6 +42,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.function.Consumer;
 
+import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_POSITION;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
@@ -98,7 +99,8 @@ public class EnderEchoingCore extends Item implements GeoItem {
             if (nearestTeleporterPos.getFirst() == null) return InteractionResultHolder.fail(itemStack);
             // 检查玩家是否有未保存数据的末影回响珍珠
             if (!player.getInventory().hasAnyMatching(item ->
-                    item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null))
+                    item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null)
+                    || player.getData(EE_PEARL_AMOUNT.get()) < 1)
                 return InteractionResultHolder.fail(itemStack);
             // 渲染传送特效
             PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(player.blockPosition()));
@@ -140,15 +142,17 @@ public class EnderEchoingCore extends Item implements GeoItem {
         if (level instanceof ServerLevel && livingEntity instanceof ServerPlayer player) {
             // 再次检查玩家是否有未保存数据的珍珠
             if (!player.getInventory().hasAnyMatching(itemStack ->
-                    itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)) {
+                    itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)
+                    || player.getData(EE_PEARL_AMOUNT.get()) < 1) {
                 player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
                 PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(BlockPos.ZERO));
                 return stack;
             }
             // 消耗一个没有保存数据的珍珠
-            player.getInventory().clearOrCountMatchingItems(itemStack ->
-                            itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() &&
-                                    itemStack.get(CUSTOM_NAME) == null, 1, player.inventoryMenu.getCraftSlots());
+            if (player.getData(EE_PEARL_AMOUNT.get()) > 0) player.setData(EE_PEARL_AMOUNT.get(), player.getData(EE_PEARL_AMOUNT.get()) - 1);
+            else player.getInventory().clearOrCountMatchingItems(itemStack ->
+                    itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() &&
+                            itemStack.get(CUSTOM_NAME) == null, 1, player.inventoryMenu.getCraftSlots());
 
             // 设置冷却时间
             player.getCooldowns().addCooldown(this, Config.ENDER_ECHOING_CORE_COOLDOWN.get());
@@ -164,6 +168,4 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {return cache;}
-
-
 }
