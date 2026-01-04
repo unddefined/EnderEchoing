@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item":"enderechoing:ender_echoing_pearl"},
+    {"item":"minecraft:blaze_powder"}
+  ],
+  "result": {
+    "id": "enderechoing:ender_echoing_eye",
+    "count": 1
+  }
+}

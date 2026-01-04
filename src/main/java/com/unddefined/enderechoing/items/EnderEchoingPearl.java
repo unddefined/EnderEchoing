@@ -23,9 +23,7 @@ import static com.unddefined.enderechoing.server.registry.DataRegistry.*;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoingPearl extends Item {
-    public EnderEchoingPearl(Properties properties) {
-        super(properties.stacksTo(8));
-    }
+    public EnderEchoingPearl(Properties properties) {super(properties.stacksTo(8));}
 
     public static void handleSetDataRequest(ServerPlayer player, String name, ItemStack handStack, Level level) {
         var Name = name.isEmpty() ? Component.translatable("item.enderechoing.ender_echoing_pearl").getString() : name;
