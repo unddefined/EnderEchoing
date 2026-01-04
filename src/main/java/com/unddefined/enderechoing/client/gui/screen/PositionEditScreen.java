@@ -22,10 +22,13 @@ public class PositionEditScreen extends Screen {
     public String fieldValue;
     private EditBox nameField;
     private boolean CursorMoved = false;
+    private boolean insertVisible = false;
     private String dimension;
     private String biome;
     private String structure = "loading...";
     private Button structureBtn;
+    private Button dimBtn;
+    private Button biomeBtn;
 
     public PositionEditScreen(Screen lastScreen, String fieldValue, BlockPos pos) {
         super(Component.translatable("screen.enderechoing.edit_title"));
@@ -37,11 +40,12 @@ public class PositionEditScreen extends Screen {
     @Override
     protected void init() {
         // 添加文本输入框
-        this.nameField = new EditBox(this.font, this.width / 2 - 100, this.height / 2 - 10, 200, 20, Component.translatable("screen.enderechoing.enter_name"));
+        this.nameField = new EditBox(this.font, this.width / 2 - 101, this.height / 2 - 10, 180, 20, Component.translatable("screen.enderechoing.enter_name"));
         this.nameField.setMaxLength(50); // 设置最大长度
         this.nameField.setValue(fieldValue);
         this.addWidget(this.nameField);
         this.setInitialFocus(this.nameField);
+        if (!fieldValue.equals("><")) CursorMoved = true;
         if (this.minecraft != null) {
             var player = this.minecraft.player;
             if (player != null) {
@@ -52,24 +56,34 @@ public class PositionEditScreen extends Screen {
                 PacketDistributor.sendToServer(new RequestStructureInfoPacket(pos));
             }
         }
+        // 添加插入按钮
+        var insertBtn = Button.builder(Component.literal("+"), (button) -> insertVisible = !insertVisible)
+                .bounds(this.width / 2 + 82, this.height / 2 - 10, 20, 20).build();
+        insertBtn.setTooltip(Tooltip.create(Component.translatable("screen.enderechoing.insert_info")));
+        this.addRenderableWidget(insertBtn);
+        if (lastScreen instanceof TunerScreen tunerScreen) {
+            //需处于同一维度
+            var M = tunerScreen.getFocusingEntry().getMarkedPosition();
+            if (M != null && !M.Dimension().location().toShortLanguageKey().equals(dimension)) insertBtn.active = false;
+        }
         // 添加维度按钮
-        var dimBtn = Button.builder(Component.translatable("screen.enderechoing.dimension"), (button) ->
-                this.nameField.insertText(dimension != null ? dimension : "null"))
-                .bounds(this.width / 2 - 102, this.height / 2 + 70, 70, 20).build();
+        dimBtn = Button.builder(Component.translatable("screen.enderechoing.dimension"), (button) ->
+                        this.nameField.insertText(dimension != null ? dimension : "null"))
+                .bounds(this.width / 2 - 101, this.height / 2 + 70, 200, 20).build();
         dimBtn.setTooltip(Tooltip.create(Component.translatable(dimension != null ? dimension : "null")));
         this.addRenderableWidget(dimBtn);
 
         // 添加生物群系按钮
-        var biomeBtn = Button.builder(Component.translatable("screen.enderechoing.biome"), (button) ->
-                this.nameField.insertText(biome != null ? biome : "null"))
-                .bounds(this.width / 2 - 25, this.height / 2 + 70, 49, 20).build();
+        biomeBtn = Button.builder(Component.translatable("screen.enderechoing.biome"), (button) ->
+                        this.nameField.insertText(biome != null ? biome : "null"))
+                .bounds(this.width / 2 - 101, this.height / 2 + 93, 200, 20).build();
         biomeBtn.setTooltip(Tooltip.create(Component.translatable(biome != null ? biome : "null")));
         this.addRenderableWidget(biomeBtn);
 
         // 添加结构按钮
         structureBtn = Button.builder(Component.translatable("screen.enderechoing.structure"), (button) ->
-                this.nameField.insertText(structure != null ? structure : "null"))
-                .bounds(this.width / 2 + 32, this.height / 2 + 70, 70, 20).build();
+                        this.nameField.insertText(structure != null ? structure : "null"))
+                .bounds(this.width / 2 - 101, this.height / 2 + 116, 200, 20).build();
         structureBtn.setTooltip(Tooltip.create(Component.translatable(structure != null ? structure : "null")));
         this.addRenderableWidget(structureBtn);
 
@@ -89,12 +103,20 @@ public class PositionEditScreen extends Screen {
 
         // 渲染标题
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 30, 0xFFFFFF);
-        guiGraphics.drawCenteredString(this.font, Component.translatable("screen.enderechoing.insert_info"), this.width / 2, this.height / 2 + 55, 0xFFFFFF);
 
         // 渲染文本框提示
         this.nameField.render(guiGraphics, mouseX, mouseY, partialTick);
         if (!CursorMoved) this.nameField.moveCursorTo(1, false);
         CursorMoved = true;
+        if (insertVisible) {
+            this.dimBtn.visible = true;
+            this.biomeBtn.visible = true;
+            this.structureBtn.visible = true;
+        } else {
+            this.dimBtn.visible = false;
+            this.biomeBtn.visible = false;
+            this.structureBtn.visible = false;
+        }
     }
 
     private void onDone() {

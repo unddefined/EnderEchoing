@@ -19,7 +19,7 @@
   "item.enderechoing.ender_echoing_core.cooldown": "Item is on cooldown!",
   "item.enderechoing.ender_echoing_pearl": "Ender Echoing Pearl",
   "item.enderechoing.ender_echoing_pearl.position": "Position: %s, %s",
-  "screen.enderechoing.edit_title": "Name Item",
+  "screen.enderechoing.edit_title": "Edit Waypoint",
   "screen.enderechoing.enter_name": "Enter item name...",
   "screen.enderechoing.done": "Done",
   "screen.enderechoing.cancel": "Cancel",
@@ -44,5 +44,5 @@
   "screen.enderechoing.dimension": "Dimension",
   "screen.enderechoing.biome": "Biome",
   "screen.enderechoing.structure": "Structure",
-  "screen.enderechoing.insert_info": "Insert info"
+  "screen.enderechoing.insert_info": "Insert info\n(should in same dimension)"
 }
