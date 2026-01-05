@@ -1,6 +1,5 @@
 package com.unddefined.enderechoing.client.gui.widgets;
 
-import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.client.gui.screen.PositionEditScreen;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
 import com.unddefined.enderechoing.server.DataComponents.PositionData;
@@ -34,9 +33,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         this.setX(x);
         this.screen = screen;
         this.contextMenu = new ContextMenu();
-        var blockEntity = Minecraft.getInstance().level.getBlockEntity(screen.getMenu().getTunerPos());
-        if (blockEntity instanceof EnderEchoTunerBlockEntity tuner)
-            selectedPosition = screen.getMarkedPositionsCache().stream().filter(M -> M.pos().equals(tuner.getPos())).findFirst().orElse(null);
+        selectedPosition = screen.getMarkedPositionsCache().stream().filter(M -> M.pos().equals(screen.getMenu().getTuner().getPos())).findFirst().orElse(null);
     }
 
     public void addWaypoint(MarkedPositionsManager.MarkedPositions M) {this.addEntry(new WaypointEntry(this, M));}

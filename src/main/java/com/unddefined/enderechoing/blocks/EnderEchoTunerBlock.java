@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -47,6 +49,7 @@ import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoTunerBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = CalibratedSculkShriekerBlock.FACING;
+    public static final BooleanProperty CHARGED = BooleanProperty.create("charged");
     protected static final VoxelShape SHAPE_UP = Shapes.or(Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.box(6.0D, 14.0D, 6.0D, 10.0D, 16.0D, 10.0D));
     protected static final VoxelShape SHAPE_DOWN = Block.box(0.0D, 8.0D, 0.0D, 16.0D, 16.0D, 16.0D);
 
@@ -61,6 +64,7 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
                 .dynamicShape()
         );
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.UP));
+        this.registerDefaultState(this.stateDefinition.any().setValue(CHARGED, false));
     }
 
     @Nullable
@@ -87,8 +91,12 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, @NotNull Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.isClientSide()) return ItemInteractionResult.FAIL;
+        if (stack.is(Items.DRAGON_BREATH)) {
+            state.setValue(CHARGED, true);
+            return ItemInteractionResult.SUCCESS;
+        }
         if (hand != InteractionHand.MAIN_HAND) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if (!stack.is(ENDER_ECHOING_PEARL.get())) {
             if (player instanceof ServerPlayer P) P.openMenu(state.getMenuProvider(level, pos));
@@ -104,7 +112,7 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {builder.add(FACING);}
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {builder.add(FACING, CHARGED);}
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {

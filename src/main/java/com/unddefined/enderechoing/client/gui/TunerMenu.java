@@ -1,8 +1,10 @@
 package com.unddefined.enderechoing.client.gui;
 
+import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.network.packet.GivePlayerPearlPacket;
 import com.unddefined.enderechoing.network.packet.SetSelectedPositionPacket;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -73,6 +75,13 @@ public class TunerMenu extends AbstractContainerMenu {
     public List<ItemStack> getIconList() {return iconList;}
 
     public BlockPos getTunerPos() {return tunerPos;}
+
+    public EnderEchoTunerBlockEntity getTuner() {
+        if (Minecraft.getInstance().level == null) return null;
+        var blockEntity = Minecraft.getInstance().level.getBlockEntity(tunerPos);
+        if (blockEntity instanceof EnderEchoTunerBlockEntity tuner) return tuner;
+        return null;
+    }
 
     public List<MarkedPositionsManager.MarkedPositions> getMarkedPositionsCache() {return markedPositionsCache;}
 
