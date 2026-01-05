@@ -1,9 +1,13 @@
 package com.unddefined.enderechoing.client.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.unddefined.enderechoing.client.gui.widgets.DimensionSelecter;
 import com.unddefined.enderechoing.network.packet.PearlRenamePacket;
+import com.unddefined.enderechoing.network.packet.RequestDimensionListPacket;
 import com.unddefined.enderechoing.network.packet.RequestStructureInfoPacket;
+import com.unddefined.enderechoing.network.packet.SetUnchargedPacket;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -12,17 +16,29 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+
+import static com.unddefined.enderechoing.blocks.EnderEchoTunerBlock.CHARGED;
 
 public class PositionEditScreen extends Screen {
     private final Screen lastScreen;
     private final BlockPos pos;
     public String fieldValue;
+    public Font font;
     private EditBox nameField;
+    private EditBox posX;
+    private EditBox posY;
+    private EditBox posZ;
+    private DimensionSelecter DimensionSelecter;
     private boolean CursorMoved = false;
     private boolean insertVisible = false;
+    private boolean isCharged = false;
     private String dimension;
     private String biome;
     private String structure = "loading...";
@@ -40,8 +56,9 @@ public class PositionEditScreen extends Screen {
     @Override
     protected void init() {
         // 添加文本输入框
+        this.font = super.font;
         this.nameField = new EditBox(this.font, this.width / 2 - 101, this.height / 2 - 10, 180, 20, Component.translatable("screen.enderechoing.enter_name"));
-        this.nameField.setMaxLength(50); // 设置最大长度
+        this.nameField.setMaxLength(50);
         this.nameField.setValue(fieldValue);
         this.addWidget(this.nameField);
         this.setInitialFocus(this.nameField);
@@ -52,8 +69,8 @@ public class PositionEditScreen extends Screen {
                 dimension = player.level().dimension().location().toShortLanguageKey();
                 biome = player.level().getBiome(player.blockPosition()).getRegisteredName();
 
-                // 请求服务器上的结构信息
                 PacketDistributor.sendToServer(new RequestStructureInfoPacket(pos));
+                PacketDistributor.sendToServer(new RequestDimensionListPacket());
             }
         }
         // 添加插入按钮
@@ -66,6 +83,25 @@ public class PositionEditScreen extends Screen {
             var M = tunerScreen.getFocusingEntry().getMarkedPosition();
             if (M != null && !M.Dimension().location().toShortLanguageKey().equals(dimension)) insertBtn.active = false;
         }
+
+        if (lastScreen instanceof TunerScreen tunerScreen && tunerScreen.getMenu().getTuner().getBlockState().getValue(CHARGED)) {
+            isCharged = true;
+            var M = tunerScreen.getFocusingEntry().getMarkedPosition();
+            posX = new EditBox(this.font, this.width / 2 - 90, this.height / 2 + 16, 52, 20, Component.literal(String.valueOf(M.pos().getX())));
+            posX.setValue( M.pos().getX() + "");
+            posY = new EditBox(this.font, this.width / 2 - 21, this.height / 2 + 16, 52, 20, Component.literal(String.valueOf(M.pos().getY())));
+            posY.setValue( M.pos().getY() + "");
+            posZ = new EditBox(this.font, this.width / 2 + 50, this.height / 2 + 16, 52, 20, Component.literal(String.valueOf(M.pos().getZ())));
+            posZ.setValue( M.pos().getZ() + "");
+            DimensionSelecter = new DimensionSelecter(List.of(Level.OVERWORLD), this, this.width / 2 - 101, this.height / 2 + 41, 180, M.Dimension().location().toString());
+            DimensionSelecter.dimension = M.Dimension();
+            this.addWidget(posX);
+            this.addWidget(posY);
+            this.addWidget(posZ);
+            this.addWidget(DimensionSelecter);
+            insertBtn.active = false;
+        }
+
         // 添加维度按钮
         dimBtn = Button.builder(Component.translatable("screen.enderechoing.dimension"), (button) ->
                         this.nameField.insertText(dimension != null ? dimension : "null"))
@@ -89,11 +125,11 @@ public class PositionEditScreen extends Screen {
 
         // 添加完成按钮
         this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.done"), (button) ->
-                this.onDone()).bounds(this.width / 2 - 102, this.height / 2 + 25, 100, 20).build());
+                this.onDone()).bounds(this.width / 2 - 102, this.height / 2 + 25 + (isCharged ? 43 : 0), 100, 20).build());
 
         // 添加取消按钮
         this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.cancel"), (button) ->
-                this.onClose()).bounds(this.width / 2 + 2, this.height / 2 + 25, 100, 20).build());
+                this.onClose()).bounds(this.width / 2 + 2, this.height / 2 + 25 + (isCharged ? 43 : 0), 100, 20).build());
     }
 
     @Override
@@ -104,8 +140,16 @@ public class PositionEditScreen extends Screen {
         // 渲染标题
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 30, 0xFFFFFF);
 
-        // 渲染文本框提示
         this.nameField.render(guiGraphics, mouseX, mouseY, partialTick);
+        if(posX != null){
+            posX.render(guiGraphics, mouseX, mouseY, partialTick);
+            posY.render(guiGraphics, mouseX, mouseY, partialTick);
+            posZ.render(guiGraphics, mouseX, mouseY, partialTick);
+            guiGraphics.drawString(font, "X:", this.width / 2 - 101, this.height / 2 + 22, -1, false);
+            guiGraphics.drawString(font, "Y:", this.width / 2 - 34, this.height / 2 + 22, -1, false);
+            guiGraphics.drawString(font, "Z:", this.width / 2 + 36, this.height / 2 + 22, -1, false);
+            DimensionSelecter.render(guiGraphics, mouseX, mouseY, partialTick);
+        }
         if (!CursorMoved) this.nameField.moveCursorTo(1, false);
         CursorMoved = true;
         if (insertVisible) {
@@ -124,9 +168,12 @@ public class PositionEditScreen extends Screen {
 
         if (lastScreen instanceof TunerScreen tunerScreen) {
             var M = tunerScreen.getFocusingEntry().getMarkedPosition();
-            var newPosition = new MarkedPositionsManager.MarkedPositions(M.Dimension(), M.pos(), name, M.iconIndex());
-            tunerScreen.getMarkedPositionsCache().set(tunerScreen.getMarkedPositionsCache().indexOf(M), newPosition);
+            var newPos = new BlockPos(Integer.parseInt(posX.getValue()), Integer.parseInt(posY.getValue()), Integer.parseInt(posZ.getValue()));
+            var newDimension = isCharged ? DimensionSelecter.dimension : M.Dimension();
+            var newM = new MarkedPositionsManager.MarkedPositions(newDimension, isCharged ? newPos : M.pos(), name, M.iconIndex());
+            tunerScreen.getMarkedPositionsCache().set(tunerScreen.getMarkedPositionsCache().indexOf(M), newM);
             tunerScreen.populateWaypointList();
+            if(isCharged && !newPos.equals(M.pos()) && !newDimension.equals(M.Dimension())) PacketDistributor.sendToServer(new SetUnchargedPacket(tunerScreen.getMenu().getTunerPos()));
         } else PacketDistributor.sendToServer(new PearlRenamePacket(name));
 
         this.onClose();
@@ -155,5 +202,9 @@ public class PositionEditScreen extends Screen {
     public void setStructure(String structure) {
         this.structure = structure;
         if (this.structureBtn != null) this.structureBtn.setTooltip(Tooltip.create(Component.translatable(structure != null ? structure : "null")));
+    }
+
+    public void setDimensionList(List<ResourceKey<Level>> dimensionList){
+        if (this.DimensionSelecter != null && dimensionList != null) this.DimensionSelecter.updateDimensionList(dimensionList);
     }
 }

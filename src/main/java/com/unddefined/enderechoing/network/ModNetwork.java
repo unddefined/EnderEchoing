@@ -106,11 +106,29 @@ public class ModNetwork {
                 RequestStructureInfoPacket.STREAM_CODEC,
                 RequestStructureInfoPacket::handle
         );
-        
         registrar.playToClient(
                 ReplyStructureInfoPacket.TYPE,
                 ReplyStructureInfoPacket.STREAM_CODEC,
                 ReplyStructureInfoPacket::handle
+        );
+
+        // 注册维度列表请求和回复数据包
+        registrar.playToServer(
+                RequestDimensionListPacket.TYPE,
+                RequestDimensionListPacket.STREAM_CODEC,
+                RequestDimensionListPacket::handle
+        );
+        registrar.playToClient(
+                ReplyDimensionListPacket.TYPE,
+                ReplyDimensionListPacket.STREAM_CODEC,
+                ReplyDimensionListPacket::handle
+        );
+
+        // 注册设置充能状态数据包
+        registrar.playToServer(
+                SetUnchargedPacket.TYPE,
+                SetUnchargedPacket.STREAM_CODEC,
+                SetUnchargedPacket::handle
         );
     }
 }
