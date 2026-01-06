@@ -18,13 +18,16 @@ public class DimensionSelecter extends AbstractWidget {
     private List<ResourceKey<Level>> dimensionList;
     private boolean visible = false;
     private String selectedDimensionString;
+    private final Component dimText = Component.translatable("screen.enderechoing.dimension").append(":");
+    private final int fontWidth;
 
     public DimensionSelecter(List<ResourceKey<Level>> dimensionList, PositionEditScreen screen, int x, int y, int width, String dimensionString) {
         super(x, y, width, 20, Component.literal(""));
         this.dimensionList = dimensionList;
         this.selectedDimensionString = dimensionString;
         this.screen = screen;
-        this.x = x + 50 + 3;
+        fontWidth = screen.font.width(dimText);
+        this.x = x + fontWidth + 3;
         this.y = y;
     }
 
@@ -32,11 +35,11 @@ public class DimensionSelecter extends AbstractWidget {
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float v) {
         int dark = FastColor.ABGR32.color(255, 0, 0, 0);
         int grey = visible ? -1 : FastColor.ABGR32.color(255, 160, 160, 160);
-        guiGraphics.fill(x, y, x - 30 + width, y + 20, dark);
+        guiGraphics.fill(x , y, x + width - 30, y + 20, dark);
         guiGraphics.hLine(x, x + width - 1 - 30, y, grey);
         guiGraphics.hLine(x, x + width - 1 - 30, y + height, grey);
         guiGraphics.drawString(screen.font, selectedDimensionString, x + 5, y + 6, -1, false);
-        guiGraphics.drawString(screen.font, Component.translatable("screen.enderechoing.dimension") + ":", x - 50 - 3, y + 6, -1, false);
+        guiGraphics.drawString(screen.font, dimText, x - fontWidth - 3, y + 6, -1, false);
         if (!visible) return;
         for (int i = 1; i < dimensionList.size() + 1; i++) {
             ResourceKey<Level> dimension = dimensionList.get(i - 1);

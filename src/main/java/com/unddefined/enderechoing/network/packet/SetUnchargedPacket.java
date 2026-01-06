@@ -20,7 +20,7 @@ public record SetUnchargedPacket(BlockPos blockPos) implements CustomPacketPaylo
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player().level().getBlockEntity(blockPos) instanceof EnderEchoTunerBlockEntity tuner)
-                tuner.getBlockState().setValue(CHARGED, false);
+                context.player().level().setBlock(blockPos, tuner.getBlockState().setValue(CHARGED, false), 3);
         });
     }
 

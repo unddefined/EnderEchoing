@@ -93,8 +93,9 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, @NotNull Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.isClientSide()) return ItemInteractionResult.FAIL;
-        if (stack.is(Items.DRAGON_BREATH)) {
-            state.setValue(CHARGED, true);
+        if (stack.is(Items.DRAGON_BREATH) && !state.getValue(CHARGED)) {
+            level.setBlock(pos, state.setValue(CHARGED, true), 3);
+            stack.shrink(1);
             return ItemInteractionResult.SUCCESS;
         }
         if (hand != InteractionHand.MAIN_HAND) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;

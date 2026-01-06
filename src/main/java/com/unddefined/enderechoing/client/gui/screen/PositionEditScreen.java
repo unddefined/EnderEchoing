@@ -173,7 +173,8 @@ public class PositionEditScreen extends Screen {
             var newM = new MarkedPositionsManager.MarkedPositions(newDimension, isCharged ? newPos : M.pos(), name, M.iconIndex());
             tunerScreen.getMarkedPositionsCache().set(tunerScreen.getMarkedPositionsCache().indexOf(M), newM);
             tunerScreen.populateWaypointList();
-            if(isCharged && !newPos.equals(M.pos()) && !newDimension.equals(M.Dimension())) PacketDistributor.sendToServer(new SetUnchargedPacket(tunerScreen.getMenu().getTunerPos()));
+            if(isCharged && !newPos.equals(M.pos()) || !newDimension.equals(M.Dimension()))
+                PacketDistributor.sendToServer(new SetUnchargedPacket(tunerScreen.getMenu().getTunerPos()));
         } else PacketDistributor.sendToServer(new PearlRenamePacket(name));
 
         this.onClose();
