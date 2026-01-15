@@ -90,7 +90,7 @@ public class EchoRenderer {
     }
 
     @SubscribeEvent
-    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {reset();}
+    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {reset();echoMap.clear();}
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -130,6 +130,7 @@ public class EchoRenderer {
         countTicks = isCounting ? countTicks + 1 : 0;
         if (countdownTicks == 0) {
             isCounting = false;
+            echoMap.clear();
             return;
         }
         countdownTicks--;
@@ -146,9 +147,6 @@ public class EchoRenderer {
         targetPos = null;
         teleportTicks = 0;
         sculkveilCountTicks = -43;
-        countTicks = 0;
-        countdownTicks = 60;
-        echoMap.clear();
         isTeleporting = false;
     }
 }
