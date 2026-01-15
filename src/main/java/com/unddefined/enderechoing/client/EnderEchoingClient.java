@@ -60,8 +60,8 @@ public class EnderEchoingClient {
                 context -> new SculkWhisperRenderer()));
         event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHO_TUNER.get(),
                 context -> new EnderEchoTunerRenderer()));
-        event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHO_CRISTAL.get(),
-                context -> new EnderEchoCristalBlockRenderer()));
+        event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHO_CRYSTAL.get(),
+                context -> new EnderEchoCrystalBlockRenderer()));
     }
     @SubscribeEvent
     private static void registerScreens(RegisterMenuScreensEvent event) {event.register(TUNER_MENU.get(), TunerScreen::new);}

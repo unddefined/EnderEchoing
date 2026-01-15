@@ -21,10 +21,10 @@ public class BlockEntityRegistry {
                     BlockRegistry.ENDER_ECHO_TUNER.get()
             ).build(null));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderEchoCristalBlockEntity>> ENDER_ECHO_CRISTAL =
-            BLOCK_ENTITY_TYPES.register("ender_echo_cristal_blockentity", () -> BlockEntityType.Builder.of(
-                    EnderEchoCristalBlockEntity::new,
-                    BlockRegistry.ENDER_ECHO_CRISTAL.get()
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderEchoCrystalBlockEntity>> ENDER_ECHO_CRYSTAL =
+            BLOCK_ENTITY_TYPES.register("ender_echo_crystal_blockentity", () -> BlockEntityType.Builder.of(
+                    EnderEchoCrystalBlockEntity::new,
+                    BlockRegistry.ENDER_ECHO_CRYSTAL.get()
             ).build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CalibratedSculkShriekerBlockEntity>> CALIBRATED_SCULK_SHRIEKER =

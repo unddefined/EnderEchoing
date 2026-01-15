@@ -1,6 +1,6 @@
 package com.unddefined.enderechoing.blocks;
 
-import com.unddefined.enderechoing.blocks.entity.EnderEchoCristalBlockEntity;
+import com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
@@ -26,10 +26,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class EnderEchoCristalBlock extends Block implements EntityBlock {
+public class EnderEchoCrystalBlock extends Block implements EntityBlock {
     private int temptick = 0;
 
-    public EnderEchoCristalBlock() {
+    public EnderEchoCrystalBlock() {
         super(Properties.of()
                 .noOcclusion()
                 .sound(SoundType.SCULK_SHRIEKER)
@@ -52,14 +52,14 @@ public class EnderEchoCristalBlock extends Block implements EntityBlock {
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {return new EnderEchoCristalBlockEntity(pos, state);}
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {return new EnderEchoCrystalBlockEntity(pos, state);}
 
     @Override
     public RenderShape getRenderShape(BlockState state) {return RenderShape.ENTITYBLOCK_ANIMATED;}
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
-        return List.of(new ItemStack(ItemRegistry.ENDER_ECHO_CRISTAL.get()), new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));
+        return List.of(new ItemStack(ItemRegistry.ENDER_ECHO_CRYSTAL.get()), new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));
     }
 
     @Override

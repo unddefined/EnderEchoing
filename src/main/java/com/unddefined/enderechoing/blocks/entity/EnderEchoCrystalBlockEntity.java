@@ -9,9 +9,9 @@ import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class EnderEchoCristalBlockEntity extends BlockEntity implements GeoBlockEntity {
-    public EnderEchoCristalBlockEntity(BlockPos pos, BlockState blockState) {
-        super(BlockEntityRegistry.ENDER_ECHO_CRISTAL.get(), pos, blockState);
+public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlockEntity {
+    public EnderEchoCrystalBlockEntity(BlockPos pos, BlockState blockState) {
+        super(BlockEntityRegistry.ENDER_ECHO_CRYSTAL.get(), pos, blockState);
     }
 
     @Override

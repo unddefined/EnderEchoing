@@ -7,8 +7,8 @@
     64
   ],
   "textures": {
-    "0": "enderechoing:item/ender_echo_cristal",
-    "particle": "enderechoing:item/ender_echo_cristal"
+    "0": "enderechoing:item/ender_echo_crystal",
+    "particle": "enderechoing:item/ender_echo_crystal"
   },
   "display": {
     "thirdperson_righthand": {

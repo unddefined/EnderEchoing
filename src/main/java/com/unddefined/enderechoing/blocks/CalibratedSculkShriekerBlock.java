@@ -94,9 +94,9 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
             level.setBlock(pos, BlockRegistry.ENDER_ECHO_TUNER.get().getStateDefinition().any().setValue(FACING, state.getValue(FACING)), 3);
             return ItemInteractionResult.SUCCESS;
         }
-        if (stack.getItem() == ItemRegistry.ENDER_ECHO_CRISTAL.get()) {
+        if (stack.getItem() == ItemRegistry.ENDER_ECHO_CRYSTAL.get()) {
             if (!player.isCreative()) stack.shrink(1);
-            level.setBlock(pos, BlockRegistry.ENDER_ECHO_CRISTAL.get().defaultBlockState(), 3);
+            level.setBlock(pos, BlockRegistry.ENDER_ECHO_CRYSTAL.get().defaultBlockState(), 3);
             return ItemInteractionResult.SUCCESS;
         }
         // 处理与物品槽位的交互
