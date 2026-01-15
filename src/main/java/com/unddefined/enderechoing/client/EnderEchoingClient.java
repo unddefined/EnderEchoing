@@ -3,10 +3,7 @@ package com.unddefined.enderechoing.client;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
 import com.unddefined.enderechoing.client.particles.ParticleDirectlyMovingDust;
-import com.unddefined.enderechoing.client.renderer.block.CalibratedSculkShriekerRenderer;
-import com.unddefined.enderechoing.client.renderer.block.EnderEchoTunerRenderer;
-import com.unddefined.enderechoing.client.renderer.block.EnderEchoicResonatorRenderer;
-import com.unddefined.enderechoing.client.renderer.block.SculkWhisperRenderer;
+import com.unddefined.enderechoing.client.renderer.block.*;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ParticlesRegistry;
 import net.minecraft.client.Minecraft;
@@ -63,6 +60,8 @@ public class EnderEchoingClient {
                 context -> new SculkWhisperRenderer()));
         event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHO_TUNER.get(),
                 context -> new EnderEchoTunerRenderer()));
+        event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHO_CRISTAL.get(),
+                context -> new EnderEchoCristalBlockRenderer()));
     }
     @SubscribeEvent
     private static void registerScreens(RegisterMenuScreensEvent event) {event.register(TUNER_MENU.get(), TunerScreen::new);}

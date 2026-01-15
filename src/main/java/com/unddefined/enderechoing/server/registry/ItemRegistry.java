@@ -13,6 +13,7 @@ public class ItemRegistry {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems("enderechoing");
     public static final DeferredItem<Item> ENDER_ECHOING_CORE = ITEMS.registerItem("ender_echoing_core", EnderEchoingCore::new);
     public static final DeferredItem<Item> ENDER_ECHO_TUNE_CHAMBER = ITEMS.registerItem("ender_echo_tune_chamber", EnderEchoTuneChamber::new);
+    public static final DeferredItem<Item> ENDER_ECHO_CRISTAL = ITEMS.registerItem("ender_echo_cristal", EnderEchoCristal::new);
     public static final DeferredItem<Item> ECHO_DRUSE = ITEMS.registerItem("echo_druse", EchoDruse::new);
     public static final DeferredItem<Item> ENDER_ECHOING_PEARL = ITEMS.registerItem("ender_echoing_pearl", EnderEchoingPearl::new);
     public static final DeferredItem<Item> ENDER_ECHOING_EYE = ITEMS.registerItem("ender_echoing_eye", EnderEchoingEye::new);
