@@ -36,10 +36,8 @@ public class CalibratedSculkShriekerLayer extends BlockAndItemGeoLayer<Calibrate
         poseStack.scale(0.5f, 0.5f, 0.5f);
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         // 距离小于1时不渲染物品
-        if (Minecraft.getInstance().cameraEntity != null) {
-            double distance = camera.getBlockPosition().distToCenterSqr(animatable.getBlockPos().getCenter());
-            if (distance < 1.0) return;
-        }
+        if (Minecraft.getInstance().cameraEntity != null && camera.getBlockPosition().distToCenterSqr(animatable.getBlockPos().getCenter()) < 1.0)
+            return;
 
         // 使物品始终面向玩家
         if (stack.is(ItemRegistry.ENDER_ECHOING_PEARL) || stack.is(Items.ENDER_EYE)) {

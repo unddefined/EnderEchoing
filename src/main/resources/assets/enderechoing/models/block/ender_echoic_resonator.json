@@ -6,7 +6,7 @@
     64
   ],
   "textures": {
-    "2": "enderechoing:block/ender_echoic_resonator",
-    "particle": "enderechoing:block/ender_echoic_resonator"
+    "2": "enderechoing:block/calibrated_sculk_shrieker",
+    "particle": "enderechoing:block/calibrated_sculk_shrieker"
   }
 }

@@ -29,6 +29,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.List;
 
+import static com.unddefined.enderechoing.blocks.EnderEchoTunerBlock.CHARGED;
+
 public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = DirectionProperty.create("facing", Direction.values());
 
@@ -85,17 +87,17 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
         if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
         // 方块转换
         if (stack.getItem() == ItemRegistry.ENDER_ECHOING_CORE.get()) {
-            if (!player.isCreative()) stack.shrink(1);
+            stack.shrink(1);
             level.setBlock(pos, BlockRegistry.ENDER_ECHOIC_RESONATOR.get().defaultBlockState(), 3);
             return ItemInteractionResult.SUCCESS;
         }
         if (stack.getItem() == ItemRegistry.ENDER_ECHO_TUNE_CHAMBER.get()) {
-            if (!player.isCreative()) stack.shrink(1);
-            level.setBlock(pos, BlockRegistry.ENDER_ECHO_TUNER.get().getStateDefinition().any().setValue(FACING, state.getValue(FACING)), 3);
+            stack.shrink(1);
+            level.setBlock(pos, BlockRegistry.ENDER_ECHO_TUNER.get().getStateDefinition().any().setValue(FACING, state.getValue(FACING)).setValue(CHARGED, false), 3);
             return ItemInteractionResult.SUCCESS;
         }
         if (stack.getItem() == ItemRegistry.ENDER_ECHO_CRYSTAL.get()) {
-            if (!player.isCreative()) stack.shrink(1);
+            stack.shrink(1);
             level.setBlock(pos, BlockRegistry.ENDER_ECHO_CRYSTAL.get().defaultBlockState(), 3);
             return ItemInteractionResult.SUCCESS;
         }
