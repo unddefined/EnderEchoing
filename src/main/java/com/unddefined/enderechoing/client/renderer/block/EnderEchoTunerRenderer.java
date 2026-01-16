@@ -6,6 +6,7 @@ import com.mojang.math.Axis;
 import com.unddefined.enderechoing.blocks.EnderEchoTunerBlock;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.client.model.EnderEchoTunerModel;
+import com.unddefined.enderechoing.client.renderer.layer.EnderEchoTunerLayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -24,6 +25,7 @@ import static net.minecraft.client.renderer.LightTexture.FULL_BLOCK;
 public class EnderEchoTunerRenderer extends GeoBlockRenderer<EnderEchoTunerBlockEntity> {
     public EnderEchoTunerRenderer() {
         super(new EnderEchoTunerModel());
+        addRenderLayer(new EnderEchoTunerLayer(this));
     }
 
     @Override
@@ -52,11 +54,7 @@ public class EnderEchoTunerRenderer extends GeoBlockRenderer<EnderEchoTunerBlock
                                MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight,
                                int packedOverlay, int colour) {
         var camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        // 距离小于1时不渲染chamber
-        if (Minecraft.getInstance().cameraEntity != null) {
-            double distance = camera.getBlockPosition().distToCenterSqr(animatable.getBlockPos().getCenter());
-           if (model.getBone("box").isPresent()) model.getBone("box").get().setHidden(distance < 1.0);
-        }
+
         if (animatable.getPos() != null && !animatable.getPos().equals(BlockPos.ZERO)) {
             poseStack.pushPose();
             // 渲染文本
@@ -71,15 +69,11 @@ public class EnderEchoTunerRenderer extends GeoBlockRenderer<EnderEchoTunerBlock
 
             font.drawInBatch(
                     Component.literal(animatable.getName()),
-                    -textWidth,
-                    0,
+                    -textWidth, 0,
                     FastColor.ABGR32.color(255, 140, 244, 226),
                     false,
-                    poseStack.last().pose(),
-                    bufferSource,
-                    Font.DisplayMode.NORMAL,
-                    0,
-                    FULL_BLOCK
+                    poseStack.last().pose(), bufferSource,
+                    Font.DisplayMode.NORMAL, 0, FULL_BLOCK
             );
             poseStack.popPose();
         }
