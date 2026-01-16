@@ -6,7 +6,7 @@
     32
   ],
   "textures": {
-    "0": "enderechoing:block/ender_echo_crystal",
-    "particle": "enderechoing:block/ender_echo_crystal"
+    "0": "enderechoing:block/ender_echo_crystal_block",
+    "particle": "enderechoing:block/ender_echo_crystal_block"
   }
 }

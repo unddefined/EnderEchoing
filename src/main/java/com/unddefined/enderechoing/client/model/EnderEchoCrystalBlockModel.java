@@ -6,8 +6,8 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.DefaultedBlockGeoModel;
 
 public class EnderEchoCrystalBlockModel extends DefaultedBlockGeoModel<EnderEchoCrystalBlockEntity> {
-    private final ResourceLocation R = ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echo_crystal");
-    public EnderEchoCrystalBlockModel() {super(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echo_crystal"));}
+    private final ResourceLocation R = ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echo_crystal_block");
+    public EnderEchoCrystalBlockModel() {super(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echo_crystal_block"));}
     @Override
     public ResourceLocation getModelResource(EnderEchoCrystalBlockEntity animatable) {return buildFormattedModelPath(R);}
 
