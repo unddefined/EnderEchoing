@@ -41,6 +41,7 @@ public class EchoRenderer {
     private static int countdownTicks = 60;
     private static int sculkveilCountTicks = -43;
     private static int teleportTicks = 0;
+    private static int responseTime = 120;
     private static boolean isCounting = false;
     private static boolean isTeleporting = false;
 
@@ -76,10 +77,10 @@ public class EchoRenderer {
 
         if (tick > 20) EchoSounding.render(PoseStack, bufferSource, PartialTicks, tick - 20, LightTexture.FULL_BRIGHT);
 
-        if (!targetPreseted && countTicks > 120 && !echoMap.isEmpty()) {
+        if (!targetPreseted && countTicks > responseTime && !echoMap.isEmpty()) {
             // 渲染EchoResponse
             echoMap.forEach((p, e) -> {
-                boolean isElementHovering = e.render(mc.player, PoseStack, bufferSource, countTicks - 160,
+                boolean isElementHovering = e.render(mc.player, PoseStack, bufferSource, countTicks - 40 - responseTime,
                         countdownTicks < 59, MarkedPositionNames.getOrDefault(p, null));
                 if (isElementHovering && !mc.player.isCurrentlyGlowing()) EchoResponsing.render(PoseStack, bufferSource, p, teleportTicks);
             });
@@ -103,7 +104,26 @@ public class EchoRenderer {
             PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
             isTeleporting = true;
         }
-        if (targetPos != null && targetPreseted){echoMap.putIfAbsent(targetPos, new EchoResponse(targetPos)); teleportTicks++;}
+        if (targetPos != null && targetPreseted) {
+            echoMap.putIfAbsent(targetPos, new EchoResponse(targetPos));
+            teleportTicks++;
+        }
+        if (EchoSoundingPos != null) {
+            isCounting = true;
+            countdownTicks = 60;
+            if (echoMap.isEmpty() && !syncedTeleporterPositions.isEmpty()) {
+                List<Double> disstances = new ArrayList<>();
+                syncedTeleporterPositions.forEach(pos -> disstances.add(EchoSoundingPos.distSqr(pos)));
+                if (disstances.stream().max(Double::compareTo).get() <= 64*64) responseTime = 30;
+                else responseTime = 120;
+
+                for (BlockPos pos : syncedTeleporterPositions) {
+                    if (pos.equals(EchoSoundingPos) && responseTime != 30) continue;
+                    if (!new AABB(EchoSoundingPos).inflate(4096).contains(Vec3.atCenterOf(pos))) continue;
+                    echoMap.putIfAbsent(pos, new EchoResponse(pos));
+                }
+            }
+        }
         echoMap.forEach((p, e) -> {
             if (e.isElementHovering) {
                 teleportTicks++;
@@ -114,19 +134,8 @@ public class EchoRenderer {
                     isTeleporting = true;
                 }
             }
-            if (!targetPreseted && countTicks > 120 && targetPos != null && targetPos.equals(p) && !e.isElementHovering) teleportTicks = 0;
+            if (!targetPreseted && countTicks > responseTime && targetPos != null && targetPos.equals(p) && !e.isElementHovering) teleportTicks = 0;
         });
-        if (EchoSoundingPos != null) {
-            isCounting = true;
-            countdownTicks = 60;
-            if (echoMap.isEmpty() && !syncedTeleporterPositions.isEmpty()) {
-                for (BlockPos pos : syncedTeleporterPositions) {
-                    if (pos.equals(EchoSoundingPos)) continue;
-                    if (!new AABB(player.blockPosition()).inflate(4096).contains(Vec3.atCenterOf(pos))) continue;
-                    echoMap.putIfAbsent(pos, new EchoResponse(pos));
-                }
-            }
-        }
         countTicks = isCounting ? countTicks + 1 : 0;
         if (countdownTicks == 0) {
             isCounting = false;
@@ -137,10 +146,11 @@ public class EchoRenderer {
         if (EchoSoundingPos == null) return;
         // 玩家离开了方块，重置状态
         if (!new AABB(EchoSoundingPos).inflate(0.6).contains(event.getEntity().blockPosition().getCenter())) {
-            PacketDistributor.sendToServer(new AddEffectPacket(MobEffects.GLOWING, 600));
+            if (responseTime != 30) PacketDistributor.sendToServer(new AddEffectPacket(MobEffects.GLOWING, 600));
             reset();
         }
     }
+
     private static void reset() {
         EchoSoundingPos = null;
         targetPreseted = false;

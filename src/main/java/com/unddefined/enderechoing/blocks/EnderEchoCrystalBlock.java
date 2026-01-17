@@ -1,8 +1,12 @@
 package com.unddefined.enderechoing.blocks;
 
 import com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity;
+import com.unddefined.enderechoing.network.packet.SendSyncedTeleporterPositionsPacket;
+import com.unddefined.enderechoing.network.packet.SetEchoSoundingPosPacket;
+import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -18,13 +22,13 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EnderEchoCrystalBlock extends Block implements EntityBlock {
-    private int temptick = 0;
-
     public EnderEchoCrystalBlock() {
         super(Properties.of()
                 .noOcclusion()
@@ -56,9 +60,13 @@ public class EnderEchoCrystalBlock extends Block implements EntityBlock {
     @Override
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
         if (!(entity instanceof ServerPlayer player)) return;
+        var crystals = EnderEchoCrystalSavedData.get((ServerLevel) level).crystals;
+        if (crystals.size() < 2) return;
         if (entity.isCurrentlyGlowing()) return;
-        if (temptick > 0) temptick--;
-
+        PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
+        List<BlockPos> posList = new ArrayList<>();
+        crystals.stream().filter(p -> p.distSqr(pos) <= 64*64).forEach(posList::add);
+        PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList));
     }
 
 }
