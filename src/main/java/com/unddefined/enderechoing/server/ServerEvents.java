@@ -1,6 +1,11 @@
 package com.unddefined.enderechoing.server;
 
 import com.unddefined.enderechoing.EnderEchoing;
+import com.unddefined.enderechoing.blocks.EnderEchoCrystalBlock;
+import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -9,9 +14,11 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 import static com.unddefined.enderechoing.effects.AttackScatteredEffect.attack_scattered_modifier_id;
@@ -77,6 +84,18 @@ public class ServerEvents {
             }
         }
         if (entity.hasEffect(SCULK_VEIL)) entity.removeEffect(SCULK_VEIL);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerJump(LivingEvent.LivingJumpEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        var pos = player.blockPosition();
+        var level = player.level();
+        if (!(level.getBlockState(pos).getBlock() instanceof EnderEchoCrystalBlock)) return;
+        EnderEchoCrystalSavedData.get((ServerLevel) level).getAll()
+                .stream().filter(p -> p.getX() == pos.getX() && p.getZ() == pos.getZ() && p.getY() > pos.getY())
+                .min(Comparator.comparingInt(BlockPos::getY))
+                .ifPresent(p -> player.teleportTo(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5));
     }
 
 }

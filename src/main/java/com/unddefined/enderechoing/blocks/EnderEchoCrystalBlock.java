@@ -26,6 +26,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class EnderEchoCrystalBlock extends Block implements EntityBlock {
@@ -60,13 +61,15 @@ public class EnderEchoCrystalBlock extends Block implements EntityBlock {
     @Override
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
         if (!(entity instanceof ServerPlayer player)) return;
-        var crystals = EnderEchoCrystalSavedData.get((ServerLevel) level).crystals;
+        var crystals = EnderEchoCrystalSavedData.get((ServerLevel) level).getAll();
         if (crystals.size() < 2) return;
         if (entity.isCurrentlyGlowing()) return;
         PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
         List<BlockPos> posList = new ArrayList<>();
         crystals.stream().filter(p -> p.distSqr(pos) <= 64*64).forEach(posList::add);
         PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList));
+       if(player.isShiftKeyDown()) posList.stream().filter(p -> (p.getX() == pos.getX()) && (p.getZ() == pos.getZ()) && (p.getY() < pos.getY()))
+               .min(Comparator.comparingInt(BlockPos::getY))
+               .ifPresent(p -> player.teleportTo(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5));
     }
-
 }

@@ -19,8 +19,10 @@ public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlock
     public EnderEchoCrystalBlockEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityRegistry.ENDER_ECHO_CRYSTAL.get(), pos, blockState);
     }
+
+    @Override
     public void setRemoved() {
-        if (level == null || level.isClientSide || level.getServer() == null) return;
+        if (level == null || level.isClientSide || level.getServer() == null || level.getServer().getPlayerList().getPlayers().isEmpty()) return;
         EnderEchoCrystalSavedData.get((ServerLevel) level).remove(worldPosition);
         super.setRemoved();
     }
