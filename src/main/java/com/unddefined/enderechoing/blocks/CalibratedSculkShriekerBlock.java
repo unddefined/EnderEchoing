@@ -1,10 +1,15 @@
 package com.unddefined.enderechoing.blocks;
 
 import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEntity;
+import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
+import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
 import com.unddefined.enderechoing.server.registry.BlockRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
+import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -26,10 +31,14 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
 import static com.unddefined.enderechoing.blocks.EnderEchoTunerBlock.CHARGED;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_POSITION;
+import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = DirectionProperty.create("facing", Direction.values());
@@ -89,6 +98,16 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
         if (stack.getItem() == ItemRegistry.ENDER_ECHOING_CORE.get()) {
             stack.shrink(1);
             level.setBlock(pos, BlockRegistry.ENDER_ECHOIC_RESONATOR.get().defaultBlockState(), 3);
+            MarkedPositionsManager.getManager(player).addTeleporter(level, pos);
+            //用一个珍珠记下并命名传送器的位置
+            if (player.getInventory().hasAnyMatching(itemStack ->
+                    itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)
+                    || player.getData(EE_PEARL_AMOUNT.get()) > 0
+            ) {
+                PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket("><", pos));
+                player.setData(EE_PEARL_POSITION.get(), pos);
+                player.setData(EE_PEARL_AMOUNT.get(), Math.max(player.getData(EE_PEARL_AMOUNT.get()) - 1, 0));
+            }
             return ItemInteractionResult.SUCCESS;
         }
         if (stack.getItem() == ItemRegistry.ENDER_ECHO_TUNE_CHAMBER.get()) {
@@ -99,6 +118,7 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
         if (stack.getItem() == ItemRegistry.ENDER_ECHO_CRYSTAL.get()) {
             stack.shrink(1);
             level.setBlock(pos, BlockRegistry.ENDER_ECHO_CRYSTAL.get().defaultBlockState(), 3);
+            EnderEchoCrystalSavedData.get((ServerLevel) level).add(pos);
             return ItemInteractionResult.SUCCESS;
         }
         // 处理与物品槽位的交互

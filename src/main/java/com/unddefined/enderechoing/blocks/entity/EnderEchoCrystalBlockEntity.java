@@ -1,7 +1,9 @@
 package com.unddefined.enderechoing.blocks.entity;
 
+import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
@@ -17,7 +19,11 @@ public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlock
     public EnderEchoCrystalBlockEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityRegistry.ENDER_ECHO_CRYSTAL.get(), pos, blockState);
     }
-
+    public void setRemoved() {
+        if (level == null || level.isClientSide || level.getServer() == null) return;
+        EnderEchoCrystalSavedData.get((ServerLevel) level).remove(worldPosition);
+        super.setRemoved();
+    }
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "controller", 0,
