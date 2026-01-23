@@ -145,7 +145,7 @@ public class EchoRenderer {
         countdownTicks--;
         if (EchoSoundingPos == null) return;
         // 玩家离开了方块，重置状态
-        if (!new AABB(EchoSoundingPos).inflate(0.6).contains(event.getEntity().blockPosition().getCenter())) {
+        if (!new AABB(EchoSoundingPos).intersects(player.getBoundingBox())) {
             if (responseTime != 30) PacketDistributor.sendToServer(new AddEffectPacket(MobEffects.GLOWING, 600));
             reset();
         }

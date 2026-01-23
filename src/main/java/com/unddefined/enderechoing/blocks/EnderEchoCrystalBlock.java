@@ -34,7 +34,6 @@ public class EnderEchoCrystalBlock extends Block implements EntityBlock {
         super(Properties.of()
                 .noOcclusion()
                 .sound(SoundType.SCULK_SHRIEKER)
-                .explosionResistance(1000.0F)
                 .destroyTime(1.5F)
                 .pushReaction(PushReaction.DESTROY)
                 .lightLevel(state -> 3)
