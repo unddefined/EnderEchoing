@@ -81,7 +81,7 @@ public class PositionEditScreen extends Screen {
         if (lastScreen instanceof TunerScreen tunerScreen) {
             //需处于同一维度
             var M = tunerScreen.getFocusingEntry().getMarkedPosition();
-            if (M != null && !M.Dimension().location().toShortLanguageKey().equals(dimension)) insertBtn.active = false;
+            if (M != null && !M.dimension().location().toShortLanguageKey().equals(dimension)) insertBtn.active = false;
         }
 
         if (lastScreen instanceof TunerScreen tunerScreen && tunerScreen.getMenu().getTuner().getBlockState().getValue(CHARGED)) {
@@ -93,8 +93,8 @@ public class PositionEditScreen extends Screen {
             posY.setValue( M.pos().getY() + "");
             posZ = new EditBox(this.font, this.width / 2 + 50, this.height / 2 + 16, 52, 20, Component.literal(String.valueOf(M.pos().getZ())));
             posZ.setValue( M.pos().getZ() + "");
-            DimensionSelecter = new DimensionSelecter(List.of(Level.OVERWORLD), this, this.width / 2 - 101, this.height / 2 + 41, 180, M.Dimension().location().toString());
-            DimensionSelecter.dimension = M.Dimension();
+            DimensionSelecter = new DimensionSelecter(List.of(Level.OVERWORLD), this, this.width / 2 - 101, this.height / 2 + 41, 180, M.dimension().location().toString());
+            DimensionSelecter.dimension = M.dimension();
             this.addWidget(posX);
             this.addWidget(posY);
             this.addWidget(posZ);
@@ -169,11 +169,11 @@ public class PositionEditScreen extends Screen {
         if (lastScreen instanceof TunerScreen tunerScreen) {
             var M = tunerScreen.getFocusingEntry().getMarkedPosition();
             var newPos = new BlockPos(Integer.parseInt(posX.getValue()), Integer.parseInt(posY.getValue()), Integer.parseInt(posZ.getValue()));
-            var newDimension = isCharged ? DimensionSelecter.dimension : M.Dimension();
+            var newDimension = isCharged ? DimensionSelecter.dimension : M.dimension();
             var newM = new MarkedPositionsManager.MarkedPositions(newDimension, isCharged ? newPos : M.pos(), name, M.iconIndex());
             tunerScreen.getMarkedPositionsCache().set(tunerScreen.getMarkedPositionsCache().indexOf(M), newM);
             tunerScreen.populateWaypointList();
-            if(isCharged && !newPos.equals(M.pos()) || !newDimension.equals(M.Dimension()))
+            if(isCharged && !newPos.equals(M.pos()) || !newDimension.equals(M.dimension()))
                 PacketDistributor.sendToServer(new SetUnchargedPacket(tunerScreen.getMenu().getTunerPos()));
         } else PacketDistributor.sendToServer(new PearlRenamePacket(name));
 

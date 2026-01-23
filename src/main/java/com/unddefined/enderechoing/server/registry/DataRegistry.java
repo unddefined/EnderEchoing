@@ -2,10 +2,10 @@ package com.unddefined.enderechoing.server.registry;
 
 import com.mojang.serialization.Codec;
 import com.unddefined.enderechoing.server.DataComponents.EntityData;
-import com.unddefined.enderechoing.server.DataComponents.PositionData;
 import com.unddefined.enderechoing.util.IconListManager;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -19,7 +19,7 @@ public class DataRegistry {
     public static final DeferredRegister.DataComponents COMPONENT_TYPES = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, "enderechoing");
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, "enderechoing");
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<PositionData>> POSITION = COMPONENT_TYPES.registerComponentType("position", builder -> builder.persistent(PositionData.CODEC));
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<GlobalPos>> POSITION = COMPONENT_TYPES.registerComponentType("position", builder -> builder.persistent(GlobalPos.CODEC));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<EntityData>> ENTITY = COMPONENT_TYPES.registerComponentType("entity", builder -> builder.persistent(EntityData.CODEC));
     public static final Supplier<AttachmentType<MarkedPositionsManager>> MARKED_POSITIONS_CACHE = ATTACHMENT_TYPES.register(
             "marked_positions_cache", () -> AttachmentType.serializable(MarkedPositionsManager::new).copyOnDeath().build()

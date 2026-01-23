@@ -91,7 +91,7 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
             pearlList.forEach(itemStack -> {
                 var p = itemStack.get(DataRegistry.POSITION);
                 var n = itemStack.get(CUSTOM_NAME);
-                if (p != null && n != null && p.Dimension().equals(level.dimension()) && posList.contains(p.pos()))
+                if (p != null && n != null && p.dimension().equals(level.dimension()) && posList.contains(p.pos()))
                     map.put(p.pos(), n.getString());
             });
             if (!map.isEmpty()) PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(map));
@@ -101,7 +101,7 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
             if (level.getBlockEntity(pos.above(2)) instanceof CalibratedSculkShriekerBlockEntity blockEntity)
                 if (blockEntity.getTheItem().getItem() instanceof EnderEchoingPearl) {
                     var p = blockEntity.getTheItem().get(DataRegistry.POSITION);
-                    targetPos = (p == null || !p.Dimension().equals(level.dimension())) ? null : p.pos();
+                    targetPos = (p == null || !p.dimension().equals(level.dimension())) ? null : p.pos();
                 }
             if (level.getBlockEntity(pos.above(2)) instanceof EnderEchoTunerBlockEntity blockEntity)
                 if (blockEntity.getDimension() != null && blockEntity.getDimension().equals(level.dimension()))

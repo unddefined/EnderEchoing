@@ -44,8 +44,8 @@ public class EnderEchoicResonatorBlockEntity extends BlockEntity implements GeoB
         if (level == null || level.isClientSide || level.getServer() == null) return;
         level.getServer().getPlayerList().getPlayers().forEach(player -> {
             var M = player.getData(DataRegistry.MARKED_POSITIONS_CACHE.get());
-            M.teleporters().removeIf(e -> e.Dimension().equals(this.level.dimension()) && e.pos().equals(worldPosition));
-            var P = M.markedPositions().stream().filter(e -> e.Dimension().equals(this.level.dimension()) && e.pos().equals(worldPosition)).findFirst();
+            M.teleporters().removeIf(e -> e.dimension().equals(this.level.dimension()) && e.pos().equals(worldPosition));
+            var P = M.markedPositions().stream().filter(e -> e.dimension().equals(this.level.dimension()) && e.pos().equals(worldPosition)).findFirst();
             var name = P.map(positions -> positions.name().replaceAll("[><]", "")).orElse(null);
             if (name != null && !name.isEmpty()) {
                 M.markedPositions().remove(P.get());

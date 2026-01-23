@@ -24,7 +24,7 @@ public record SyncTunerDataPacket(List<ItemStack> iconList,
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncTunerDataPacket> STREAM_CODEC = StreamCodec.composite(
             ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()),
             SyncTunerDataPacket::iconList,
-            MarkedPositionsManager.STREAM_CODEC.apply(ByteBufCodecs.list()),
+            MarkedPositionsManager.MarkedPositions.STREAM_CODEC.apply(ByteBufCodecs.list()),
             SyncTunerDataPacket::markedPositionsCache,
             INT.cast(),
             SyncTunerDataPacket::ee_pearl_amount,

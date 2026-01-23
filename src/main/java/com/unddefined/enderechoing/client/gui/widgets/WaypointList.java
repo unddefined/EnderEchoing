@@ -2,7 +2,6 @@ package com.unddefined.enderechoing.client.gui.widgets;
 
 import com.unddefined.enderechoing.client.gui.screen.PositionEditScreen;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
-import com.unddefined.enderechoing.server.DataComponents.PositionData;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -11,6 +10,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -50,7 +50,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         contextMenu.addItem("screen.enderechoing.copy", () -> {
             screen.getMenu().ee_pearl_amount--;
             var pearl = new ItemStack(ENDER_ECHOING_PEARL.get(), 1);
-            pearl.set(POSITION.get(), new PositionData(M.Dimension(), M.pos()));
+            pearl.set(POSITION.get(), new GlobalPos(M.dimension(), M.pos()));
             pearl.set(CUSTOM_NAME, Component.literal(M.name()));
             screen.getMenu().givePlayerPearl(pearl);
         });
@@ -153,7 +153,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
 
         public void renderTooltip(GuiGraphics gfx, int mouseX, int mouseY) {
             if (!this.hovered) return;
-            var posText = Component.translatable("item.enderechoing.ender_echoing_pearl.position", markedPosition.pos().toShortString(), Component.translationArg(markedPosition.Dimension().location()));
+            var posText = Component.translatable("item.enderechoing.ender_echoing_pearl.position", markedPosition.pos().toShortString(), Component.translationArg(markedPosition.dimension().location()));
             var distanceText = Component.translatable("screen.enderechoing.distance", (int) Math.sqrt(parent.screen.getMenu().getTunerPos().distSqr(markedPosition.pos())));
             gfx.renderComponentTooltip(mc.font, List.of(posText, distanceText), mouseX, mouseY);
         }

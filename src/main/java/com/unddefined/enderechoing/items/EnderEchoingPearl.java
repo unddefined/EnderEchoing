@@ -1,10 +1,10 @@
 package com.unddefined.enderechoing.items;
 
 import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
-import com.unddefined.enderechoing.server.DataComponents.PositionData;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,7 +35,7 @@ public class EnderEchoingPearl extends Item {
         if (handStack.getItem() instanceof EnderEchoingPearl) {
             //pearl.use()标记
             handStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
-            handStack.set(POSITION.get(), new PositionData(level.dimension(), playerPos));
+            handStack.set(POSITION.get(), new GlobalPos(level.dimension(), playerPos));
         } else {
             //非pearl.use()标记
             var targetPosition = player.getData(EE_PEARL_POSITION.get());
@@ -47,7 +47,7 @@ public class EnderEchoingPearl extends Item {
             var pearlStack = player.getInventory().getItem(player.getInventory().findSlotMatchingItem(pearl));
             var CopyStack = pearlStack.copyWithCount(1);
             CopyStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
-            CopyStack.set(POSITION.get(), new PositionData(level.dimension(), targetPosition));
+            CopyStack.set(POSITION.get(), new GlobalPos(level.dimension(), targetPosition));
             player.getInventory().add(CopyStack);
             pearlStack.shrink(1);
         }
@@ -75,7 +75,7 @@ public class EnderEchoingPearl extends Item {
         var P = stack.get(POSITION.get());
         if (P != null)
             tooltip.add(Component.translatable("item.enderechoing.ender_echoing_pearl.position", P.pos().toShortString(),
-                    Component.translationArg(P.Dimension().location())));
+                    Component.translationArg(P.dimension().location())));
         super.appendHoverText(stack, context, tooltip, tooltipFlag);
     }
 }

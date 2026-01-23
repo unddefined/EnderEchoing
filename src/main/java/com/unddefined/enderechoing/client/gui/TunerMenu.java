@@ -40,7 +40,7 @@ public class TunerMenu extends AbstractContainerMenu {
         this.selected_tuner_tab = buf.readInt();
         this.ee_pearl_amount = buf.readInt();
         this.tunerPos = buf.readBlockPos();
-        this.markedPositionsCache = buf.readList(MarkedPositionsManager.STREAM_CODEC);
+        this.markedPositionsCache = buf.readList(MarkedPositionsManager.MarkedPositions.STREAM_CODEC);
         for (int i = 0; i < 10; i++) this.iconList.add(new ItemStack(ITEM.get(buf.readResourceLocation())));
     }
 
@@ -57,7 +57,7 @@ public class TunerMenu extends AbstractContainerMenu {
 
     public void setSelectedPosition(MarkedPositionsManager.MarkedPositions M) {
         if (M == null) PacketDistributor.sendToServer(new SetSelectedPositionPacket(tunerPos, BlockPos.ZERO, Level.OVERWORLD, ""));
-        else PacketDistributor.sendToServer(new SetSelectedPositionPacket(tunerPos, M.pos(), M.Dimension(), M.name()));
+        else PacketDistributor.sendToServer(new SetSelectedPositionPacket(tunerPos, M.pos(), M.dimension(), M.name()));
     }
 
     public void givePlayerPearl(ItemStack itemStack) {
@@ -89,7 +89,7 @@ public class TunerMenu extends AbstractContainerMenu {
         buf.writeInt(selected_tuner_tab);
         buf.writeInt(ee_pearl_amount);
         buf.writeBlockPos(pos);
-        buf.writeCollection(markedPositionsCache, MarkedPositionsManager.STREAM_CODEC);
+        buf.writeCollection(markedPositionsCache, MarkedPositionsManager.MarkedPositions.STREAM_CODEC);
         for (ItemStack stack : iconList) buf.writeResourceLocation(ITEM.getKey(stack.getItem()));
     }
 }
