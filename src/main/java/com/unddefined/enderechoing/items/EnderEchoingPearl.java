@@ -1,5 +1,6 @@
 package com.unddefined.enderechoing.items;
 
+import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
@@ -65,7 +66,8 @@ public class EnderEchoingPearl extends Item {
             return InteractionResultHolder.success(itemStack);
         }
 
-        if (positionData == null) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket("", BlockPos.ZERO));
+        if (positionData == null) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket(
+                level.getBlockEntity(player.blockPosition()) instanceof EnderEchoicResonatorBlockEntity ? "><" : "", BlockPos.ZERO));
 
         return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
     }

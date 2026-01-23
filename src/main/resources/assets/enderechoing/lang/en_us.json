@@ -48,5 +48,9 @@
   "screen.enderechoing.dimension": "Dimension",
   "screen.enderechoing.biome": "Biome",
   "screen.enderechoing.structure": "Structure",
-  "screen.enderechoing.insert_info": "Insert info\n(should in same dimension)"
+  "screen.enderechoing.insert_info": "Insert info\n(should in same dimension)",
+  "screen.enderechoing.last_death": "Last Death",
+  "screen.enderechoing.previous_death": "Previous Death",
+  "screen.enderechoing.earlier_death": "Earlier Death",
+  "screen.enderechoing.even_earlier_death": "Even Earlier Death"
 }

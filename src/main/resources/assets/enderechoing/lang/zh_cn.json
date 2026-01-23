@@ -48,5 +48,9 @@
   "screen.enderechoing.dimension": "维度",
   "screen.enderechoing.biome": "生物群系",
   "screen.enderechoing.structure": "所处结构/建筑",
-  "screen.enderechoing.insert_info": "插入额外信息\n（需处于同一维度）"
+  "screen.enderechoing.insert_info": "插入额外信息\n（需处于同一维度）",
+  "screen.enderechoing.last_death": "上次死亡地点",
+  "screen.enderechoing.previous_death": "此前死亡地点",
+  "screen.enderechoing.earlier_death":  "更早的死亡地点",
+  "screen.enderechoing.even_earlier_death":  "更更早的死亡地点"
 }
