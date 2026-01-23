@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.blocks;
 
 import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEntity;
+import com.unddefined.enderechoing.entities.CrystalHitProxyEntity;
 import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
 import com.unddefined.enderechoing.server.registry.BlockRegistry;
@@ -118,6 +119,7 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
         if (stack.getItem() == ItemRegistry.ENDER_ECHO_CRYSTAL.get()) {
             if (!player.isCreative()) stack.shrink(1);
             level.setBlock(pos, BlockRegistry.ENDER_ECHO_CRYSTAL.get().defaultBlockState(), 3);
+            level.addFreshEntity(new CrystalHitProxyEntity(level, pos));
             EnderEchoCrystalSavedData.get((ServerLevel) level).add(pos);
             return ItemInteractionResult.SUCCESS;
         }
@@ -180,6 +182,8 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {return List.of(new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));}
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        return List.of(new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));
+    }
 
 }

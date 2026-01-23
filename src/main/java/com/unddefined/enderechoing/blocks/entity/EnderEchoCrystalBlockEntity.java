@@ -1,11 +1,14 @@
 package com.unddefined.enderechoing.blocks.entity;
 
+import com.unddefined.enderechoing.entities.CrystalHitProxyEntity;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
@@ -24,6 +27,8 @@ public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlock
     public void setRemoved() {
         if (level == null || level.isClientSide || level.getServer() == null || level.getServer().getPlayerList().getPlayers().isEmpty()) return;
         EnderEchoCrystalSavedData.get((ServerLevel) level).remove(worldPosition);
+        level.getEntities(new CrystalHitProxyEntity(level, worldPosition), new AABB(worldPosition), e -> true)
+                .forEach(e -> e.remove(Entity.RemovalReason.KILLED));
         super.setRemoved();
     }
     @Override

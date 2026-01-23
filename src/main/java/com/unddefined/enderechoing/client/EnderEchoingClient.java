@@ -4,7 +4,9 @@ import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
 import com.unddefined.enderechoing.client.particles.ParticleDirectlyMovingDust;
 import com.unddefined.enderechoing.client.renderer.block.*;
+import com.unddefined.enderechoing.entities.CrystalHitProxyEntity;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
+import com.unddefined.enderechoing.server.registry.EntityRegistry;
 import com.unddefined.enderechoing.server.registry.ParticlesRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
@@ -16,6 +18,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -62,6 +65,11 @@ public class EnderEchoingClient {
                 context -> new EnderEchoTunerRenderer()));
         event.enqueueWork(() -> BlockEntityRenderers.register(BlockEntityRegistry.ENDER_ECHO_CRYSTAL.get(),
                 context -> new EnderEchoCrystalBlockRenderer()));
+    }
+
+    @SubscribeEvent
+    public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(EntityRegistry.CRYSTAL_HIT_PROXY.get(), CrystalHitProxyEntity.NoopRenderer::new);
     }
     @SubscribeEvent
     private static void registerScreens(RegisterMenuScreensEvent event) {event.register(TUNER_MENU.get(), TunerScreen::new);}
