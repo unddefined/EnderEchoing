@@ -1,6 +1,8 @@
 package com.unddefined.enderechoing.compat.curios;
 
 import com.unddefined.enderechoing.EnderEchoing;
+import com.unddefined.enderechoing.network.packet.SendMarkedPositionNamesPacket;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
@@ -9,14 +11,17 @@ import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.unddefined.enderechoing.server.registry.DataRegistry.ENDER_EYE_OWNER;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.MARKED_POSITIONS_CACHE;
 
 @EventBusSubscriber(modid = EnderEchoing.MODID)
 public class EnderEchoCuriosPlugin {
@@ -27,6 +32,7 @@ public class EnderEchoCuriosPlugin {
                     private static final int HEAL_INTERVAL = 50; // 5s
                     private static final int XP_COST = 50;
                     private static EndCrystal crystal;
+
                     @Override
                     public ItemStack getStack() {
                         return stack;
@@ -41,6 +47,16 @@ public class EnderEchoCuriosPlugin {
                     public void curioTick(SlotContext slotContext) {
                         if (!(slotContext.entity() instanceof ServerPlayer player)) return;
                         var level = (ServerLevel) player.level();
+
+                        var manager = player.getData(MARKED_POSITIONS_CACHE);
+                        if (!manager.teleporters().isEmpty() && !manager.markedPositions().isEmpty()) {
+                            Map<BlockPos, String> posName = new java.util.HashMap<>();
+                            var map = manager.getMarkedTeleportersMap(manager.getTeleporterPositions(level), level);
+                            var min = map.keySet().stream().min(Comparator.comparingDouble(e -> e.distToCenterSqr(player.position()))).get();
+                            if (min.distToCenterSqr(player.position()) < 9) posName.put(min, map.get(min));
+                            PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
+                        }
+
                         if (level.getDragonFight() != null) return;
 
                         if (player.totalExperience < XP_COST || player.getHealth() >= player.getMaxHealth()) return;
@@ -61,8 +77,9 @@ public class EnderEchoCuriosPlugin {
                     @Override
                     public void onUnequip(SlotContext slotContext, ItemStack newStack) {
                         if (!(slotContext.entity() instanceof ServerPlayer player)) return;
-                        if (crystal == null || crystal.getBeamTarget() == null || !crystal.getBeamTarget().equals(player.blockPosition().below())) return;
-                        crystal.getEntityData().set(ENDER_EYE_OWNER, Optional.empty());
+                        Map<BlockPos, String> posName = new java.util.HashMap<>();
+                        PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
+                        if (crystal != null) crystal.getEntityData().set(ENDER_EYE_OWNER, Optional.empty());
                     }
                 }, Items.ENDER_EYE);
     }

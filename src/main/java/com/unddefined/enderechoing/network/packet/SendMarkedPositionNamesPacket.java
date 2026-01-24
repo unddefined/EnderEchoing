@@ -2,6 +2,7 @@ package com.unddefined.enderechoing.network.packet;
 
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.renderer.EchoRenderer;
+import com.unddefined.enderechoing.client.renderer.PositionNameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -23,7 +24,10 @@ public record SendMarkedPositionNamesPacket(Map<BlockPos, String> markedPosition
             SendMarkedPositionNamesPacket::markedPositionNames, SendMarkedPositionNamesPacket::new);
 
     public static void handle(SendMarkedPositionNamesPacket msg, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> EchoRenderer.MarkedPositionNames = msg.markedPositionNames());
+        ctx.enqueueWork(() -> {
+            if (msg.markedPositionNames.size() > 1) EchoRenderer.MarkedPositionNames = msg.markedPositionNames();
+            else PositionNameRenderer.posName = msg.markedPositionNames();
+        });
     }
 
     @Override
