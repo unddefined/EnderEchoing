@@ -8,19 +8,27 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class DataRegistry {
-    public static final DeferredRegister.DataComponents COMPONENT_TYPES = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, "enderechoing");
-    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, "enderechoing");
+    public static final EntityDataAccessor<Optional<UUID>> ENDER_EYE_OWNER = SynchedEntityData.defineId(EndCrystal.class, EntityDataSerializers.OPTIONAL_UUID);
 
+    public static final DeferredRegister.DataComponents COMPONENT_TYPES = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, "enderechoing");
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<GlobalPos>> POSITION = COMPONENT_TYPES.registerComponentType("position", builder -> builder.persistent(GlobalPos.CODEC));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<EntityData>> ENTITY = COMPONENT_TYPES.registerComponentType("entity", builder -> builder.persistent(EntityData.CODEC));
+
+    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, "enderechoing");
     public static final Supplier<AttachmentType<MarkedPositionsManager>> MARKED_POSITIONS_CACHE = ATTACHMENT_TYPES.register(
             "marked_positions_cache", () -> AttachmentType.serializable(MarkedPositionsManager::new).copyOnDeath().build()
     );

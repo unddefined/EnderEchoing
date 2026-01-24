@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "CatalystListenerMixin",
+    "EndCrystalMixin",
     "EntityMixin",
     "FlyTowardsPositionParticleMixin",
     "FogDataAccessor",
@@ -11,6 +12,7 @@
     "SculkPatchFeatureMixin"
   ],
   "client": [
+    "EndCrystalRendererMixin",
     "FogRendererMixin"
   ],
   "server": [
