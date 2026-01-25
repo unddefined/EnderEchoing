@@ -1,7 +1,6 @@
 package com.unddefined.enderechoing.network.packet;
 
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.util.IconListManager;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -35,7 +34,7 @@ public record SyncTunerDataPacket(List<ItemStack> iconList,
 
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
-            context.player().setData(ICON_LIST.get(), new IconListManager(iconList));
+            context.player().setData(ICON_LIST.get(), iconList);
             context.player().setData(EE_PEARL_AMOUNT.get(), ee_pearl_amount);
             var manager = MarkedPositionsManager.getManager(context.player());
             manager.markedPositions().clear();
