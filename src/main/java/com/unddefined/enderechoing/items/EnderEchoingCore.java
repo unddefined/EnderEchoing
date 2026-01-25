@@ -100,7 +100,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
             // 检查玩家是否有未保存数据的末影回响珍珠
             if (!player.getInventory().hasAnyMatching(item ->
                     item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null)
-                    || player.getData(EE_PEARL_AMOUNT.get()) < 1)
+                    && player.getData(EE_PEARL_AMOUNT.get()) < 1)
                 return InteractionResultHolder.fail(itemStack);
             // 渲染传送特效
             PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(player.blockPosition()));
@@ -143,7 +143,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
             // 再次检查玩家是否有未保存数据的珍珠
             if (!player.getInventory().hasAnyMatching(itemStack ->
                     itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)
-                    || player.getData(EE_PEARL_AMOUNT.get()) < 1) {
+                    && player.getData(EE_PEARL_AMOUNT.get()) < 1) {
                 player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
                 PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(BlockPos.ZERO));
                 return stack;
