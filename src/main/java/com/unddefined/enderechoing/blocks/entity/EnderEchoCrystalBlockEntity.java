@@ -27,7 +27,8 @@ import java.util.UUID;
 
 public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlockEntity {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    private UUID playerUUID;
+    public static final UUID nullUUID = new UUID(0, 0);
+    private UUID playerUUID = nullUUID;
 
     public EnderEchoCrystalBlockEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityRegistry.ENDER_ECHO_CRYSTAL.get(), pos, blockState);
@@ -39,27 +40,28 @@ public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlock
 
     public void setPlayerUUID(UUID playerUUID) {
         this.playerUUID = playerUUID;
+        if (level != null) level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+        setChanged();
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, EnderEchoCrystalBlockEntity self) {
         if (level == null || level.isClientSide) return;
-        if (self.playerUUID == null) return;
+        if (self.playerUUID.equals(nullUUID)) return;
         var player = level.getPlayerByUUID(self.playerUUID);
         if (player == null || player.distanceToSqr(pos.getCenter()) > 16 * 16 || player.getHealth() >= player.getMaxHealth())
-            self.playerUUID = null;
+            self.setPlayerUUID(nullUUID);
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        if (tag.contains("player")) playerUUID = tag.getUUID("player");
+        if (tag.contains("player")) setPlayerUUID(tag.getUUID("player"));
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        if (playerUUID != null) tag.putUUID("player", playerUUID);
-        else tag.remove("player");
+        tag.putUUID("player", playerUUID);
     }
 
     @Override

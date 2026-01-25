@@ -89,10 +89,11 @@ public class EnderEchoCuriosPlugin {
     public static void showResonatorName(ServerPlayer player) {
         var level = (ServerLevel) player.level();
         var manager = player.getData(MARKED_POSITIONS_CACHE);
-        if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
+        if (manager.teleporters().isEmpty() || manager.markedPositions().isEmpty()) return;
 
         Map<BlockPos, String> posName = new java.util.HashMap<>();
         var map = manager.getMarkedTeleportersMap(manager.getTeleporterPositions(level), level);
+        if (map.isEmpty()) return;
         var min = map.keySet().stream().min(Comparator.comparingDouble(e -> e.distToCenterSqr(player.position()))).get();
         if (min.distToCenterSqr(player.position()) < 9) posName.put(min, map.get(min));
         PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));

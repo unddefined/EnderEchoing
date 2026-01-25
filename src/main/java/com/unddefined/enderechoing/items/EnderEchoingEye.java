@@ -21,6 +21,7 @@ import top.theillusivec4.curios.api.type.capability.ICurioItem;
 import java.util.Comparator;
 import java.util.Map;
 
+import static com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity.nullUUID;
 import static com.unddefined.enderechoing.compat.curios.EnderEchoCuriosPlugin.*;
 
 public class EnderEchoingEye extends Item implements ICurioItem {
@@ -51,7 +52,7 @@ public class EnderEchoingEye extends Item implements ICurioItem {
         showResonatorName(player);
         if (player.totalExperience < XP_COST || player.getHealth() >= player.getMaxHealth()) return;
 
-        if (EECrystal == null || EECrystal.getPlayerUUID() == null || !EECrystal.getPlayerUUID().equals(player.getUUID()))
+        if (EECrystal == null || EECrystal.getPlayerUUID().equals(nullUUID) || !EECrystal.getPlayerUUID().equals(player.getUUID()))
             crystal = enderEyeCurioHealTick(player, 50, 50);
         if (crystal != null) {
             var UUID = crystal.getEntityData().get(DataRegistry.ENDER_EYE_OWNER);
@@ -65,8 +66,7 @@ public class EnderEchoingEye extends Item implements ICurioItem {
                 .ifPresentOrElse(blockPos -> EECrystal = (EnderEchoCrystalBlockEntity) level.getBlockEntity(blockPos), () -> EECrystal = null);
         if (EECrystal == null) return;
 
-        var playerUUID = EECrystal.getPlayerUUID();
-        if (playerUUID != null && !playerUUID.equals(player.getUUID())) return;
+        if (!EECrystal.getPlayerUUID().equals(nullUUID) && !EECrystal.getPlayerUUID().equals(player.getUUID())) return;
 
         EECrystal.setPlayerUUID(player.getUUID());
 
