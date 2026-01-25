@@ -1,21 +1,34 @@
 package com.unddefined.enderechoing.items;
 
+import com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity;
+import com.unddefined.enderechoing.network.packet.SendMarkedPositionNamesPacket;
+import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
+import com.unddefined.enderechoing.server.registry.DataRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.network.PacketDistributor;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
+
+import java.util.Comparator;
+import java.util.Map;
 
 import static com.unddefined.enderechoing.compat.curios.EnderEchoCuriosPlugin.*;
 
 public class EnderEchoingEye extends Item implements ICurioItem {
     private static final int HEAL_INTERVAL = 50; // 5s
-    private static final int XP_COST = 50;
+    private static final int XP_COST = 100;
+
     private static EndCrystal crystal;
+    private static EnderEchoCrystalBlockEntity EECrystal;
 
     public EnderEchoingEye(Properties properties) {
         super(properties.stacksTo(8));
@@ -33,15 +46,44 @@ public class EnderEchoingEye extends Item implements ICurioItem {
     }
 
     @Override
-    public void curioTick(SlotContext slotContext, ItemStack stack) {
-        showResonatorName(slotContext);
-        crystal = enderEyeCurioHealTick(slotContext, 50, 50);
+    public void curioTick(SlotContext ctx, ItemStack stack) {
+        if (!(ctx.entity() instanceof ServerPlayer player)) return;
+        showResonatorName(player);
+        if (player.totalExperience < XP_COST || player.getHealth() >= player.getMaxHealth()) return;
 
+        if (EECrystal == null || EECrystal.getPlayerUUID() == null || !EECrystal.getPlayerUUID().equals(player.getUUID()))
+            crystal = enderEyeCurioHealTick(player, 50, 50);
+        if (crystal != null) {
+            var UUID = crystal.getEntityData().get(DataRegistry.ENDER_EYE_OWNER);
+            if (UUID.isPresent() && UUID.get().equals(player.getUUID())) return;
+        }
+
+        var level = (ServerLevel) player.level();
+        EnderEchoCrystalSavedData.get(level).crystals.stream()
+                .min(Comparator.comparingDouble(c -> c.distToCenterSqr(player.getX(), player.getY(), player.getZ())))
+                .filter( c -> c.distToCenterSqr(player.getX(), player.getY(), player.getZ()) < 16 * 16)
+                .ifPresentOrElse(blockPos -> EECrystal = (EnderEchoCrystalBlockEntity) level.getBlockEntity(blockPos), () -> EECrystal = null);
+        if (EECrystal == null) return;
+
+        var playerUUID = EECrystal.getPlayerUUID();
+        if (playerUUID != null && !playerUUID.equals(player.getUUID())) return;
+
+        EECrystal.setPlayerUUID(player.getUUID());
+
+        if (level.getGameTime() % HEAL_INTERVAL != 0) return;
+        player.giveExperiencePoints(-XP_COST);
+        player.heal(2.0F);
     }
 
     @Override
     public void onUnequip(SlotContext slotContext, ItemStack newStack, ItemStack stack) {
-        onEnderEyeUnequip(slotContext, crystal);
+        if (!(slotContext.entity() instanceof ServerPlayer player)) return;
+
+        onEnderEyeUnequip(crystal, player);
+
+        Map<BlockPos, String> posName = new java.util.HashMap<>();
+        PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
+        if (EECrystal != null) EECrystal.setPlayerUUID(null);
     }
 
     @Override

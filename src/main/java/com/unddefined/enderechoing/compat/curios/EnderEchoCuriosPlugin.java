@@ -54,23 +54,23 @@ public class EnderEchoCuriosPlugin {
 
                     @Override
                     public void curioTick(SlotContext slotContext) {
-                        showResonatorName(slotContext);
-                        crystal = enderEyeCurioHealTick(slotContext, XP_COST, HEAL_INTERVAL);
+                         if (!(slotContext.entity() instanceof ServerPlayer player)) return;
+                        showResonatorName(player);
+                        if (player.totalExperience < XP_COST || player.getHealth() >= player.getMaxHealth()) return;
+                        crystal = enderEyeCurioHealTick(player, XP_COST, HEAL_INTERVAL);
                     }
 
                     @Override
                     public void onUnequip(SlotContext slotContext, ItemStack newStack) {
-                        onEnderEyeUnequip(slotContext, crystal);
+                        if (!(slotContext.entity() instanceof ServerPlayer player)) return;
+                        onEnderEyeUnequip(crystal, player);
                     }
                 }, Items.ENDER_EYE);
     }
 
-    public static EndCrystal enderEyeCurioHealTick(SlotContext ctx, int XP_COST, int HEAL_INTERVAL) {
-        if (!(ctx.entity() instanceof ServerPlayer player)) return null;
+    public static EndCrystal enderEyeCurioHealTick(ServerPlayer player, int XP_COST, int HEAL_INTERVAL) {
         var level = (ServerLevel) player.level();
         if (level.getDragonFight() != null) return null;
-
-        if (player.totalExperience < XP_COST || player.getHealth() >= player.getMaxHealth()) return null;
 
         EndCrystal crystal = level.getEntitiesOfClass(EndCrystal.class, player.getBoundingBox().inflate(16))
                 .stream().min(Comparator.comparingDouble(c -> c.distanceToSqr(player))).orElse(null);
@@ -86,8 +86,7 @@ public class EnderEchoCuriosPlugin {
         return crystal;
     }
 
-    public static void showResonatorName(SlotContext ctx) {
-        if (!(ctx.entity() instanceof ServerPlayer player)) return;
+    public static void showResonatorName(ServerPlayer player) {
         var level = (ServerLevel) player.level();
         var manager = player.getData(MARKED_POSITIONS_CACHE);
         if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
@@ -99,8 +98,7 @@ public class EnderEchoCuriosPlugin {
         PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
     }
 
-    public static void onEnderEyeUnequip(SlotContext slotContext, EndCrystal crystal){
-        if (!(slotContext.entity() instanceof ServerPlayer player)) return;
+    public static void onEnderEyeUnequip(EndCrystal crystal, ServerPlayer player){
         Map<BlockPos, String> posName = new java.util.HashMap<>();
         PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
         if (crystal != null) crystal.getEntityData().set(ENDER_EYE_OWNER, Optional.empty());
