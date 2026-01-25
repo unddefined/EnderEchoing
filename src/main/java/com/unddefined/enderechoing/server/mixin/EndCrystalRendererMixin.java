@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EndCrystalRenderer;
 import net.minecraft.client.renderer.entity.EnderDragonRenderer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,9 +21,9 @@ public abstract class EndCrystalRendererMixin {
         if (tag.get(ENDER_EYE_OWNER).isPresent()) {
             var player = entity.level().getPlayerByUUID(tag.get(ENDER_EYE_OWNER).get());
             if (player != null && player.distanceToSqr(entity) < 16 * 16 && player.getHealth() < player.getMaxHealth()) {
-                float dx = (float) (Mth.lerp(partialTicks, player.xo, player.getX()) - entity.getX());
-                float dy = (float) (Mth.lerp(partialTicks, player.xo, player.getY()) - entity.getY() - player.getBbHeight() * 0.5);
-                float dz = (float) (Mth.lerp(partialTicks, player.xo, player.getZ()) - entity.getZ());
+                float dx = (float) (player.getX() - entity.getX());
+                float dy = (float) (player.getY() - entity.getY() - player.getBbHeight() * 0.5);
+                float dz = (float) (player.getZ() - entity.getZ());
                 poseStack.translate(dx, dy, dz);
                 EnderDragonRenderer
                         .renderCrystalBeams(-dx, -dy + getY(entity, partialTicks), -dz, partialTicks, entity.time, poseStack, buffer, packedLight);

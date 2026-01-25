@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "minecraft:ender_eye"
+    "minecraft:ender_eye",
+    "enderechoing:ender_echoing_eye"
   ]
 }
