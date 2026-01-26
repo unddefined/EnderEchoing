@@ -29,7 +29,6 @@ public record ReplyDimensionListPacket(List<ResourceKey<Level>> dimensionList) i
 
     public static void handle(ReplyDimensionListPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
-            // 在客户端更新 PositionEditScreen 中的 structure 字段
             if (context.player().level().isClientSide &&
                     Minecraft.getInstance().screen instanceof PositionEditScreen P) P.setDimensionList(packet.dimensionList);
         });

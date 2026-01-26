@@ -6,7 +6,7 @@ import com.mojang.math.Axis;
 import com.unddefined.enderechoing.blocks.EnderEchoTunerBlock;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.client.model.EnderEchoTunerModel;
-import com.unddefined.enderechoing.client.renderer.PositionNameRenderer;
+import com.unddefined.enderechoing.client.renderer.ResonatorNameRenderer;
 import com.unddefined.enderechoing.client.renderer.layer.EnderEchoTunerLayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -53,7 +53,7 @@ public class EnderEchoTunerRenderer extends GeoBlockRenderer<EnderEchoTunerBlock
             // 渲染文本
             if (animatable.getBlockState().getValue(EnderEchoTunerBlock.FACING) != Direction.DOWN) poseStack.translate(0, 1.6f, 0);
             else poseStack.translate(0, -0.3f, 0);
-            PositionNameRenderer.renderPositionName(animatable.getName(), bufferSource, poseStack);
+            ResonatorNameRenderer.renderPositionName(animatable.getName(), bufferSource, poseStack);
             poseStack.popPose();
         }
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);

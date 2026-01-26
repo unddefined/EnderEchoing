@@ -45,6 +45,8 @@ public class PositionEditScreen extends Screen {
     private Button structureBtn;
     private Button dimBtn;
     private Button biomeBtn;
+    private Button doneBtn;
+    private Button cancelBtn;
 
     public PositionEditScreen(Screen lastScreen, String fieldValue, BlockPos pos) {
         super(Component.translatable("screen.enderechoing.edit_title"));
@@ -88,48 +90,48 @@ public class PositionEditScreen extends Screen {
             isCharged = true;
             var M = tunerScreen.getFocusingEntry().getMarkedPosition();
             posX = new EditBox(this.font, this.width / 2 - 90, this.height / 2 + 16, 52, 20, Component.literal(String.valueOf(M.pos().getX())));
-            posX.setValue( M.pos().getX() + "");
+            posX.setValue(M.pos().getX() + "");
             posY = new EditBox(this.font, this.width / 2 - 21, this.height / 2 + 16, 52, 20, Component.literal(String.valueOf(M.pos().getY())));
-            posY.setValue( M.pos().getY() + "");
+            posY.setValue(M.pos().getY() + "");
             posZ = new EditBox(this.font, this.width / 2 + 50, this.height / 2 + 16, 52, 20, Component.literal(String.valueOf(M.pos().getZ())));
-            posZ.setValue( M.pos().getZ() + "");
-            DimensionSelecter = new DimensionSelecter(List.of(Level.OVERWORLD), this, this.width / 2 - 101, this.height / 2 + 41, 180, M.dimension().location().toString());
+            posZ.setValue(M.pos().getZ() + "");
+            DimensionSelecter = new DimensionSelecter(List.of(Level.OVERWORLD), this, this.width / 2 - 101, this.height / 2 + 41, 210, M.dimension().location().toString());
             DimensionSelecter.dimension = M.dimension();
             this.addWidget(posX);
             this.addWidget(posY);
             this.addWidget(posZ);
             this.addWidget(DimensionSelecter);
-            insertBtn.active = false;
         }
 
         // 添加维度按钮
         dimBtn = Button.builder(Component.translatable("screen.enderechoing.dimension"), (button) ->
                         this.nameField.insertText(dimension != null ? dimension : "null"))
-                .bounds(this.width / 2 - 101, this.height / 2 + 70, 200, 20).build();
+                .bounds(this.width / 2 - 101, this.height / 2 + 70 - (isCharged ? 41 - 70 : 0), 200, 20).build();
         dimBtn.setTooltip(Tooltip.create(Component.translatable(dimension != null ? dimension : "null")));
         this.addRenderableWidget(dimBtn);
 
         // 添加生物群系按钮
         biomeBtn = Button.builder(Component.translatable("screen.enderechoing.biome"), (button) ->
                         this.nameField.insertText(biome != null ? biome : "null"))
-                .bounds(this.width / 2 - 101, this.height / 2 + 93, 200, 20).build();
+                .bounds(this.width / 2 - 101, this.height / 2 + 93 - (isCharged ? 41 - 73 : 0), 200, 20).build();
         biomeBtn.setTooltip(Tooltip.create(Component.translatable(biome != null ? biome : "null")));
         this.addRenderableWidget(biomeBtn);
 
         // 添加结构按钮
         structureBtn = Button.builder(Component.translatable("screen.enderechoing.structure"), (button) ->
                         this.nameField.insertText(structure != null ? structure : "null"))
-                .bounds(this.width / 2 - 101, this.height / 2 + 116, 200, 20).build();
+                .bounds(this.width / 2 - 101, this.height / 2 + 116 - (isCharged ? 41 - 76 : 0), 200, 20).build();
         structureBtn.setTooltip(Tooltip.create(Component.translatable(structure != null ? structure : "null")));
         this.addRenderableWidget(structureBtn);
 
         // 添加完成按钮
-        this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.done"), (button) ->
-                this.onDone()).bounds(this.width / 2 - 102, this.height / 2 + 25 + (isCharged ? 43 : 0), 100, 20).build());
-
+        this.doneBtn = Button.builder(Component.translatable("screen.enderechoing.done"), (button) ->
+                this.onDone()).bounds(this.width / 2 - 102, this.height / 2 + 25 + (isCharged ? 43 : 0), 100, 20).build();
+        this.addRenderableWidget(doneBtn);
         // 添加取消按钮
-        this.addRenderableWidget(Button.builder(Component.translatable("screen.enderechoing.cancel"), (button) ->
-                this.onClose()).bounds(this.width / 2 + 2, this.height / 2 + 25 + (isCharged ? 43 : 0), 100, 20).build());
+        this.cancelBtn = Button.builder(Component.translatable("screen.enderechoing.cancel"), (button) ->
+                this.onClose()).bounds(this.width / 2 + 2, this.height / 2 + 25 + (isCharged ? 43 : 0), 100, 20).build();
+        this.addRenderableWidget(cancelBtn);
     }
 
     @Override
@@ -141,7 +143,7 @@ public class PositionEditScreen extends Screen {
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 30, 0xFFFFFF);
 
         this.nameField.render(guiGraphics, mouseX, mouseY, partialTick);
-        if(posX != null){
+        if (posX != null) {
             posX.render(guiGraphics, mouseX, mouseY, partialTick);
             posY.render(guiGraphics, mouseX, mouseY, partialTick);
             posZ.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -149,7 +151,15 @@ public class PositionEditScreen extends Screen {
             guiGraphics.drawString(font, "Y:", this.width / 2 - 34, this.height / 2 + 22, -1, false);
             guiGraphics.drawString(font, "Z:", this.width / 2 + 36, this.height / 2 + 22, -1, false);
             DimensionSelecter.render(guiGraphics, mouseX, mouseY, partialTick);
+            if (DimensionSelecter.isVisible()) {
+                doneBtn.visible = false;
+                cancelBtn.visible = false;
+            } else {
+                doneBtn.visible = true;
+                cancelBtn.visible = true;
+            }
         }
+
         if (!CursorMoved) this.nameField.moveCursorTo(1, false);
         CursorMoved = true;
         if (insertVisible) {
@@ -168,12 +178,12 @@ public class PositionEditScreen extends Screen {
 
         if (lastScreen instanceof TunerScreen tunerScreen) {
             var M = tunerScreen.getFocusingEntry().getMarkedPosition();
-            var newPos = new BlockPos(Integer.parseInt(posX.getValue()), Integer.parseInt(posY.getValue()), Integer.parseInt(posZ.getValue()));
+            var newPos = isCharged ? new BlockPos(Integer.parseInt(posX.getValue()), Integer.parseInt(posY.getValue()), Integer.parseInt(posZ.getValue())) : M.pos();
             var newDimension = isCharged ? DimensionSelecter.dimension : M.dimension();
-            var newM = new MarkedPositionsManager.MarkedPositions(newDimension, isCharged ? newPos : M.pos(), name, M.iconIndex());
+            var newM = new MarkedPositionsManager.MarkedPositions(newDimension, newPos, name, M.iconIndex());
             tunerScreen.getMarkedPositionsCache().set(tunerScreen.getMarkedPositionsCache().indexOf(M), newM);
             tunerScreen.populateWaypointList();
-            if(isCharged && !newPos.equals(M.pos()) || !newDimension.equals(M.dimension()))
+            if (isCharged && !newPos.equals(M.pos()) || !newDimension.equals(M.dimension()))
                 PacketDistributor.sendToServer(new SetUnchargedPacket(tunerScreen.getMenu().getTunerPos()));
         } else PacketDistributor.sendToServer(new PearlRenamePacket(name));
 
@@ -197,7 +207,9 @@ public class PositionEditScreen extends Screen {
     }
 
     @Override
-    public boolean isPauseScreen() {return false;}
+    public boolean isPauseScreen() {
+        return false;
+    }
 
     // 供 ReplyStructureInfoPacket 回调使用
     public void setStructure(String structure) {
@@ -205,7 +217,7 @@ public class PositionEditScreen extends Screen {
         if (this.structureBtn != null) this.structureBtn.setTooltip(Tooltip.create(Component.translatable(structure != null ? structure : "null")));
     }
 
-    public void setDimensionList(List<ResourceKey<Level>> dimensionList){
+    public void setDimensionList(List<ResourceKey<Level>> dimensionList) {
         if (this.DimensionSelecter != null && dimensionList != null) this.DimensionSelecter.updateDimensionList(dimensionList);
     }
 }

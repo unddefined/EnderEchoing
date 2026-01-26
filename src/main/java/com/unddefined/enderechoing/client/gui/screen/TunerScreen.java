@@ -206,7 +206,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         if (changeIcon && jeiItem.isEmpty()) jeiItem = getItemFromJei();
         if (waypointList.getContextMenu().isVisible() || tabBar.getContextMenu().isVisible()) return false;
         if (button != 0) return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
-        if (tabBar.mouseDragged(mouseX, mouseY, button)) return true;
+        if (tabBar.mouseDragged(button)) return true;
 
         var selected = waypointList.getSelected();
         if (selected == null) return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);

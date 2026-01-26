@@ -21,7 +21,7 @@ import java.util.Map;
 import static net.minecraft.client.renderer.LightTexture.FULL_BLOCK;
 
 @EventBusSubscriber(modid = EnderEchoing.MODID, value = Dist.CLIENT)
-public class PositionNameRenderer {
+public class ResonatorNameRenderer {
     private static final Minecraft mc = Minecraft.getInstance();
     public static Map<BlockPos, String> posName = new java.util.HashMap<>();
     @SubscribeEvent

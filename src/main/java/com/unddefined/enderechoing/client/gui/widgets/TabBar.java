@@ -1,6 +1,5 @@
 package com.unddefined.enderechoing.client.gui.widgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.unddefined.enderechoing.client.gui.TunerMenu;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
 import com.unddefined.enderechoing.network.packet.SetTunerSelectedTabPacket;
@@ -40,40 +39,26 @@ public class TabBar {
     }
 
     public void render(GuiGraphics G, int mouseX, int mouseY, float partialTick) {
-        RenderSystem.enableBlend();
-        G.pose().pushPose();
 
         G.blitSprite(HOTBAR_SPRITE, x, y, 182, 22);
         G.blitSprite(HOTBAR_OFFHAND_LEFT_SPRITE, x - 29, y - 1, 29, 24);
         G.blitSprite(HOTBAR_SELECTION_SPRITE, x - 30 + screen.selectedTab * 20 + (screen.selectedTab > 0 ? 9 : 0), y - 1, 24, 23);
-        G.pose().popPose();
 
-        this.renderSlot(G, x - 26, y + 3, partialTick, menu.getIconList().getFirst());
-        for (int i1 = 1; i1 <= 9; i1++) {
-            int j1 = x - 20 + i1 * 20 + 3;
-            this.renderSlot(G, j1, y + 3, partialTick, menu.getIconList().get(i1));
-        }
-        RenderSystem.disableBlend();
-        // 渲染右键菜单
-        contextMenu.render(G, 0, 0, partialTick);
+        this.renderSlot(G, x - 26, y + 3, menu.getIconList().getFirst());
+        for (int i1 = 1; i1 <= 9; i1++) this.renderSlot(G, x - 20 + i1 * 20 + 3, y + 3, menu.getIconList().get(i1));
+
         if (dragging) G.renderFakeItem(menu.getIconList().get(screen.selectedTab), mouseX - 8, mouseY - 8);
+
+        contextMenu.render(G, 0, 0, partialTick);
     }
 
-    private void renderSlot(GuiGraphics guiGraphics, int x, int y, float partialTick, ItemStack stack) {
-        if (stack.isEmpty()) return;
-        float f = (float) stack.getPopTime() - partialTick;
-        if (f > 0.0F) {
-            float f1 = 1.0F + f / 5.0F;
-            guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate((float) (x + 8), (float) (y + 12), 0.0F);
-            guiGraphics.pose().scale(1.0F / f1, (f1 + 1.0F) / 2.0F, 1.0F);
-            guiGraphics.pose().translate((float) (-(x + 8)), (float) (-(y + 12)), 0.0F);
-        }
-        var air = dragging && menu.getIconList().get(screen.selectedTab).equals(stack) ? ItemStack.EMPTY : stack;
-        guiGraphics.renderFakeItem(air, x, y);
-        if (f > 0.0F) guiGraphics.pose().popPose();
-        ItemStack fakepearl = stack.is(ENDER_ECHOING_PEARL) ? new ItemStack(STONE, menu.ee_pearl_amount) : stack;
-        guiGraphics.renderItemDecorations(screen.getMinecraft().font, fakepearl, x, y);
+    private void renderSlot(GuiGraphics guiGraphics, int x, int y, ItemStack stack) {
+        if (stack.isEmpty() || (contextMenu.isVisible() && !stack.equals(menu.getIconList().get(screen.selectedTab)) && !stack.equals(menu.getIconList().getFirst())))
+            return;
+
+        guiGraphics.renderFakeItem(dragging && menu.getIconList().get(screen.selectedTab).equals(stack) ? ItemStack.EMPTY : stack, x, y);
+        ItemStack pearl = stack.is(ENDER_ECHOING_PEARL) ? new ItemStack(ENDER_ECHOING_PEARL.get(), menu.ee_pearl_amount) : stack;
+        guiGraphics.renderItemDecorations(screen.getMinecraft().font, pearl, x, y);
     }
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -174,17 +159,17 @@ public class TabBar {
         return false;
     }
 
-    public boolean mouseDragged(double mouseX, double mouseY, int button) {
+    public boolean mouseDragged(int button) {
         if (button != 0) return false;
         if (screen.selectedTab < 1) return false;
-        if (!dragging && tabClicked) {
-            this.dragging = true;
-            return true;
-        }
-        return false;
+        if (!dragging && !tabClicked) return false;
+        this.dragging = true;
+        return true;
     }
 
-    public ContextMenu getContextMenu() {return contextMenu;}
+    public ContextMenu getContextMenu() {
+        return contextMenu;
+    }
 
 }
 
