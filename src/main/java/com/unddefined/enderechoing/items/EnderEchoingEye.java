@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.monster.EnderMan;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -28,8 +27,8 @@ public class EnderEchoingEye extends Item implements ICurioItem {
     private static final int HEAL_INTERVAL = 50; // 5s
     private static final int XP_COST = 100;
 
-    private static EndCrystal crystal;
-    private static EnderEchoCrystalBlockEntity EECrystal;
+    private EndCrystal crystal;
+    private EnderEchoCrystalBlockEntity EECrystal;
 
     public EnderEchoingEye(Properties properties) {
         super(properties.stacksTo(8));
@@ -62,7 +61,7 @@ public class EnderEchoingEye extends Item implements ICurioItem {
         var level = (ServerLevel) player.level();
         EnderEchoCrystalSavedData.get(level).crystals.stream()
                 .min(Comparator.comparingDouble(c -> c.distToCenterSqr(player.getX(), player.getY(), player.getZ())))
-                .filter( c -> c.distToCenterSqr(player.getX(), player.getY(), player.getZ()) < 16 * 16)
+                .filter(c -> c.distToCenterSqr(player.getX(), player.getY(), player.getZ()) < 16 * 16)
                 .ifPresentOrElse(blockPos -> EECrystal = (EnderEchoCrystalBlockEntity) level.getBlockEntity(blockPos), () -> EECrystal = null);
         if (EECrystal == null) return;
 
@@ -88,6 +87,6 @@ public class EnderEchoingEye extends Item implements ICurioItem {
 
     @Override
     public boolean isEnderMask(SlotContext slotContext, EnderMan enderMan, ItemStack stack) {
-        return slotContext.entity() instanceof Player;
+        return true;
     }
 }

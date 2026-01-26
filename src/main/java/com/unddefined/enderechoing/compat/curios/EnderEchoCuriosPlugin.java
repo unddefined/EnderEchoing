@@ -33,7 +33,7 @@ public class EnderEchoCuriosPlugin {
                 (stack, context) -> new ICurio() {
                     private static final int HEAL_INTERVAL = 50; // 5s
                     private static final int XP_COST = 50;
-                    private static EndCrystal crystal;
+                    private EndCrystal crystal;
 
                     @Override
                     public ItemStack getStack() {
