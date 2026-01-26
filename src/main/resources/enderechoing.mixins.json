@@ -5,6 +5,7 @@
   "mixins": [
     "CatalystListenerMixin",
     "EndCrystalMixin",
+    "EnderManMixin",
     "EntityMixin",
     "FlyTowardsPositionParticleMixin",
     "FogDataAccessor",
