@@ -1,7 +1,5 @@
 package com.unddefined.enderechoing.blocks.entity;
 
-import com.unddefined.enderechoing.entities.CrystalHitProxyEntity;
-import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -9,12 +7,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -46,7 +41,7 @@ public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlock
 
     public static void tick(Level level, BlockPos pos, BlockState state, EnderEchoCrystalBlockEntity self) {
         if (level == null || level.isClientSide) return;
-        if (self.playerUUID.equals(nullUUID)) return;
+        if (self.playerUUID == null || self.playerUUID.equals(nullUUID)) return;
         var player = level.getPlayerByUUID(self.playerUUID);
         if (player == null || player.distanceToSqr(pos.getCenter()) > 16 * 16 || player.getHealth() >= player.getMaxHealth())
             self.setPlayerUUID(nullUUID);
@@ -72,15 +67,6 @@ public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlock
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
-    }
-
-    @Override
-    public void setRemoved() {
-        if (level == null || level.isClientSide || level.getServer() == null || level.getServer().getPlayerList().getPlayers().isEmpty()) return;
-        EnderEchoCrystalSavedData.get((ServerLevel) level).remove(worldPosition);
-        level.getEntities(new CrystalHitProxyEntity(level, worldPosition), new AABB(worldPosition), e -> true)
-                .forEach(e -> e.remove(Entity.RemovalReason.KILLED));
-        super.setRemoved();
     }
 
     @Override

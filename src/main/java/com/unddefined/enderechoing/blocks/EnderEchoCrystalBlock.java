@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.blocks;
 
 import com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity;
+import com.unddefined.enderechoing.entities.CrystalHitProxyEntity;
 import com.unddefined.enderechoing.network.packet.SendSyncedTeleporterPositionsPacket;
 import com.unddefined.enderechoing.network.packet.SetEchoSoundingPosPacket;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -58,6 +60,16 @@ public class EnderEchoCrystalBlock extends Block implements EntityBlock {
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         return List.of(new ItemStack(ItemRegistry.ENDER_ECHO_CRYSTAL.get()), new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));
+    }
+
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.is(newState.getBlock())) {
+            EnderEchoCrystalSavedData.get((ServerLevel) level).remove(pos);
+            level.getEntities(new CrystalHitProxyEntity(level, pos), new AABB(pos), e -> true)
+                    .forEach(e -> e.remove(Entity.RemovalReason.KILLED));
+        }
+        super.onRemove(state, level, pos, newState, moved);
     }
 
     @Override

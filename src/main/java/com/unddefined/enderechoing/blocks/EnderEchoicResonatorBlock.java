@@ -66,14 +66,34 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {return new EnderEchoicResonatorBlockEntity(pos, state);}
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new EnderEchoicResonatorBlockEntity(pos, state);
+    }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {return RenderShape.ENTITYBLOCK_ANIMATED;}
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.ENTITYBLOCK_ANIMATED;
+    }
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         return List.of(new ItemStack(ItemRegistry.ENDER_ECHOING_CORE.get()), new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (level.getServer() == null) return;
+        level.getServer().getPlayerList().getPlayers().forEach(player -> {
+            var M = player.getData(DataRegistry.MARKED_POSITIONS_CACHE.get());
+            M.teleporters().removeIf(e -> e.dimension().equals(level.dimension()) && e.pos().equals(pos));
+            var P = M.markedPositions().stream().filter(e -> e.dimension().equals(level.dimension()) && e.pos().equals(pos)).findFirst();
+            var name = P.map(positions -> positions.name().replaceAll("[><]", "")).orElse(null);
+            if (name != null && !name.isEmpty()) {
+                M.markedPositions().remove(P.get());
+                M.addMarkedPosition(player.level().dimension(), P.get().pos(), name, P.get().iconIndex());
+            }
+        });
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.unddefined.enderechoing.blocks.entity;
 
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
-import com.unddefined.enderechoing.server.registry.DataRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.level.Level;
@@ -38,22 +37,6 @@ public class EnderEchoicResonatorBlockEntity extends BlockEntity implements GeoB
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {}
-
-    @Override
-    public void setRemoved() {
-        if (level == null || level.isClientSide || level.getServer() == null) return;
-        level.getServer().getPlayerList().getPlayers().forEach(player -> {
-            var M = player.getData(DataRegistry.MARKED_POSITIONS_CACHE.get());
-            M.teleporters().removeIf(e -> e.dimension().equals(this.level.dimension()) && e.pos().equals(worldPosition));
-            var P = M.markedPositions().stream().filter(e -> e.dimension().equals(this.level.dimension()) && e.pos().equals(worldPosition)).findFirst();
-            var name = P.map(positions -> positions.name().replaceAll("[><]", "")).orElse(null);
-            if (name != null && !name.isEmpty()) {
-                M.markedPositions().remove(P.get());
-                M.addMarkedPosition(player.level().dimension(), P.get().pos(), name, P.get().iconIndex());
-            }
-        });
-        super.setRemoved();
-    }
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {return this.cache;}
