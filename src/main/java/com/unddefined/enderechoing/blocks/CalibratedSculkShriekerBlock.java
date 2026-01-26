@@ -100,7 +100,6 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
             ) {
                 PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket("><", pos));
                 player.setData(EE_PEARL_POSITION.get(), pos);
-                player.setData(EE_PEARL_AMOUNT.get(), Math.max(player.getData(EE_PEARL_AMOUNT.get()) - 1, 0));
             }
             return ItemInteractionResult.SUCCESS;
         }

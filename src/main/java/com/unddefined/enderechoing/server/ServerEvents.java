@@ -21,7 +21,6 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
 import java.util.Comparator;
-import java.util.Objects;
 
 import static com.unddefined.enderechoing.effects.AttackScatteredEffect.attack_scattered_modifier_id;
 import static com.unddefined.enderechoing.effects.StaggerEffect.stagger_modifier_id;
@@ -35,16 +34,15 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
 public class ServerEvents {
     @SubscribeEvent
     public static void onExpireEffect(MobEffectEvent.Expired event) {
-        if (!event.getEntity().hasEffect(TINNITUS)) {
-            if (event.getEntity() instanceof Monster monster) {
-                Objects.requireNonNull(monster.getAttribute(FOLLOW_RANGE)).removeModifier(tinnitus_modifier_id);
-            }
+        if (!event.getEntity().hasEffect(TINNITUS) && event.getEntity().getAttribute(FOLLOW_RANGE) != null) {
+            if (event.getEntity() instanceof Monster monster)
+                monster.getAttribute(FOLLOW_RANGE).removeModifier(tinnitus_modifier_id);
         }
-        if (!event.getEntity().hasEffect(STAGGER)) {
-            Objects.requireNonNull(event.getEntity().getAttribute(MOVEMENT_SPEED)).removeModifier(stagger_modifier_id);
+        if (!event.getEntity().hasEffect(STAGGER) && event.getEntity().getAttribute(MOVEMENT_SPEED) != null) {
+            event.getEntity().getAttribute(MOVEMENT_SPEED).removeModifier(stagger_modifier_id);
         }
-        if (!event.getEntity().hasEffect(ATTACK_SCATTERED)) {
-            Objects.requireNonNull(event.getEntity().getAttribute(ATTACK_SPEED)).removeModifier(attack_scattered_modifier_id);
+        if (!event.getEntity().hasEffect(ATTACK_SCATTERED) && event.getEntity().getAttribute(ATTACK_SPEED) != null) {
+            event.getEntity().getAttribute(ATTACK_SPEED).removeModifier(attack_scattered_modifier_id);
         }
     }
 
@@ -128,4 +126,5 @@ public class ServerEvents {
         // 消耗珍珠
         if (deaths.size() < 4) player.setData(EE_PEARL_AMOUNT, player.getData(EE_PEARL_AMOUNT) - 1);
     }
+
 }

@@ -42,9 +42,7 @@ public record MarkedPositionsManager(List<MarkedPositionsManager.Teleporters> te
 
     public boolean addMarkedPosition(ResourceKey<Level> dimension, BlockPos pos, String name, int iconIndex) {
         if (pos == null || name == null || dimension == null) return false;
-        for (MarkedPositionsManager.MarkedPositions entry : markedPositions)
-            if (entry.dimension.equals(dimension) && entry.pos.equals(pos)) return false;
-
+        markedPositions.removeIf(entry -> entry.dimension.equals(dimension) && entry.pos.equals(pos));
         markedPositions.add(new MarkedPositionsManager.MarkedPositions(dimension, pos, name, iconIndex));
         return true;
     }
