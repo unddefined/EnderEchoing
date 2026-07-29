@@ -115,11 +115,6 @@ public class EchoRenderer {
             isCounting = true;
             countdownTicks = 60;
             if (echoMap.isEmpty() && !syncedTeleporterPositions.isEmpty()) {
-                List<Double> disstances = new ArrayList<>();
-                syncedTeleporterPositions.forEach(pos -> disstances.add(EchoSoundingPos.distSqr(pos)));
-                if (disstances.stream().max(Double::compareTo).get() <= 64 * 64) responseTime = 30;
-                else responseTime = 120;
-
                 for (BlockPos pos : syncedTeleporterPositions) {
                     if (pos.equals(EchoSoundingPos)) continue;
                     if (!new AABB(EchoSoundingPos).inflate(4096).contains(Vec3.atCenterOf(pos))) continue;
@@ -150,7 +145,7 @@ public class EchoRenderer {
         if (EchoSoundingPos == null) return;
         // 玩家离开了方块，重置状态
         if (!new AABB(EchoSoundingPos).intersects(player.getBoundingBox())) {
-            if (responseTime != 30) PacketDistributor.sendToServer(new AddEffectPacket(MobEffects.GLOWING, 600));
+            if (player.hasEffect(SCULK_VEIL)) PacketDistributor.sendToServer(new AddEffectPacket(MobEffects.GLOWING, 600));
             reset();
         }
     }
@@ -162,5 +157,6 @@ public class EchoRenderer {
         teleportTicks = 0;
         sculkveilCountTicks = -43;
         isTeleporting = false;
+        echoMap.clear();
     }
 }
