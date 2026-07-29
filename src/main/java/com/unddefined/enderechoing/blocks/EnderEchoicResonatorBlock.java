@@ -15,6 +15,7 @@ import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -102,7 +103,7 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         if (entity.isCurrentlyGlowing()) return;
         if (temptick > 0) temptick--;
         var manager = MarkedPositionsManager.getManager(player);
-        if (manager.teleporters().isEmpty() || manager.markedPositions().isEmpty()) return;
+        if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
         if (temptick == 0) {
             //获取目的地名称
             var posList = manager.getTeleporterPositions(level);
@@ -130,8 +131,10 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
             PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
             player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
             temptick = 30;
-            if (targetPos != null) PacketDistributor.sendToPlayer(player, new SetTeleportPosPacket(targetPos, true));
-            else PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList));
+            if (targetPos != null) {
+                PacketDistributor.sendToPlayer(player, new SetTeleportPosPacket(targetPos, true));
+                player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 400));
+            } else PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList));
         }
     }
 

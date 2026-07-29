@@ -91,7 +91,10 @@ public class EchoRenderer {
     }
 
     @SubscribeEvent
-    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {reset();echoMap.clear();}
+    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        reset();
+        echoMap.clear();
+    }
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -114,11 +117,11 @@ public class EchoRenderer {
             if (echoMap.isEmpty() && !syncedTeleporterPositions.isEmpty()) {
                 List<Double> disstances = new ArrayList<>();
                 syncedTeleporterPositions.forEach(pos -> disstances.add(EchoSoundingPos.distSqr(pos)));
-                if (disstances.stream().max(Double::compareTo).get() <= 64*64) responseTime = 30;
+                if (disstances.stream().max(Double::compareTo).get() <= 64 * 64) responseTime = 30;
                 else responseTime = 120;
 
                 for (BlockPos pos : syncedTeleporterPositions) {
-                    if (pos.equals(EchoSoundingPos) && responseTime != 30) continue;
+                    if (pos.equals(EchoSoundingPos)) continue;
                     if (!new AABB(EchoSoundingPos).inflate(4096).contains(Vec3.atCenterOf(pos))) continue;
                     echoMap.putIfAbsent(pos, new EchoResponse(pos));
                 }
@@ -134,7 +137,8 @@ public class EchoRenderer {
                     isTeleporting = true;
                 }
             }
-            if (!targetPreseted && countTicks > responseTime && targetPos != null && targetPos.equals(p) && !e.isElementHovering) teleportTicks = 0;
+            if (!targetPreseted && countTicks > responseTime && targetPos != null && targetPos.equals(p) && !e.isElementHovering)
+                teleportTicks = 0;
         });
         countTicks = isCounting ? countTicks + 1 : 0;
         if (countdownTicks == 0) {
