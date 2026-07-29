@@ -1,7 +1,7 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"idle": {
+		"ender_echo_crystal.idle": {
 			"loop": true,
 			"bones": {
 				"membrane": {
@@ -9,7 +9,7 @@
 						"vector": [0, "-query.anim_time * 72", 0]
 					},
 					"position": {
-						"vector": [0, "math.sin(query.anim_time * 120) * 3", 0]
+						"vector": [0, "math.sin(query.anim_time * 120) * 2", 0]
 					}
 				},
 				"glass": {
@@ -29,6 +29,5 @@
 				}
 			}
 		}
-	},
-	"geckolib_format_version": 2
+	}
 }

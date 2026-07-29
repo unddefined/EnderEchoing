@@ -1,7 +1,7 @@
 package com.unddefined.enderechoing.blocks;
 
 import com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity;
-import com.unddefined.enderechoing.entities.CrystalHitProxyEntity;
+import com.unddefined.enderechoing.entities.EnderEchoCrystalEntity;
 import com.unddefined.enderechoing.network.packet.SendSyncedTeleporterPositionsPacket;
 import com.unddefined.enderechoing.network.packet.SetEchoSoundingPosPacket;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
@@ -66,7 +66,7 @@ public class EnderEchoCrystalBlock extends Block implements EntityBlock {
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.is(newState.getBlock())) {
             EnderEchoCrystalSavedData.get((ServerLevel) level).remove(pos);
-            level.getEntities(new CrystalHitProxyEntity(level, pos), new AABB(pos), e -> true)
+            level.getEntities(new EnderEchoCrystalEntity(level, pos), new AABB(pos), e -> true)
                     .forEach(e -> e.remove(Entity.RemovalReason.KILLED));
         }
         super.onRemove(state, level, pos, newState, moved);

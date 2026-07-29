@@ -3,27 +3,27 @@
 	"minecraft:geometry": [
 		{
 			"description": {
-				"identifier": "geometry.EnderEchoTuner",
+				"identifier": "geometry.EnderEchoCrystal",
 				"texture_width": 64,
 				"texture_height": 64,
-				"visible_bounds_width": 2,
+				"visible_bounds_width": 3,
 				"visible_bounds_height": 3.5,
 				"visible_bounds_offset": [0, 1.25, 0]
 			},
 			"bones": [
 				{
 					"name": "membrane",
-					"pivot": [0, 17, 0]
+					"pivot": [0, 11, 0]
 				},
 				{
 					"name": "RotateVerticallyAroundDiagonal",
 					"parent": "membrane",
-					"pivot": [0, 17, 0],
+					"pivot": [0, 9, 0],
 					"cubes": [
 						{
-							"origin": [-4, 13, -4],
+							"origin": [-4, 5, -4],
 							"size": [8, 8, 8],
-							"inflate": 1.1,
+							"inflate": 1,
 							"uv": {
 								"north": {"uv": [0, 0], "uv_size": [7, 7]},
 								"east": {"uv": [0, 0], "uv_size": [7, 7]},
@@ -38,10 +38,10 @@
 				{
 					"name": "glass",
 					"parent": "RotateVerticallyAroundDiagonal",
-					"pivot": [0, 17, 0],
+					"pivot": [0, 9, 0],
 					"cubes": [
 						{
-							"origin": [-7, 10, -7],
+							"origin": [-7, 2, -7],
 							"size": [14, 14, 14],
 							"inflate": -2.5,
 							"uv": {
@@ -58,10 +58,10 @@
 				{
 					"name": "cube",
 					"parent": "RotateVerticallyAroundDiagonal",
-					"pivot": [0, 17, 0],
+					"pivot": [0, 9, 0],
 					"cubes": [
 						{
-							"origin": [-6, 11, -6],
+							"origin": [-6, 3, -6],
 							"size": [12, 12, 12],
 							"inflate": -2.2,
 							"uv": {
@@ -73,35 +73,18 @@
 								"down": {"uv": [62, 46], "uv_size": [-12, -12]}
 							}
 						},
-						{"origin": [-6, 11, -6], "size": [12, 12, 12], "inflate": -2.1, "uv": [8, 35], "mirror": true}
-					]
-				},
-				{
-					"name": "sculk_shrieker",
-					"pivot": [8, 0, -8],
-					"cubes": [
+						{"origin": [-6, 3, -6], "size": [12, 12, 12], "inflate": -2.1, "uv": [8, 35], "mirror": true},
 						{
-							"origin": [-7, 8, -7],
-							"size": [14, 7, 14],
+							"origin": [-3, 6, -3],
+							"size": [6, 6, 6],
+							"inflate": 0.3,
 							"uv": {
-								"north": {"uv": [36, 17], "uv_size": [14, 7]},
-								"east": {"uv": [36, 17], "uv_size": [14, 7]},
-								"south": {"uv": [36, 17], "uv_size": [14, 7]},
-								"west": {"uv": [36, 17], "uv_size": [14, 7]},
-								"up": {"uv": [2, 10], "uv_size": [14, 14]},
-								"down": {"uv": [50, 30], "uv_size": [14, -14]}
-							}
-						},
-						{
-							"origin": [-8, 0, -8],
-							"size": [16, 8, 16],
-							"uv": {
-								"north": {"uv": [19, 16], "uv_size": [16, 8]},
-								"east": {"uv": [19, 16], "uv_size": [16, 8]},
-								"south": {"uv": [19, 16], "uv_size": [16, 8]},
-								"west": {"uv": [19, 16], "uv_size": [16, 8]},
-								"up": {"uv": [19, 0], "uv_size": [16, 16]},
-								"down": {"uv": [35, 16], "uv_size": [16, -16]}
+								"north": {"uv": [56, 50], "uv_size": [6, 6]},
+								"east": {"uv": [56, 50], "uv_size": [6, 6]},
+								"south": {"uv": [56, 50], "uv_size": [6, 6]},
+								"west": {"uv": [56, 50], "uv_size": [6, 6]},
+								"up": {"uv": [56, 50], "uv_size": [6, 6]},
+								"down": {"uv": [56, 56], "uv_size": [6, -6]}
 							}
 						}
 					]

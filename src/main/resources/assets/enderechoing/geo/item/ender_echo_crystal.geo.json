@@ -3,46 +3,25 @@
 	"minecraft:geometry": [
 		{
 			"description": {
-				"identifier": "geometry.EnderEchoTuner",
+				"identifier": "geometry.EnderEchoCrystal",
 				"texture_width": 64,
 				"texture_height": 64,
-				"visible_bounds_width": 2,
-				"visible_bounds_height": 2.5,
-				"visible_bounds_offset": [0, 0.75, 0]
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 3.5,
+				"visible_bounds_offset": [0, 1.25, 0]
 			},
 			"bones": [
 				{
-					"name": "bone",
-					"pivot": [0, 17, 0],
-					"cubes": [
-						{
-							"origin": [-7, 10, -7],
-							"size": [14, 14, 14],
-							"inflate": -2.5,
-							"uv": {
-								"north": {"uv": [2, 33], "uv_size": [14, 14]},
-								"east": {"uv": [2, 33], "uv_size": [14, 14]},
-								"south": {"uv": [2, 33], "uv_size": [14, 14]},
-								"west": {"uv": [2, 33], "uv_size": [14, 14]},
-								"up": {"uv": [16, 47], "uv_size": [-14, -14]},
-								"down": {"uv": [16, 47], "uv_size": [-14, -14]}
-							}
-						}
-					]
+					"name": "membrane",
+					"pivot": [0, 3, 0]
 				},
 				{
-					"name": "bone2",
-					"pivot": [0, 17, 0],
-					"cubes": [
-						{"origin": [-6, 11, -6], "size": [12, 12, 12], "inflate": -1.9, "uv": [8, 35], "mirror": true}
-					]
-				},
-				{
-					"name": "bone3",
-					"pivot": [0, 17, 0],
+					"name": "RotateVerticallyAroundDiagonal",
+					"parent": "membrane",
+					"pivot": [0, 1, 0],
 					"cubes": [
 						{
-							"origin": [-4, 13, -4],
+							"origin": [-4, -3, -4],
 							"size": [8, 8, 8],
 							"inflate": 1,
 							"uv": {
@@ -57,13 +36,34 @@
 					]
 				},
 				{
-					"name": "bone4",
-					"pivot": [0, 17, 0],
+					"name": "glass",
+					"parent": "RotateVerticallyAroundDiagonal",
+					"pivot": [0, 1, 0],
 					"cubes": [
 						{
-							"origin": [-6, 11, -6],
+							"origin": [-7, -6, -7],
+							"size": [14, 14, 14],
+							"inflate": -2.5,
+							"uv": {
+								"north": {"uv": [2, 33], "uv_size": [14, 14]},
+								"east": {"uv": [2, 33], "uv_size": [14, 14]},
+								"south": {"uv": [2, 33], "uv_size": [14, 14]},
+								"west": {"uv": [2, 33], "uv_size": [14, 14]},
+								"up": {"uv": [16, 47], "uv_size": [-14, -14]},
+								"down": {"uv": [16, 47], "uv_size": [-14, -14]}
+							}
+						}
+					]
+				},
+				{
+					"name": "cube",
+					"parent": "RotateVerticallyAroundDiagonal",
+					"pivot": [0, 1, 0],
+					"cubes": [
+						{
+							"origin": [-6, -5, -6],
 							"size": [12, 12, 12],
-							"inflate": -2,
+							"inflate": -2.2,
 							"uv": {
 								"north": {"uv": [50, 34], "uv_size": [12, 12]},
 								"east": {"uv": [50, 34], "uv_size": [12, 12]},
@@ -71,6 +71,20 @@
 								"west": {"uv": [50, 34], "uv_size": [12, 12]},
 								"up": {"uv": [62, 46], "uv_size": [-12, -12]},
 								"down": {"uv": [62, 46], "uv_size": [-12, -12]}
+							}
+						},
+						{"origin": [-6, -5, -6], "size": [12, 12, 12], "inflate": -2.1, "uv": [8, 35], "mirror": true},
+						{
+							"origin": [-3, -2, -3],
+							"size": [6, 6, 6],
+							"inflate": 0.3,
+							"uv": {
+								"north": {"uv": [56, 50], "uv_size": [6, 6]},
+								"east": {"uv": [56, 50], "uv_size": [6, 6]},
+								"south": {"uv": [56, 50], "uv_size": [6, 6]},
+								"west": {"uv": [56, 50], "uv_size": [6, 6]},
+								"up": {"uv": [56, 50], "uv_size": [6, 6]},
+								"down": {"uv": [56, 56], "uv_size": [6, -6]}
 							}
 						}
 					]

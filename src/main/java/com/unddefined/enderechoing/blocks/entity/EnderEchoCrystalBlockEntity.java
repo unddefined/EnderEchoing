@@ -72,7 +72,7 @@ public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlock
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "controller", 0,
-                state -> state.setAndContinue(RawAnimation.begin().thenPlay("idle")))
+                state -> state.setAndContinue(RawAnimation.begin().thenPlay("item")))
         );
     }
 

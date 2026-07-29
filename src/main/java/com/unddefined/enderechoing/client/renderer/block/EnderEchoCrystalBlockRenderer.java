@@ -40,7 +40,7 @@ public class EnderEchoCrystalBlockRenderer extends GeoBlockRenderer<EnderEchoCry
         float z = (float) -(Mth.lerp(partialTick, player.zo, player.getZ()) - 0.5 - blockPos.getZ());
         poseStack.translate(-x, -y, -z);
 
-        var floatY = model.getBone("membrane").get().getPosY() / 15 + y;
+        var floatY = model.getBone("item").get().getPosY() / 15 + y;
         float f = Mth.sqrt(x * x + z * z);
         float f1 = Mth.sqrt(x * x + floatY * floatY + z * z);
         float f2 = 0.0F - ((float) tick + partialTick) * 0.01F;
