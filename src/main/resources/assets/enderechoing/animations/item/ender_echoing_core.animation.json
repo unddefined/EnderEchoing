@@ -4,7 +4,7 @@
 		"ender_echoing_core.use": {
 			"animation_length": 2,
 			"bones": {
-				"core": {
+				"cube": {
 					"rotation": {
 						"vector": ["math.sin(query.anim_time * 120) * 180", 0, "math.cos(query.anim_time * 120) * 180"]
 					},

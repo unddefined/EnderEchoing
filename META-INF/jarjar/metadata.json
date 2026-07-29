@@ -1,0 +1,28 @@
+{
+  "jars": [
+    {
+      "identifier": {
+        "group": "org.lwjgl",
+        "artifact": "lwjgl-vulkan"
+      },
+      "version": {
+        "range": "[3.3.4,)",
+        "artifactVersion": "3.3.4"
+      },
+      "path": "META-INF/jarjar/lwjgl-vulkan-3.3.4.jar",
+      "isObfuscated": false
+    },
+    {
+      "identifier": {
+        "group": "",
+        "artifact": "org.lwjgl.vma"
+      },
+      "version": {
+        "range": "[4d205a13a4184ca328db634092fdc194]",
+        "artifactVersion": "4d205a13a4184ca328db634092fdc194"
+      },
+      "path": "META-INF/jarjar/lwjgl-vma-3.3.4-merged.jar",
+      "isObfuscated": false
+    }
+  ]
+}

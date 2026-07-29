@@ -73,11 +73,18 @@
 								"down": {"uv": [62, 46], "uv_size": [-12, -12]}
 							}
 						},
-						{"origin": [-6, 3, -6], "size": [12, 12, 12], "inflate": -2.1, "uv": [8, 35], "mirror": true},
+						{"origin": [-6, 3, -6], "size": [12, 12, 12], "inflate": -2.1, "uv": [8, 35], "mirror": true}
+					]
+				},
+				{
+					"name": "core",
+					"parent": "cube",
+					"pivot": [-0.5, 11.5, 0.5],
+					"cubes": [
 						{
 							"origin": [-3, 6, -3],
 							"size": [6, 6, 6],
-							"inflate": 0.3,
+							"inflate": 0,
 							"uv": {
 								"north": {"uv": [56, 50], "uv_size": [6, 6]},
 								"east": {"uv": [56, 50], "uv_size": [6, 6]},

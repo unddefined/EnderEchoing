@@ -13,15 +13,15 @@
 			"bones": [
 				{
 					"name": "membrane",
-					"pivot": [0, 3, 0]
+					"pivot": [0, 11, 0]
 				},
 				{
 					"name": "RotateVerticallyAroundDiagonal",
 					"parent": "membrane",
-					"pivot": [0, 1, 0],
+					"pivot": [0, 9, 0],
 					"cubes": [
 						{
-							"origin": [-4, -3, -4],
+							"origin": [-4, 5, -4],
 							"size": [8, 8, 8],
 							"inflate": 1,
 							"uv": {
@@ -38,10 +38,10 @@
 				{
 					"name": "glass",
 					"parent": "RotateVerticallyAroundDiagonal",
-					"pivot": [0, 1, 0],
+					"pivot": [0, 9, 0],
 					"cubes": [
 						{
-							"origin": [-7, -6, -7],
+							"origin": [-7, 2, -7],
 							"size": [14, 14, 14],
 							"inflate": -2.5,
 							"uv": {
@@ -58,10 +58,10 @@
 				{
 					"name": "cube",
 					"parent": "RotateVerticallyAroundDiagonal",
-					"pivot": [0, 1, 0],
+					"pivot": [0, 9, 0],
 					"cubes": [
 						{
-							"origin": [-6, -5, -6],
+							"origin": [-6, 3, -6],
 							"size": [12, 12, 12],
 							"inflate": -2.2,
 							"uv": {
@@ -73,11 +73,18 @@
 								"down": {"uv": [62, 46], "uv_size": [-12, -12]}
 							}
 						},
-						{"origin": [-6, -5, -6], "size": [12, 12, 12], "inflate": -2.1, "uv": [8, 35], "mirror": true},
+						{"origin": [-6, 3, -6], "size": [12, 12, 12], "inflate": -2.1, "uv": [8, 35], "mirror": true}
+					]
+				},
+				{
+					"name": "core",
+					"parent": "cube",
+					"pivot": [-0.5, 11.5, 0.5],
+					"cubes": [
 						{
-							"origin": [-3, -2, -3],
+							"origin": [-3, 6, -3],
 							"size": [6, 6, 6],
-							"inflate": 0.3,
+							"inflate": 0,
 							"uv": {
 								"north": {"uv": [56, 50], "uv_size": [6, 6]},
 								"east": {"uv": [56, 50], "uv_size": [6, 6]},

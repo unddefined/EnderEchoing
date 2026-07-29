@@ -51,7 +51,6 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
                 .explosionResistance(1000.0F)
                 .destroyTime(1.5F)
                 .pushReaction(PushReaction.DESTROY)
-                .lightLevel(state -> 3)
         );
     }
 
