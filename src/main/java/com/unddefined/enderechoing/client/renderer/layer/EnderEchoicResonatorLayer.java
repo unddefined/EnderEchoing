@@ -32,7 +32,7 @@ public class EnderEchoicResonatorLayer extends BlockAndItemGeoLayer<EnderEchoicR
     @Override
     protected ItemStack getStackForBone(GeoBone bone, EnderEchoicResonatorBlockEntity animatable) {
         // 只在特定骨骼上渲染物品
-        if (bone.getName().equals("EnderEchoingCore")) return new ItemStack(ItemRegistry.ENDER_ECHOING_CORE.get());
+        if (bone.getName().equals("item")) return new ItemStack(ItemRegistry.ENDER_ECHOING_CORE.get());
         return this.stackForBone.apply(bone, animatable);
     }
 
@@ -70,7 +70,7 @@ public class EnderEchoicResonatorLayer extends BlockAndItemGeoLayer<EnderEchoicR
         currentPositionYMap.put(posKey, currentPositionY);
 
         // 应用骨骼动画（替代JSON动画）
-        if (bone.getName().equals("EnderEchoingCore")) {
+        if (bone.getName().equals("item")) {
             // 获取动画时间
             float animTime = animatable.getAnimationTime();
 

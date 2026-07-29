@@ -5,7 +5,7 @@
   "render_type": "translucent",
   "textures": {
 		"0": "enderechoing:item/echo_druse",
-		"particle": "eenderechoing:item/echo_druse"
+		"particle": "enderechoing:item/echo_druse"
 	},
   "elements": [
     {

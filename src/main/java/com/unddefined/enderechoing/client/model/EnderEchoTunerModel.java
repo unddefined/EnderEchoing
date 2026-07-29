@@ -8,13 +8,12 @@ import software.bernie.geckolib.model.DefaultedBlockGeoModel;
 import static com.unddefined.enderechoing.blocks.EnderEchoTunerBlock.CHARGED;
 
 public class EnderEchoTunerModel extends DefaultedBlockGeoModel<EnderEchoTunerBlockEntity> {
-    private final ResourceLocation E = ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echo_tuner");
     private final ResourceLocation R = ResourceLocation.fromNamespaceAndPath("enderechoing", "calibrated_sculk_shrieker");
 
     public EnderEchoTunerModel() {super(ResourceLocation.fromNamespaceAndPath("enderechoing", "ender_echo_tuner"));}
 
     @Override
-    public ResourceLocation getModelResource(EnderEchoTunerBlockEntity animatable) {return buildFormattedModelPath(E);}
+    public ResourceLocation getModelResource(EnderEchoTunerBlockEntity animatable) {return buildFormattedModelPath(R);}
 
     @Override
     public ResourceLocation getTextureResource(EnderEchoTunerBlockEntity animatable) {
@@ -23,7 +22,7 @@ public class EnderEchoTunerModel extends DefaultedBlockGeoModel<EnderEchoTunerBl
     }
 
     @Override
-    public ResourceLocation getAnimationResource(EnderEchoTunerBlockEntity animatable) {return buildFormattedAnimationPath(E);}
+    public ResourceLocation getAnimationResource(EnderEchoTunerBlockEntity animatable) {return buildFormattedAnimationPath(R);}
 
     @Override
     public RenderType getRenderType(EnderEchoTunerBlockEntity animatable, ResourceLocation texture) {return RenderType.entityTranslucent(texture);}

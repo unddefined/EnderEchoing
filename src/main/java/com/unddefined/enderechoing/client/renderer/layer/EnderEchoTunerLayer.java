@@ -19,7 +19,7 @@ public class EnderEchoTunerLayer extends BlockAndItemGeoLayer<EnderEchoTunerBloc
     @Override
     protected ItemStack getStackForBone(GeoBone bone, EnderEchoTunerBlockEntity animatable) {
         // 只在特定骨骼上渲染物品
-        if (bone.getName().equals("box")) return new ItemStack(ItemRegistry.ENDER_ECHO_TUNE_CHAMBER.get());
+        if (bone.getName().equals("item")) return new ItemStack(ItemRegistry.ENDER_ECHO_TUNE_CHAMBER.get());
         return this.stackForBone.apply(bone, animatable);
     }
 

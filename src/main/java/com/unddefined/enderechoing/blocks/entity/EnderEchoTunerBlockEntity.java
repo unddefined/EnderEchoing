@@ -24,7 +24,6 @@ import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 public class EnderEchoTunerBlockEntity extends BlockEntity implements GeoBlockEntity {
-    private static final RawAnimation common = RawAnimation.begin().thenPlay("common");
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private ResourceKey<Level> Dimension;
     private String name;
@@ -82,7 +81,7 @@ public class EnderEchoTunerBlockEntity extends BlockEntity implements GeoBlockEn
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "controller", 20, event -> event.setAndContinue(common)));
+        controllers.add(new AnimationController<>(this, "controller", 20, event -> event.setAndContinue(RawAnimation.begin().thenLoop("tuner"))));
     }
 
     @Override
