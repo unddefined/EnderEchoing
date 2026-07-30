@@ -111,7 +111,7 @@ public class ServerEvents {
         manager.markedPositions().removeIf(p -> p.name().startsWith("☠"));
         // 最新的死亡点，直接加
         manager.addMarkedPosition(player.level().dimension(), player.blockPosition(),
-                "☠" + Component.translatable("screen.enderechoing.last_death").getString() + "☠", 0);
+                "☠" + Component.translatable("screen.enderechoing.last_death").getString() + "☠", 0, false);
         // 之前的死亡点依次下沉，最多保留 3 个
         for (int i = 0; i < Math.min(3, deaths.size()); i++) {
             var old = deaths.get(i);
@@ -121,7 +121,7 @@ public class ServerEvents {
                 case 1 -> name = "☠" + Component.translatable("screen.enderechoing.earlier_death").getString() + "☠";
                 case 2 -> name = "☠" + Component.translatable("screen.enderechoing.even_earlier_death").getString() + "☠";
             }
-            manager.addMarkedPosition(old.dimension(), old.pos(), name, 0);
+            manager.addMarkedPosition(old.dimension(), old.pos(), name, 0, false);
         }
         // 消耗珍珠
         if (deaths.size() < 4) player.setData(EE_PEARL_AMOUNT, player.getData(EE_PEARL_AMOUNT) - 1);

@@ -29,6 +29,7 @@ public class DataRegistry {
 
     public static final DeferredRegister.DataComponents COMPONENT_TYPES = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, "enderechoing");
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<GlobalPos>> POSITION = COMPONENT_TYPES.registerComponentType("position", builder -> builder.persistent(GlobalPos.CODEC));
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> TBOUND = COMPONENT_TYPES.registerComponentType("teleporter_bound", builder -> builder.persistent(Codec.BOOL));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<EntityData>> ENTITY = COMPONENT_TYPES.registerComponentType("entity", builder -> builder.persistent(EntityData.CODEC));
 
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, "enderechoing");

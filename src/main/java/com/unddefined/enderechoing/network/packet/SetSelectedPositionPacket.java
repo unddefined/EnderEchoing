@@ -4,6 +4,7 @@ import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -15,15 +16,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
-public record SetSelectedPositionPacket(BlockPos blockPos, BlockPos selectedPos, ResourceKey<Level> dimension,
-                                        String name) implements CustomPacketPayload {
+public record SetSelectedPositionPacket(BlockPos blockPos, GlobalPos selectedPos, String name) implements CustomPacketPayload {
     public static final StreamCodec<ByteBuf, SetSelectedPositionPacket> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC,
             SetSelectedPositionPacket::blockPos,
-            BlockPos.STREAM_CODEC,
+            GlobalPos.STREAM_CODEC,
             SetSelectedPositionPacket::selectedPos,
-            ResourceKey.streamCodec(Registries.DIMENSION),
-            SetSelectedPositionPacket::dimension,
             ByteBufCodecs.STRING_UTF8,
             SetSelectedPositionPacket::name,
             SetSelectedPositionPacket::new
@@ -35,7 +33,7 @@ public record SetSelectedPositionPacket(BlockPos blockPos, BlockPos selectedPos,
         context.enqueueWork(() -> {
             var player = context.player();
             BlockEntity be = player.level().getBlockEntity(blockPos);
-            if (be instanceof EnderEchoTunerBlockEntity tuner) tuner.setSelectedPosition(selectedPos, dimension, name);
+            if (be instanceof EnderEchoTunerBlockEntity tuner) tuner.setSelectedPosition(selectedPos, name);
         });
     }
 

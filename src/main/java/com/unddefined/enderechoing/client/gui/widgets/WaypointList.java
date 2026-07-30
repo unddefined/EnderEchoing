@@ -1,5 +1,6 @@
 package com.unddefined.enderechoing.client.gui.widgets;
 
+import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.client.gui.screen.PositionEditScreen;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
@@ -33,7 +34,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         this.setX(x);
         this.screen = screen;
         this.contextMenu = new ContextMenu();
-        selectedPosition = screen.getMarkedPositionsCache().stream().filter(M -> M.pos().equals(screen.getMenu().getTuner().getPos())).findFirst().orElse(null);
+        selectedPosition = screen.getMarkedPositionsCache().stream().filter(M -> M.pos().equals(screen.getMenu().getSelectedPos().pos())).findFirst().orElse(null);
     }
 
     public void addWaypoint(MarkedPositionsManager.MarkedPositions M) {this.addEntry(new WaypointEntry(this, M));}
@@ -124,13 +125,17 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         private final WaypointList parent;
         private final MarkedPositionsManager.MarkedPositions markedPosition;
         private final boolean isSelf;
+        private final boolean can_teleport;
         public boolean selected;
         private boolean hovered;
+        private final boolean isFacing_down;
 
         public WaypointEntry(WaypointList parent, MarkedPositionsManager.MarkedPositions M) {
             this.parent = parent;
             this.markedPosition = M;
-            this.isSelf = markedPosition.pos().above(2).equals(parent.screen.getMenu().getTunerPos());
+            this.isFacing_down = parent.screen.getMenu().isFacing_down();
+            this.isSelf = markedPosition.pos().above(2).equals(parent.screen.getMenu().getTunerPos().pos());
+            this.can_teleport = (markedPosition.teleporterBound() && parent.screen.getMenu().getTunerPos().dimension().equals(markedPosition.dimension())) || parent.screen.getMenu().isMultiBlocked();
         }
 
         public MarkedPositionsManager.MarkedPositions getMarkedPosition() {return markedPosition;}
@@ -142,7 +147,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
             selected = parent.selectedPosition == markedPosition;
             int width = entryWidth - 6;
 
-            gfx.blitSprite(SPRITES.get(!isSelf, this.hovered || this.selected), left + 3, top, width - 4, height);
+            gfx.blitSprite(SPRITES.get((!isSelf && can_teleport) || !isFacing_down, this.hovered || this.selected), left + 3, top, width - 4, height);
 
             // ---- 绘制文字 ----
             Component text = Component.literal(markedPosition.name());
@@ -154,7 +159,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         public void renderTooltip(GuiGraphics gfx, int mouseX, int mouseY) {
             if (!this.hovered) return;
             var posText = Component.translatable("item.enderechoing.ender_echoing_pearl.position", markedPosition.pos().toShortString(), Component.translationArg(markedPosition.dimension().location()));
-            var distanceText = Component.translatable("screen.enderechoing.distance", (int) Math.sqrt(parent.screen.getMenu().getTunerPos().distSqr(markedPosition.pos())));
+            var distanceText = Component.translatable("screen.enderechoing.distance", (int) Math.sqrt(parent.screen.getMenu().getTunerPos().pos().distSqr(markedPosition.pos())));
             gfx.renderComponentTooltip(mc.font, List.of(posText, distanceText), mouseX, mouseY);
         }
 
@@ -164,7 +169,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (!hovered) return false;
-            if (isSelf) return false;
+            if (isSelf || !can_teleport && isFacing_down) return false;
             mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             selected = !selected;
 

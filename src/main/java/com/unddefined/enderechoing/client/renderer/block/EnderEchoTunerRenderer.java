@@ -17,6 +17,10 @@ import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoBlockRenderer;
 
+import java.util.Objects;
+
+import static com.unddefined.enderechoing.EnderEchoing.GZERO;
+
 public class EnderEchoTunerRenderer extends GeoBlockRenderer<EnderEchoTunerBlockEntity> {
     public EnderEchoTunerRenderer() {
         super(new EnderEchoTunerModel());
@@ -48,12 +52,12 @@ public class EnderEchoTunerRenderer extends GeoBlockRenderer<EnderEchoTunerBlock
     public void actuallyRender(PoseStack poseStack, EnderEchoTunerBlockEntity animatable, BakedGeoModel model, @Nullable RenderType renderType,
                                MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight,
                                int packedOverlay, int colour) {
-        if (animatable.getPos() != null && !animatable.getPos().equals(BlockPos.ZERO) && animatable.getName() != null) {
+        if (animatable.getSelectedPos() != GZERO) {
             poseStack.pushPose();
             // 渲染文本
             if (animatable.getBlockState().getValue(EnderEchoTunerBlock.FACING) != Direction.DOWN) poseStack.translate(0, 1.6f, 0);
             else poseStack.translate(0, -0.3f, 0);
-            ResonatorNameRenderer.renderPositionName(animatable.getName(), bufferSource, poseStack);
+            ResonatorNameRenderer.renderPositionName(animatable.getselectedName(), bufferSource, poseStack);
             poseStack.popPose();
         }
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);

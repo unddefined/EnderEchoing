@@ -4,6 +4,9 @@ import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.client.ModSoundEvents;
 import com.unddefined.enderechoing.client.gui.TunerMenu;
 import com.unddefined.enderechoing.server.registry.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
@@ -17,6 +20,8 @@ import org.slf4j.Logger;
 
 import java.util.function.Supplier;
 
+import static net.minecraft.world.level.Level.OVERWORLD;
+
 // The @Mod annotation tells the loader that this class is the main mod class.
 // The mod id is defined in mods.toml and must match the modId field below.
 @Mod(EnderEchoing.MODID)
@@ -25,6 +30,7 @@ public class EnderEchoing {
     public static final String MODID = "enderechoing";
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
+    public static final GlobalPos GZERO = new GlobalPos(OVERWORLD, BlockPos.ZERO);
     public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, MODID);
     public static final Supplier<MenuType<TunerMenu>> TUNER_MENU = MENUS.register("tuner_menu", () -> IMenuTypeExtension.create(TunerMenu::new));
     public EnderEchoing(IEventBus modEventBus, ModContainer modContainer) {

@@ -188,7 +188,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
             selectedTab = i;
 
-            var newPosition = new MarkedPositionsManager.MarkedPositions(M.dimension(), M.pos(), M.name(), i);
+            var newPosition = new MarkedPositionsManager.MarkedPositions(M.dimension(), M.pos(), M.name(), i, M.teleporterBound());
             MarkedPositionsCache.set(MarkedPositionsCache.indexOf(M), newPosition);
             populateWaypointList();
         }

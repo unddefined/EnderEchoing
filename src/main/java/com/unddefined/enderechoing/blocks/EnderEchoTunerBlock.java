@@ -7,6 +7,7 @@ import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -42,8 +43,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
-import static com.unddefined.enderechoing.server.registry.DataRegistry.POSITION;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.*;
 import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
@@ -85,7 +85,7 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
 
             @Override
             public void writeClientSideData(AbstractContainerMenu menu, net.minecraft.network.RegistryFriendlyByteBuf buf) {
-                if (menu instanceof TunerMenu tunerMenu) tunerMenu.writeClientSideData(buf, pos);
+                if (menu instanceof TunerMenu tunerMenu) tunerMenu.writeClientSideData(buf, new GlobalPos(level.dimension(),pos));
             }
         };
     }
@@ -105,7 +105,7 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
         }
         var stackPos = stack.get(POSITION);
         boolean result = stackPos != null && MarkedPositionsManager.getManager(player)
-                .addMarkedPosition(stackPos.dimension(), stackPos.pos(), stack.get(CUSTOM_NAME).getString(), 0);
+                .addMarkedPosition(stackPos.dimension(), stackPos.pos(), stack.get(CUSTOM_NAME).getString(), 0, Boolean.TRUE.equals(stack.get(TBOUND)));
         player.setData(EE_PEARL_AMOUNT.get(), player.getData(EE_PEARL_AMOUNT.get()) + stack.getCount() - (result ? 1 : 0));
         stack.shrink(stack.getCount());
 

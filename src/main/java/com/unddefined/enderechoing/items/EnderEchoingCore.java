@@ -15,6 +15,7 @@ import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -104,7 +105,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 return InteractionResultHolder.fail(itemStack);
             // 渲染传送特效
             PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(player.blockPosition()));
-            PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(nearestTeleporterPos.getFirst(), true));
+            PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(new GlobalPos(level.dimension(),nearestTeleporterPos.getFirst()), true));
             // 添加玩家动画
             PacketDistributor.sendToPlayer(S, new SetPlayerAnimationPacket());
             // 添加动画
@@ -134,7 +135,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
             stopTriggeredAnim(S, GeoItem.getOrAssignId(stack, SL), CONTROLLER_NAME, null);
             S.addEffect(new MobEffectInstance(MobEffects.GLOWING, 400));
             PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
-            PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(BlockPos.ZERO, false));
+            PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(new GlobalPos(level.dimension(),BlockPos.ZERO), false));
         }
     }
 

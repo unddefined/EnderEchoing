@@ -18,6 +18,7 @@ import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -87,20 +88,17 @@ public class EnderEchoCuriosPlugin {
     }
 
     public static void showResonatorName(ServerPlayer player) {
-        var level = (ServerLevel) player.level();
-        var manager = player.getData(MARKED_POSITIONS_CACHE);
-        Map<BlockPos, String> posName = new java.util.HashMap<>();
-        if (manager.teleporters().isEmpty() || manager.markedPositions().isEmpty()) {
+        Map<BlockPos, String> posName = new HashMap<>();
+        var markedPositions = player.getData(MARKED_POSITIONS_CACHE).markedPositions();
+
+        if (markedPositions.isEmpty()) {
             PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
             return;
         }
-        var map = manager.getMarkedTeleportersMap(manager.getTeleporterPositions(level), level);
-        if (map.isEmpty()) {
-            PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
-            return;
-        }
-        var min = map.keySet().stream().min(Comparator.comparingDouble(e -> e.distToCenterSqr(player.position()))).get();
-        if (min.distToCenterSqr(player.position()) < 9) posName.put(min, map.get(min));
+
+        markedPositions.stream().filter(e -> e.dimension().equals(player.level().dimension()))
+                .min(Comparator.comparingDouble(e -> e.pos().distToCenterSqr(player.position()))).ifPresent(e -> {if (e.pos().distToCenterSqr(player.position()) < 9) posName.put(e.pos(), e.name());});
+
         PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
     }
 

@@ -10,6 +10,7 @@ import com.unddefined.enderechoing.network.packet.TeleportRequestPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -34,7 +35,7 @@ public class EchoRenderer {
     private static final Map<BlockPos, EchoResponse> echoMap = new HashMap<>();
     public static BlockPos EchoSoundingPos = null;
     public static boolean targetPreseted = false;
-    public static BlockPos targetPos = null;
+    public static GlobalPos targetPos = null;
     public static List<BlockPos> syncedTeleporterPositions = new ArrayList<>();
     public static Map<BlockPos, String> MarkedPositionNames = new HashMap<>();
     private static int countTicks = 0;
@@ -68,10 +69,10 @@ public class EchoRenderer {
         if (targetPreseted) {
             EchoSounding.render(PoseStack, bufferSource, PartialTicks, tick - 20, LightTexture.FULL_BRIGHT);
             //定向传送
-            if (targetPos != null && echoMap.containsKey(targetPos)) {
-                echoMap.getOrDefault(targetPos, null)
+            if (targetPos != null && echoMap.containsKey(targetPos.pos())) {
+                echoMap.getOrDefault(targetPos.pos(), null)
                         .render(mc.player, PoseStack, bufferSource, teleportTicks - 80, false, null);
-                if (teleportTicks > 60) EchoResponsing.render(PoseStack, bufferSource, targetPos, teleportTicks);
+                if (teleportTicks > 60) EchoResponsing.render(PoseStack, bufferSource, targetPos.pos(), teleportTicks);
             }
         }
 
@@ -99,8 +100,9 @@ public class EchoRenderer {
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (EchoSoundingPos != null && EchoSoundingPos.equals(BlockPos.ZERO)) EchoSoundingPos = null;
-        if (targetPos != null && targetPos.equals(BlockPos.ZERO)) targetPos = null;
+        if (targetPos != null && targetPos.pos().equals(BlockPos.ZERO)) targetPos = null;
         var player = event.getEntity();
+        var level = player.level();
         if (SculkVeilRenderer.fadeProgress != 0f) sculkveilCountTicks++;
         else sculkveilCountTicks = -43;
         if (teleportTicks > 82 && !player.isCurrentlyGlowing() && !isTeleporting) {
@@ -108,7 +110,8 @@ public class EchoRenderer {
             isTeleporting = true;
         }
         if (targetPos != null && targetPreseted) {
-            echoMap.putIfAbsent(targetPos, new EchoResponse(targetPos));
+            if (level.dimension().equals(targetPos.dimension()))
+                echoMap.putIfAbsent(targetPos.pos(), new EchoResponse(targetPos.pos()));
             teleportTicks++;
         }
         if (EchoSoundingPos != null) {
@@ -126,7 +129,7 @@ public class EchoRenderer {
             if (e.isElementHovering) {
                 teleportTicks++;
                 e.hoveringTicks++;
-                targetPos = p;
+                targetPos = new GlobalPos(level.dimension(), p);
                 if (teleportTicks > 40 && !player.isCurrentlyGlowing() && !isTeleporting) {
                     PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
                     isTeleporting = true;

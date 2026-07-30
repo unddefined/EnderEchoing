@@ -13,21 +13,23 @@ import com.unddefined.enderechoing.server.registry.DataRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -35,14 +37,18 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static com.unddefined.enderechoing.EnderEchoing.GZERO;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
-    private int temptick = 0;
+    public static final BooleanProperty CoolDown = BooleanProperty.create("cooldown");
 
     public EnderEchoicResonatorBlock() {
         super(Properties.of()
@@ -52,6 +58,12 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
                 .destroyTime(1.5F)
                 .pushReaction(PushReaction.DESTROY)
         );
+        this.registerDefaultState(this.stateDefinition.any().setValue(CoolDown, false));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(CoolDown);
     }
 
     @Nullable
@@ -86,55 +98,51 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         level.getServer().getPlayerList().getPlayers().forEach(player -> {
             var M = player.getData(DataRegistry.MARKED_POSITIONS_CACHE.get());
             M.teleporters().removeIf(e -> e.dimension().equals(level.dimension()) && e.pos().equals(pos));
-            var P = M.markedPositions().stream().filter(e -> e.dimension().equals(level.dimension()) && e.pos().equals(pos)).findFirst();
-            var name = P.map(positions -> positions.name().replaceAll("[><]", "")).orElse(null);
-            if (name != null && !name.isEmpty()) {
-                M.markedPositions().remove(P.get());
-                M.addMarkedPosition(player.level().dimension(), P.get().pos(), name, P.get().iconIndex());
-            }
         });
         super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        level.setBlock(pos, state.setValue(CoolDown, true), 3);
     }
 
     @Override
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
         if (!(entity instanceof ServerPlayer player)) return;
         if (entity.isCurrentlyGlowing()) return;
-        if (temptick > 0) temptick--;
         var manager = MarkedPositionsManager.getManager(player);
         if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
-        if (temptick == 0) {
-            //获取目的地名称
-            var posList = manager.getTeleporterPositions(level);
-            var map = manager.getMarkedTeleportersMap(posList, level);
-            var pearlList = player.getInventory().items.stream().filter(i -> i.is(ENDER_ECHOING_PEARL.get())).toList();
-            pearlList.forEach(itemStack -> {
-                var p = itemStack.get(DataRegistry.POSITION);
-                var n = itemStack.get(CUSTOM_NAME);
-                if (p != null && n != null && p.dimension().equals(level.dimension()) && posList.contains(p.pos()))
-                    map.put(p.pos(), n.getString());
-            });
-            if (!map.isEmpty()) PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(map));
+        level.scheduleTick(pos, this, 50);
+        if (!state.getValue(CoolDown)) return;
+        //获取目的地名称
+        var posList = manager.getTeleporterPositions(level);
+        var map = manager.getMarkedTeleportersMap(level);
+        var pearlList = player.getInventory().items.stream().filter(i -> i.is(ENDER_ECHOING_PEARL.get())).toList();
+        pearlList.forEach(itemStack -> {
+            var p = itemStack.get(DataRegistry.POSITION);
+            var n = itemStack.get(CUSTOM_NAME);
+            if (p != null && n != null && p.dimension().equals(level.dimension()) && posList.contains(p.pos()))
+                map.put(p.pos(), n.getString());
+        });
+        if (!map.isEmpty()) PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(map));
 
-            BlockPos targetPos = null;
-            //获取定向目的地 TODO:跨维度传送
-            if (level.getBlockEntity(pos.above(2)) instanceof CalibratedSculkShriekerBlockEntity blockEntity)
-                if (blockEntity.getTheItem().getItem() instanceof EnderEchoingPearl) {
-                    var p = blockEntity.getTheItem().get(DataRegistry.POSITION);
-                    targetPos = (p == null || !p.dimension().equals(level.dimension())) ? null : p.pos();
-                }
-            if (level.getBlockEntity(pos.above(2)) instanceof EnderEchoTunerBlockEntity blockEntity)
-                if (blockEntity.getDimension() != null && blockEntity.getDimension().equals(level.dimension()))
-                    targetPos = blockEntity.getPos() == null ? null : blockEntity.getPos();
-            // 传送
-            PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
-            player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
-            temptick = 30;
-            if (targetPos != null) {
-                PacketDistributor.sendToPlayer(player, new SetTeleportPosPacket(targetPos, true));
-                player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 400));
-            } else PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList));
-        }
+        GlobalPos targetPos = null;
+        var tuner = level.getBlockEntity(pos.above(2));
+        //获取定向目的地
+        if (tuner instanceof EnderEchoTunerBlockEntity B)
+            if (!B.getSelectedPos().equals(GZERO) && (B.getSelectedPos().dimension().equals(level.dimension()) || B.checkMultiblock()))
+                targetPos = B.getSelectedPos();
+        // 传送
+        PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
+        player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
+        level.setBlock(pos, state.setValue(CoolDown, false), 3);
+        if (targetPos != null) {
+            if (!targetPos.dimension().equals(level.dimension())){
+                if (tuner instanceof EnderEchoTunerBlockEntity B) B.consumeAnchorCharge();
+                player.setData(EE_PEARL_AMOUNT,player.getData(EE_PEARL_AMOUNT) - 1);
+            }
+            PacketDistributor.sendToPlayer(player, new SetTeleportPosPacket(targetPos, true));
+        } else PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList));
     }
 
     @Override
