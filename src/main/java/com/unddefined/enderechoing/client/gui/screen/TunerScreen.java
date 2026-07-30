@@ -58,9 +58,9 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
         selectedTab = menu.selected_tuner_tab;
         int listLeft = this.width / 2 - 107;
-        int listWidth = this.width / 4 + 18;
-        int listTop = this.height / 2;
-        int listBottom = this.height / 3 - 25;
+        int listWidth = 204;
+        int listTop = (int) (this.height * 0.5);
+        int listBottom = (int) (this.height * 0.3);
         this.imageWidth = this.width;
         this.imageHeight = this.height;
         editBarX = listLeft + 1;
@@ -120,7 +120,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
         // 渲染标题
         guiGraphics.drawString(this.font, this.title, width / 2 + 2 - (this.font.width(this.title) / 2),
-                this.height / 7 + 6 - (changeIcon ? 24 : 0), 0xd1d6b6, false);
+                this.height / 7 - (changeIcon ? 21 : 0), 0xd1d6b6, false);
 
         waypointList.getContextMenu().render(guiGraphics, mouseX, mouseY, partialTick);
         tabBar.getContextMenu().render(guiGraphics, mouseX, mouseY, partialTick);
@@ -182,7 +182,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         for (int i = 0; i <= 9; i++) {
             double slotSize = 20;
             double tx = (double) this.width / 2 - 81 - 30 + i * slotSize + (i > 0 ? 9 : 0);
-            double ty = this.height - 332;
+            double ty = (int) (this.height * 0.3) - 30;
 
             if (!(mouseX >= tx && mouseX < tx + slotSize && mouseY >= ty && mouseY < ty + slotSize)) continue;
 

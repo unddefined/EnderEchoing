@@ -110,7 +110,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
     }
 
     @Override
-    protected int getScrollbarPosition() {return this.width + 277;}
+    protected int getScrollbarPosition() {return this.getX() + this.width;}
 
     @Override
     public int getRowWidth() {return this.width - 12;}
