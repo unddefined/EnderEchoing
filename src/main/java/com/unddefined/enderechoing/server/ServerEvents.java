@@ -3,8 +3,9 @@ package com.unddefined.enderechoing.server;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.blocks.EnderEchoCrystalBlock;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
-import net.minecraft.core.BlockPos;
+import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -19,12 +20,15 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.Comparator;
 
+import static com.unddefined.enderechoing.EnderEchoing.LOGGER;
 import static com.unddefined.enderechoing.effects.AttackScatteredEffect.attack_scattered_modifier_id;
 import static com.unddefined.enderechoing.effects.StaggerEffect.stagger_modifier_id;
 import static com.unddefined.enderechoing.effects.TinnitusEffect.tinnitus_modifier_id;
+import static com.unddefined.enderechoing.server.registry.BlockRegistry.ENDER_ECHOIC_RESONATOR;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.MARKED_POSITIONS_CACHE;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
@@ -32,6 +36,25 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
 
 @EventBusSubscriber(modid = EnderEchoing.MODID)
 public class ServerEvents {
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        var data = MarkedPositionsManager.getManager(player).teleporters();
+        // 使用 removeIf 安全地过滤并删除无效数据
+        data.removeIf(T -> {
+            MinecraftServer server = player.server;
+            ServerLevel target = server.getLevel(T.dimension());
+
+            // 如果 target 为 null，或者方块不是预期的，则返回 true 进行删除
+            if (target == null) return true;
+            if (!target.getBlockState(T.pos()).is(ENDER_ECHOIC_RESONATOR.get())) {
+                LOGGER.info("Removed invalid crystal at {}", T);
+                return true; // 返回 true 表示移除该元素
+            }
+            return false; // 返回 false 表示保留该元素
+        });
+    }
+
     @SubscribeEvent
     public static void onExpireEffect(MobEffectEvent.Expired event) {
         if (!event.getEntity().hasEffect(TINNITUS) && event.getEntity().getAttribute(FOLLOW_RANGE) != null) {
@@ -95,9 +118,9 @@ public class ServerEvents {
         var level = player.level();
         if (!(level.getBlockState(pos).getBlock() instanceof EnderEchoCrystalBlock)) return;
         EnderEchoCrystalSavedData.get((ServerLevel) level).getAll()
-                .stream().filter(p -> p.getX() == pos.getX() && p.getZ() == pos.getZ() && p.getY() > pos.getY())
-                .min(Comparator.comparingInt(BlockPos::getY))
-                .ifPresent(p -> player.teleportTo(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5));
+                .stream().filter(p ->p.pos().dimension().equals(level.dimension() ) && p.pos().pos().getX() == pos.getX() && p.pos().pos().getZ() == pos.getZ() && p.pos().pos().getY() > pos.getY())
+                .min(Comparator.comparingInt(p -> p.pos().pos().getY()))
+                .ifPresent(p -> player.teleportTo(p.pos().pos().getX() + 0.5, p.pos().pos().getY() + 0.5, p.pos().pos().getZ() + 0.5));
     }
 
     @SubscribeEvent
