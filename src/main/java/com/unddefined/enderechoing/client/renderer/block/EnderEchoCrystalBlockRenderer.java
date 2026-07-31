@@ -11,16 +11,18 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
+import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.GeoBlockRenderer;
 
+import static com.unddefined.enderechoing.blocks.EnderEchoCrystalBlock.CHANNEL;
 import static net.minecraft.client.renderer.entity.EnderDragonRenderer.CRYSTAL_BEAM_LOCATION;
 
 public class EnderEchoCrystalBlockRenderer extends GeoBlockRenderer<EnderEchoCrystalBlockEntity> {
     private static final RenderType BEAM = RenderType.entitySmoothCutout(CRYSTAL_BEAM_LOCATION);
-
-    public EnderEchoCrystalBlockRenderer() {
-        super(new EnderEchoCrystalBlockModel());
-    }
+    private static final int[] CHANNEL_COLORS = {0xFFFFFF, 0xFF5555, 0xF9801D, 0xFFFF55, 0x55FF55, 0x5555FF,
+            0x1D1D21, 0x55FF55, 0x55FFFF, 0xFF55FF, 0x835432, 0xAA00AA, 0x00AAAA
+    };
+    public EnderEchoCrystalBlockRenderer() {super(new EnderEchoCrystalBlockModel());}
 
     @Override
     public void actuallyRender(PoseStack poseStack, EnderEchoCrystalBlockEntity animatable, BakedGeoModel model, @Nullable RenderType renderType,
@@ -75,5 +77,15 @@ public class EnderEchoCrystalBlockRenderer extends GeoBlockRenderer<EnderEchoCry
 
         poseStack.popPose();
         poseStack.popPose();
+    }
+
+    @Override
+    public void renderRecursively(PoseStack poseStack, EnderEchoCrystalBlockEntity animatable, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
+        if (bone.getName().equals("Amethyst")) {
+            buffer = bufferSource.getBuffer(RenderType.entitySolid(getTextureLocation(animatable)));
+            super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, CHANNEL_COLORS[animatable.getBlockState().getValue(CHANNEL)]);
+            return;
+        }
+        super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
     }
 }

@@ -7,11 +7,19 @@ import com.unddefined.enderechoing.network.packet.SetEchoSoundingPosPacket;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
+import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -22,19 +30,41 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.checkerframework.checker.units.qual.C;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+
+import static com.unddefined.enderechoing.server.registry.DataRegistry.*;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
+import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
+import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
+import static net.minecraft.world.item.Items.AMETHYST_SHARD;
+import static net.minecraft.world.item.armortrim.TrimMaterials.AMETHYST;
 
 public class EnderEchoCrystalBlock extends Block implements EntityBlock {
+    public static final IntegerProperty CHANNEL = IntegerProperty.create("channel", 0, 15);
+    public static final Map<Item, Integer> DYE_CHANNELS = Map.ofEntries(
+            Map.entry(Items.RED_DYE, 1), Map.entry(Items.ORANGE_DYE, 2), Map.entry(Items.YELLOW_DYE, 3),
+            Map.entry(Items.GREEN_DYE, 4), Map.entry(Items.BLUE_DYE, 5), Map.entry(Items.BLACK_DYE, 6),
+            Map.entry(Items.LIME_DYE, 7),  Map.entry(Items.LIGHT_BLUE_DYE, 8), Map.entry(Items.PINK_DYE, 9),
+            Map.entry(Items.BROWN_DYE, 10), Map.entry(Items.PURPLE_DYE, 11), Map.entry(Items.CYAN_DYE, 12)
+    );
+
     public EnderEchoCrystalBlock() {
         super(Properties.of()
                 .noOcclusion()
@@ -43,6 +73,18 @@ public class EnderEchoCrystalBlock extends Block implements EntityBlock {
                 .pushReaction(PushReaction.DESTROY)
                 .lightLevel(state -> 3)
         );
+        this.registerDefaultState(this.stateDefinition.any().setValue(CHANNEL, 0));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(CHANNEL);
+    }
+
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState().setValue(CHANNEL, 0);
     }
 
     @Override
@@ -52,14 +94,36 @@ public class EnderEchoCrystalBlock extends Block implements EntityBlock {
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {return new EnderEchoCrystalBlockEntity(pos, state);}
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new EnderEchoCrystalBlockEntity(pos, state);
+    }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {return RenderShape.ENTITYBLOCK_ANIMATED;}
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.ENTITYBLOCK_ANIMATED;
+    }
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         return List.of(new ItemStack(ItemRegistry.ENDER_ECHO_CRYSTAL.get()), new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, @NotNull Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (level.isClientSide()) return ItemInteractionResult.FAIL;
+
+        if (stack.getItem().equals(AMETHYST_SHARD) && state.getValue(CHANNEL) > 0) {
+            level.setBlock(pos, state.setValue(CHANNEL, 0), 3);
+            stack.shrink(1);
+            return ItemInteractionResult.SUCCESS;
+        }
+        int channel = DYE_CHANNELS.getOrDefault(stack.getItem(), -1);
+        if (channel == -1) return ItemInteractionResult.FAIL;
+        if (state.getValue(CHANNEL) != channel) {
+            level.setBlock(pos, state.setValue(CHANNEL, channel), 3);
+            stack.shrink(1);
+        }
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override
@@ -80,12 +144,16 @@ public class EnderEchoCrystalBlock extends Block implements EntityBlock {
         if (entity.isCurrentlyGlowing()) return;
         PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
         List<BlockPos> posList = new ArrayList<>();
-        crystals.stream().filter(p -> p.distSqr(pos) <= 64*64).forEach(posList::add);
+        crystals.stream().filter(p -> p.distSqr(pos) <= 96 * 96).filter(
+                p -> level.getBlockState(p).getValue(CHANNEL).equals(state.getValue(CHANNEL))
+        ).forEach(posList::add);
         PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList));
-       if(player.isShiftKeyDown()) posList.stream().filter(p -> (p.getX() == pos.getX()) && (p.getZ() == pos.getZ()) && (p.getY() < pos.getY()))
-               .min(Comparator.comparingInt(BlockPos::getY))
-               .ifPresent(p -> player.teleportTo(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5));
+        if (player.isShiftKeyDown()) posList.stream()
+                .filter(p -> (p.getX() == pos.getX()) && (p.getZ() == pos.getZ()) && (p.getY() < pos.getY()))
+                .min(Comparator.comparingInt(BlockPos::getY))
+                .ifPresent(p -> player.teleportTo(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5));
     }
+
     @Nullable
     protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> typeA, BlockEntityType<E> typeB, BlockEntityTicker<? super E> ticker) {
         return typeA == typeB ? (BlockEntityTicker<A>) ticker : null;
