@@ -58,7 +58,7 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
                 .destroyTime(1.5F)
                 .pushReaction(PushReaction.DESTROY)
         );
-        this.registerDefaultState(this.stateDefinition.any().setValue(CoolDown, false));
+        this.registerDefaultState(this.stateDefinition.any().setValue(CoolDown, true));
     }
 
     @Override
@@ -95,6 +95,7 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (level.getServer() == null) return;
+        if (state.is(newState.getBlock())) return;
         level.getServer().getPlayerList().getPlayers().forEach(player -> {
             var M = player.getData(DataRegistry.MARKED_POSITIONS_CACHE.get());
             M.teleporters().removeIf(e -> e.dimension().equals(level.dimension()) && e.pos().equals(pos));

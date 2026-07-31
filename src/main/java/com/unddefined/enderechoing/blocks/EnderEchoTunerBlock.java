@@ -63,8 +63,7 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
                 .lightLevel(state -> 3)
                 .dynamicShape()
         );
-        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.UP));
-        this.registerDefaultState(this.stateDefinition.any().setValue(CHARGED, false));
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.UP).setValue(CHARGED, false));
     }
 
     @Nullable

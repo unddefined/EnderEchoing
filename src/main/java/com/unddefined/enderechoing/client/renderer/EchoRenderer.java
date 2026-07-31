@@ -94,7 +94,6 @@ public class EchoRenderer {
     @SubscribeEvent
     public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
         reset();
-        echoMap.clear();
     }
 
     @SubscribeEvent
@@ -117,7 +116,10 @@ public class EchoRenderer {
         if (EchoSoundingPos != null) {
             isCounting = true;
             countdownTicks = 60;
+            if (player.hasEffect(SCULK_VEIL)) responseTime = 120;
+            else responseTime = 30;
             if (echoMap.isEmpty() && !syncedTeleporterPositions.isEmpty()) {
+
                 for (BlockPos pos : syncedTeleporterPositions) {
                     if (pos.equals(EchoSoundingPos)) continue;
                     if (!new AABB(EchoSoundingPos).inflate(4096).contains(Vec3.atCenterOf(pos))) continue;
@@ -148,7 +150,7 @@ public class EchoRenderer {
         if (EchoSoundingPos == null) return;
         // 玩家离开了方块，重置状态
         if (!new AABB(EchoSoundingPos).intersects(player.getBoundingBox())) {
-            if (player.hasEffect(SCULK_VEIL)) PacketDistributor.sendToServer(new AddEffectPacket(MobEffects.GLOWING, 600));
+            if (responseTime != 30) PacketDistributor.sendToServer(new AddEffectPacket(MobEffects.GLOWING, 600));
             reset();
         }
     }
