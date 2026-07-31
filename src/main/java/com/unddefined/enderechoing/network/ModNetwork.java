@@ -94,6 +94,13 @@ public class ModNetwork {
                 SendMarkedPositionNamesPacket.STREAM_CODEC,
                 SendMarkedPositionNamesPacket::handle
         );
+
+        registrar.playToClient(
+                RenderEchoNamesPacket.TYPE,
+                RenderEchoNamesPacket.STREAM_CODEC,
+                RenderEchoNamesPacket::handle
+        );
+
         registrar.playToClient(
                 SendSyncedTeleporterPositionsPacket.TYPE,
                 SendSyncedTeleporterPositionsPacket.STREAM_CODEC,

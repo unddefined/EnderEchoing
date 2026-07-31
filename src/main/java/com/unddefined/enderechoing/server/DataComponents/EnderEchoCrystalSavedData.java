@@ -1,49 +1,92 @@
 package com.unddefined.enderechoing.server.DataComponents;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class EnderEchoCrystalSavedData extends SavedData {
     public static final String ID = "ender_echo_crystals";
-    public final Set<BlockPos> crystals = new HashSet<>();
+    public final Set<CrystalEntry> crystals = new HashSet<>();
 
-    public EnderEchoCrystalSavedData() {}
+    public EnderEchoCrystalSavedData() {
+    }
 
     public static EnderEchoCrystalSavedData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(new Factory<>(EnderEchoCrystalSavedData::new, EnderEchoCrystalSavedData::load), ID);
     }
 
     public static EnderEchoCrystalSavedData load(CompoundTag tag, HolderLookup.Provider registries) {
-        var data = new EnderEchoCrystalSavedData();
-        Arrays.stream(tag.getLongArray(ID)).forEach(l -> data.crystals.add(BlockPos.of(l)));
+        EnderEchoCrystalSavedData data = new EnderEchoCrystalSavedData();
+        ListTag list = tag.getList(ID, Tag.TAG_COMPOUND);
+        for (Tag t : list) {
+            CompoundTag crystal = (CompoundTag) t;
+            var dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(crystal.getString("dimension")));
+            GlobalPos pos = GlobalPos.of(dimension, BlockPos.of(crystal.getLong("pos")));
+            String name = crystal.getString("name");
+            data.crystals.add(new CrystalEntry(pos, name));
+        }
         return data;
     }
 
     // ===== API =====
-    public void add(BlockPos pos) {
-        crystals.add(pos);
+    public void add(ResourceKey<Level> d, BlockPos p) {
+        crystals.add(new CrystalEntry(GlobalPos.of(d, p), ""));
         setDirty();
     }
 
-    public void remove(BlockPos pos) {
-        crystals.remove(pos);
+    public void remove(GlobalPos pos) {
+        crystals.removeIf(g -> g.pos.equals(pos));
         setDirty();
     }
 
-    public Set<BlockPos> getAll() {return Collections.unmodifiableSet(crystals);}
+    public Set<CrystalEntry> getAll() {
+        return Collections.unmodifiableSet(crystals);
+    }
 
     @Override
-    public @NotNull CompoundTag save(CompoundTag compoundTag, HolderLookup.@NotNull Provider registries) {
-        compoundTag.putLongArray(ID, crystals.stream().mapToLong(BlockPos::asLong).toArray());
-        return compoundTag;
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+        ListTag list = new ListTag();
+        for (CrystalEntry entry : crystals) {
+            CompoundTag crystal = new CompoundTag();
+            crystal.putString("dimension", entry.pos().dimension().location().toString());
+            crystal.putLong("pos", entry.pos().pos().asLong());
+            crystal.putString("name", entry.name());
+            list.add(crystal);
+        }
+        tag.put(ID, list);
+        return tag;
+    }
+
+    public static class CrystalEntry {
+        private final GlobalPos pos;
+        private String name = "";
+
+        public CrystalEntry(GlobalPos pos, String name) {
+            this.pos = pos;
+            this.name = name;
+        }
+
+        public GlobalPos pos() {
+            return pos;
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 }

@@ -1,7 +1,7 @@
 package com.unddefined.enderechoing.items;
 
 import com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity;
-import com.unddefined.enderechoing.network.packet.SendMarkedPositionNamesPacket;
+import com.unddefined.enderechoing.network.packet.RenderEchoNamesPacket;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
 import com.unddefined.enderechoing.server.registry.DataRegistry;
 import net.minecraft.core.BlockPos;
@@ -59,10 +59,10 @@ public class EnderEchoingEye extends Item implements ICurioItem {
         }
 
         var level = (ServerLevel) player.level();
-        EnderEchoCrystalSavedData.get(level).crystals.stream()
-                .min(Comparator.comparingDouble(c -> c.distToCenterSqr(player.getX(), player.getY(), player.getZ())))
-                .filter(c -> c.distToCenterSqr(player.getX(), player.getY(), player.getZ()) < 16 * 16)
-                .ifPresentOrElse(blockPos -> EECrystal = (EnderEchoCrystalBlockEntity) level.getBlockEntity(blockPos), () -> EECrystal = null);
+        EnderEchoCrystalSavedData.get(level).crystals.stream().filter(c -> c.pos().dimension().equals(level.dimension()))
+                .min(Comparator.comparingDouble(c -> c.pos().pos().distToCenterSqr(player.getX(), player.getY(), player.getZ())))
+                .filter(c -> c.pos().pos().distToCenterSqr(player.getX(), player.getY(), player.getZ()) < 16 * 16)
+                .ifPresentOrElse(c -> EECrystal = (EnderEchoCrystalBlockEntity) level.getBlockEntity(c.pos().pos()), () -> EECrystal = null);
         if (EECrystal == null) return;
 
         if (!EECrystal.getPlayerUUID().equals(nullUUID) && !EECrystal.getPlayerUUID().equals(player.getUUID())) return;
@@ -77,11 +77,7 @@ public class EnderEchoingEye extends Item implements ICurioItem {
     @Override
     public void onUnequip(SlotContext slotContext, ItemStack newStack, ItemStack stack) {
         if (!(slotContext.entity() instanceof ServerPlayer player)) return;
-
         onEnderEyeUnequip(crystal, player);
-
-        Map<BlockPos, String> posName = new java.util.HashMap<>();
-        PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
         if (EECrystal != null) EECrystal.setPlayerUUID(null);
     }
 

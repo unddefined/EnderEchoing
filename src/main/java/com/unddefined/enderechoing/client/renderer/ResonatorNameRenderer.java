@@ -16,6 +16,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static net.minecraft.client.renderer.LightTexture.FULL_BLOCK;
@@ -23,34 +24,39 @@ import static net.minecraft.client.renderer.LightTexture.FULL_BLOCK;
 @EventBusSubscriber(modid = EnderEchoing.MODID, value = Dist.CLIENT)
 public class ResonatorNameRenderer {
     private static final Minecraft mc = Minecraft.getInstance();
-    public static Map<BlockPos, String> posName = new java.util.HashMap<>();
+    public static Map<BlockPos, String> posName = new HashMap<>();
+
     @SubscribeEvent
     public static void renderPositionName(RenderLevelStageEvent event) {
-        if (posName == null || posName.size() != 1) return;
+        if (posName.isEmpty()) return;
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
-        event.getPoseStack().pushPose();
-        var pos = posName.keySet().stream().findFirst().get();
+        PoseStack poseStack = event.getPoseStack();
         var camPos = mc.gameRenderer.getMainCamera().getPosition();
-        event.getPoseStack().translate(pos.getX() + 0.5f - camPos.x, pos.getY() + 1f - camPos.y , pos.getZ() + 0.5f - camPos.z);
-        renderPositionName(posName.values().stream().findFirst().get(), mc.renderBuffers().bufferSource(), event.getPoseStack());
-        event.getPoseStack().popPose();
+        for (var entry : posName.entrySet()) {
+            BlockPos pos = entry.getKey();
+            poseStack.pushPose();
+            poseStack.translate(pos.getX() + 0.5f - camPos.x, pos.getY() + 1f - camPos.y, pos.getZ() + 0.5f - camPos.z);
+            renderPositionName(entry.getValue(), mc.renderBuffers().bufferSource(), poseStack);
+            poseStack.popPose();
+        }
     }
+
     public static void renderPositionName(String name, MultiBufferSource bufferSource, PoseStack poseStack) {
         var camera = mc.gameRenderer.getMainCamera();
         float textWidth = mc.font.width(name) / 2.0f;
         poseStack.scale(0.033f, 0.033f, 0.033f);
+        // 始终面向玩家
         poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
         poseStack.mulPose(Axis.ZP.rotationDegrees(180));
-
-        mc.font.drawInBatch(
-                Component.literal(name), -textWidth, 0,
+        mc.font.drawInBatch(Component.literal(name), -textWidth, 0,
                 FastColor.ABGR32.color(255, 140, 244, 226), false,
-                poseStack.last().pose(), bufferSource,
-                Font.DisplayMode.NORMAL, 0, FULL_BLOCK
+                poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, FULL_BLOCK
         );
     }
 
     @SubscribeEvent
-    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {posName.clear();}
+    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        posName.clear();
+    }
 }

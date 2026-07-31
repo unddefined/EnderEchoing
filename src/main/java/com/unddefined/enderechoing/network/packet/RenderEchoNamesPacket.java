@@ -15,18 +15,18 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-public record SendMarkedPositionNamesPacket(Map<BlockPos, String> markedPositionNames) implements CustomPacketPayload {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "send_marked_position_names");
-    public static final Type<SendMarkedPositionNamesPacket> TYPE = new Type<>(ID);
+public record RenderEchoNamesPacket(Map<BlockPos, String> markedPositionNames) implements CustomPacketPayload {
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "render_echo_names");
+    public static final Type<RenderEchoNamesPacket> TYPE = new Type<>(ID);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SendMarkedPositionNamesPacket> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, RenderEchoNamesPacket> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.map(HashMap::new, BlockPos.STREAM_CODEC, ByteBufCodecs.STRING_UTF8, 256),
-            SendMarkedPositionNamesPacket::markedPositionNames, SendMarkedPositionNamesPacket::new);
+            RenderEchoNamesPacket::markedPositionNames, RenderEchoNamesPacket::new);
 
-    public static void handle(SendMarkedPositionNamesPacket msg, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> EchoRenderer.MarkedPositionNames = msg.markedPositionNames());
+    public static void handle(RenderEchoNamesPacket msg, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ResonatorNameRenderer.posName = msg.markedPositionNames());
     }
 
     @Override
-    public @NotNull Type<? extends CustomPacketPayload> type() {return TYPE;}
+    public @NotNull CustomPacketPayload.Type<? extends CustomPacketPayload> type() {return TYPE;}
 }

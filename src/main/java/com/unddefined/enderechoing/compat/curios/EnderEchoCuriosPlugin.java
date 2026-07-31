@@ -1,7 +1,8 @@
 package com.unddefined.enderechoing.compat.curios;
 
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.network.packet.SendMarkedPositionNamesPacket;
+import com.unddefined.enderechoing.network.packet.RenderEchoNamesPacket;
+import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,7 +56,7 @@ public class EnderEchoCuriosPlugin {
 
                     @Override
                     public void curioTick(SlotContext slotContext) {
-                         if (!(slotContext.entity() instanceof ServerPlayer player)) return;
+                        if (!(slotContext.entity() instanceof ServerPlayer player)) return;
                         showResonatorName(player);
                         if (player.totalExperience < XP_COST || player.getHealth() >= player.getMaxHealth()) return;
                         crystal = enderEyeCurioHealTick(player, XP_COST, HEAL_INTERVAL);
@@ -90,21 +91,23 @@ public class EnderEchoCuriosPlugin {
     public static void showResonatorName(ServerPlayer player) {
         Map<BlockPos, String> posName = new HashMap<>();
         var markedPositions = player.getData(MARKED_POSITIONS_CACHE).markedPositions();
-
-        if (markedPositions.isEmpty()) {
-            PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
-            return;
-        }
+        var crystals = EnderEchoCrystalSavedData.get((ServerLevel) player.level()).getAll().stream()
+                        .filter(c -> c.pos().dimension().equals(player.level().dimension())).toList();
 
         markedPositions.stream().filter(e -> e.dimension().equals(player.level().dimension()))
-                .min(Comparator.comparingDouble(e -> e.pos().distToCenterSqr(player.position()))).ifPresent(e -> {if (e.pos().distToCenterSqr(player.position()) < 9) posName.put(e.pos(), e.name());});
+                .filter(e -> e.pos().distToCenterSqr(player.position()) < 25)
+                .forEach(e -> posName.put(e.pos(), e.name()));
 
-        PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
+        crystals.stream().filter(e -> e.pos().pos().distToCenterSqr(player.position()) < 25)
+                .forEach(e -> posName.put(e.pos().pos(), e.name()));
+
+        PacketDistributor.sendToPlayer(player, new RenderEchoNamesPacket(posName));
     }
 
-    public static void onEnderEyeUnequip(EndCrystal crystal, ServerPlayer player){
+    public static void onEnderEyeUnequip(EndCrystal crystal, ServerPlayer player) {
         Map<BlockPos, String> posName = new java.util.HashMap<>();
-        PacketDistributor.sendToPlayer(player, new SendMarkedPositionNamesPacket(posName));
+        PacketDistributor.sendToPlayer(player, new RenderEchoNamesPacket(posName));
         if (crystal != null) crystal.getEntityData().set(ENDER_EYE_OWNER, Optional.empty());
+        showResonatorName(player);
     }
 }
