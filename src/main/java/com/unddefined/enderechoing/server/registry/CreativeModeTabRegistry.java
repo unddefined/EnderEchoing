@@ -19,6 +19,7 @@ public class CreativeModeTabRegistry {
                 output.accept(ItemRegistry.ENDER_ECHOING_CORE.get());
                 output.accept(ItemRegistry.ENDER_ECHO_TUNE_CHAMBER.get());
                 output.accept(ItemRegistry.ENDER_ECHO_CRYSTAL.get());
+                output.accept(ItemRegistry.ENDER_ECHO_COMPASS.get());
                 output.accept(ItemRegistry.ECHO_DRUSE.get());
                 output.accept(ItemRegistry.ENDER_ECHOING_PEARL.get());
                 output.accept(ItemRegistry.ENDER_ECHOING_EYE.get());

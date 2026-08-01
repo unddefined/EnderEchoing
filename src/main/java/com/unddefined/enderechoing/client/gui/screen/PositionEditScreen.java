@@ -175,6 +175,7 @@ public class PositionEditScreen extends Screen {
 
     private void onDone() {
         String name = this.nameField.getValue().trim();
+        if (name.equals("")) name = fieldValue;
 
         if (lastScreen instanceof TunerScreen tunerScreen) {
             var M = tunerScreen.getFocusingEntry().getMarkedPosition();

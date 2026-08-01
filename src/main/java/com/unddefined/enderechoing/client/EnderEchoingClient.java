@@ -11,7 +11,10 @@ import com.unddefined.enderechoing.server.registry.ParticlesRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.item.CompassItemPropertyFunction;
+import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -27,6 +30,8 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import java.io.IOException;
 
 import static com.unddefined.enderechoing.EnderEchoing.TUNER_MENU;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.POSITION;
+import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHO_COMPASS;
 
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
@@ -48,10 +53,20 @@ public class EnderEchoingClient {
     static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             try {
-                sculkVeilPostChain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), mc.getMainRenderTarget(), ResourceLocation.fromNamespaceAndPath("enderechoing", "shaders/post/sculk_veil.json"));
+                sculkVeilPostChain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), mc.getMainRenderTarget(),
+                        ResourceLocation.fromNamespaceAndPath("enderechoing", "shaders/post/sculk_veil.json"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
+            ItemProperties.register(ENDER_ECHO_COMPASS.get(),
+                    ResourceLocation.fromNamespaceAndPath("enderechoing", "angle"),
+                    new CompassItemPropertyFunction((level, stack, entity) -> {
+                        if (entity instanceof Player player) return stack.get(POSITION) == null ?
+                                    player.getLastDeathLocation().orElse(null) : stack.get(POSITION);
+                        return null;
+                    })
+            );
         });
 
         // Register block entity renderers
@@ -71,8 +86,11 @@ public class EnderEchoingClient {
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(EntityRegistry.ENDER_ECHO_CRYSTAL_ENTITY.get(), EnderEchoCrystalEntityRenderer::new);
     }
+
     @SubscribeEvent
-    private static void registerScreens(RegisterMenuScreensEvent event) {event.register(TUNER_MENU.get(), TunerScreen::new);}
+    private static void registerScreens(RegisterMenuScreensEvent event) {
+        event.register(TUNER_MENU.get(), TunerScreen::new);
+    }
 
     @SubscribeEvent
     public static void registerParticleProviders(RegisterParticleProvidersEvent event) {

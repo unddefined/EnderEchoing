@@ -48,7 +48,7 @@ public class ServerEvents {
             // 如果 target 为 null，或者方块不是预期的，则返回 true 进行删除
             if (target == null) return true;
             if (!target.getBlockState(T.pos()).is(ENDER_ECHOIC_RESONATOR.get())) {
-                LOGGER.info("Removed invalid crystal at {}", T);
+                LOGGER.info("Removed invalid resonator at {}", T);
                 return true; // 返回 true 表示移除该元素
             }
             return false; // 返回 false 表示保留该元素

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item":"enderechoing:ender_echoing_eye"},
+    {"item":"minecraft:recovery_compass"}
+  ],
+  "result": {
+    "id": "enderechoing:ender_echo_compass",
+    "count": 1
+  }
+}
