@@ -32,6 +32,7 @@ import static com.unddefined.enderechoing.server.registry.BlockRegistry.ENDER_EC
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.MARKED_POSITIONS_CACHE;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
+import static net.minecraft.world.effect.MobEffects.GLOWING;
 import static net.minecraft.world.entity.ai.attributes.Attributes.*;
 
 @EventBusSubscriber(modid = EnderEchoing.MODID)
@@ -57,16 +58,18 @@ public class ServerEvents {
 
     @SubscribeEvent
     public static void onExpireEffect(MobEffectEvent.Expired event) {
-        if (!event.getEntity().hasEffect(TINNITUS) && event.getEntity().getAttribute(FOLLOW_RANGE) != null) {
-            if (event.getEntity() instanceof Monster monster)
-                monster.getAttribute(FOLLOW_RANGE).removeModifier(tinnitus_modifier_id);
+        var E = event.getEntity();
+        if (!E.hasEffect(TINNITUS) && E.getAttribute(FOLLOW_RANGE) != null) {
+            if (E instanceof Monster monster) monster.getAttribute(FOLLOW_RANGE).removeModifier(tinnitus_modifier_id);
         }
-        if (!event.getEntity().hasEffect(STAGGER) && event.getEntity().getAttribute(MOVEMENT_SPEED) != null) {
-            event.getEntity().getAttribute(MOVEMENT_SPEED).removeModifier(stagger_modifier_id);
+        if (!E.hasEffect(STAGGER) && E.getAttribute(MOVEMENT_SPEED) != null) {
+            E.getAttribute(MOVEMENT_SPEED).removeModifier(stagger_modifier_id);
         }
-        if (!event.getEntity().hasEffect(ATTACK_SCATTERED) && event.getEntity().getAttribute(ATTACK_SPEED) != null) {
-            event.getEntity().getAttribute(ATTACK_SPEED).removeModifier(attack_scattered_modifier_id);
+        if (!E.hasEffect(ATTACK_SCATTERED) && E.getAttribute(ATTACK_SPEED) != null) {
+            E.getAttribute(ATTACK_SPEED).removeModifier(attack_scattered_modifier_id);
         }
+        if (!E.hasEffect(SCULK_VEIL)) E.addEffect(new MobEffectInstance(GLOWING,600));
+
     }
 
     @SubscribeEvent

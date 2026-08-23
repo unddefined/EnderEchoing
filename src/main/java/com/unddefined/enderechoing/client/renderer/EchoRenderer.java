@@ -5,13 +5,11 @@ import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.particles.EchoResponse;
 import com.unddefined.enderechoing.client.particles.EchoResponsing;
 import com.unddefined.enderechoing.client.particles.EchoSounding;
-import com.unddefined.enderechoing.network.packet.AddEffectPacket;
 import com.unddefined.enderechoing.network.packet.TeleportRequestPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -119,7 +117,6 @@ public class EchoRenderer {
             if (player.hasEffect(SCULK_VEIL)) responseTime = 120;
             else responseTime = 30;
             if (echoMap.isEmpty() && !syncedTeleporterPositions.isEmpty()) {
-
                 for (BlockPos pos : syncedTeleporterPositions) {
                     if (pos.equals(EchoSoundingPos)) continue;
                     if (!new AABB(EchoSoundingPos).inflate(4096).contains(Vec3.atCenterOf(pos))) continue;
@@ -149,10 +146,7 @@ public class EchoRenderer {
         countdownTicks--;
         if (EchoSoundingPos == null) return;
         // 玩家离开了方块，重置状态
-        if (!new AABB(EchoSoundingPos).intersects(player.getBoundingBox())) {
-            if (responseTime != 30) PacketDistributor.sendToServer(new AddEffectPacket(MobEffects.GLOWING, 600));
-            reset();
-        }
+        if (!new AABB(EchoSoundingPos).intersects(player.getBoundingBox())) reset();
     }
 
     private static void reset() {

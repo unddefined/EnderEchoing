@@ -115,6 +115,9 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
         level.scheduleTick(pos, this, 50);
         if (!state.getValue(CoolDown)) return;
+        PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
+        player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
+        level.setBlock(pos, state.setValue(CoolDown, false), 3);
         //获取目的地名称
         var posList = manager.getTeleporterPositions(level);
         var map = manager.getMarkedTeleportersMap(level);
@@ -134,10 +137,8 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
             if (!B.getSelectedPos().equals(GZERO) && (B.getSelectedPos().dimension().equals(level.dimension()) || B.checkMultiblock()))
                 targetPos = B.getSelectedPos();
         // 传送
-        PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
-        player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
-        level.setBlock(pos, state.setValue(CoolDown, false), 3);
         if (targetPos != null) {
+            if (!map.containsKey(targetPos.pos())) player.setData(EE_PEARL_AMOUNT,player.getData(EE_PEARL_AMOUNT) - 1);
             if (!targetPos.dimension().equals(level.dimension())){
                 if (tuner instanceof EnderEchoTunerBlockEntity B) B.consumeAnchorCharge();
                 player.setData(EE_PEARL_AMOUNT,player.getData(EE_PEARL_AMOUNT) - 1);

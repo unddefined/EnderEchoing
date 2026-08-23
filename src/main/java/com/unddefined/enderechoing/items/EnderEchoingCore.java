@@ -21,7 +21,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -133,7 +132,6 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
         if (level instanceof ServerLevel SL && livingEntity instanceof ServerPlayer S) {
             stopTriggeredAnim(S, GeoItem.getOrAssignId(stack, SL), CONTROLLER_NAME, null);
-            S.addEffect(new MobEffectInstance(MobEffects.GLOWING, 400));
             PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
             PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(new GlobalPos(level.dimension(),BlockPos.ZERO), false));
         }
@@ -145,7 +143,6 @@ public class EnderEchoingCore extends Item implements GeoItem {
             if (!player.getInventory().hasAnyMatching(itemStack ->
                     itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)
                     && player.getData(EE_PEARL_AMOUNT.get()) < 1) {
-                player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 300));
                 PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(BlockPos.ZERO));
                 return stack;
             }

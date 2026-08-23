@@ -144,7 +144,7 @@ void main() {
     vec3 rayPos = CameraPos;
     vec3 rayDir = getWorldRayDir(texCoord);
     float fogAcc = 0.0;
-    vec3 fogColor = vec3(5./255., 42./255., 103./255.);
+    vec3 fogColor = vec3(11./255., 77./255., 66./255.);
     float stepSize = FOG_RADIUS / float(STEPS);
 
     for (int i = 0; i < STEPS; i++) {

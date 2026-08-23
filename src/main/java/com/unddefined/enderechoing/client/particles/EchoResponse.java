@@ -129,7 +129,7 @@ public class EchoResponse {
             var vertexConsumer = bufferSource.getBuffer(WAVE_RENDER_TYPE);
             var matrix4f = poseStack.last().pose();
             int color = isElementHovering ? FastColor.ABGR32.color((int) (alpha * 255), 140, 244, 226)
-                    : FastColor.ABGR32.color((int) (alpha * 255 * Math.max(0.1, (1 - (distance / 4096)))), 41, 223, 235);
+                    : FastColor.ABGR32.color((int) (alpha * 255 * Math.max(0.1, (1 - (distance / 4096)))), 44, 205, 177);
             // 绘制一个平面 quad，包含所有必需的顶点属性
             vertexConsumer.addVertex(matrix4f, -1f, -1f, 0f).setUv(0f, 0f).setColor(color)
                     .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(0f, 1f, 0f);

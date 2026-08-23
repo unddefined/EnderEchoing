@@ -1,6 +1,5 @@
 package com.unddefined.enderechoing.client.gui.widgets;
 
-import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.client.gui.screen.PositionEditScreen;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
@@ -125,7 +124,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         private final WaypointList parent;
         private final MarkedPositionsManager.MarkedPositions markedPosition;
         private final boolean isSelf;
-        private final boolean can_teleport;
+        private final boolean can_crossDimension;
         public boolean selected;
         private boolean hovered;
         private final boolean isFacing_down;
@@ -136,7 +135,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
             this.markedPosition = M;
             this.isFacing_down = parent.screen.getMenu().isFacing_down();
             this.isSelf = markedPosition.pos().above(2).equals(parent.screen.getMenu().getTunerPos().pos());
-            this.can_teleport = (markedPosition.teleporterBound() && parent.screen.getMenu().getTunerPos().dimension().equals(markedPosition.dimension())) || parent.screen.getMenu().isMultiBlocked();
+            this.can_crossDimension = (parent.screen.getMenu().getTunerPos().dimension().equals(markedPosition.dimension())) || parent.screen.getMenu().isMultiBlocked();
             this.pearlEnough = parent.screen.getMenu().ee_pearl_amount > 1;
         }
 
@@ -149,7 +148,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
             selected = parent.selectedPosition == markedPosition;
             int width = entryWidth - 6;
 
-            gfx.blitSprite(SPRITES.get((!isSelf && can_teleport && pearlEnough) || !isFacing_down, this.hovered || this.selected), left + 3, top, width - 4, height);
+            gfx.blitSprite(SPRITES.get((!isSelf && can_crossDimension && pearlEnough) || !isFacing_down, this.hovered || this.selected), left + 3, top, width - 4, height);
 
             // ---- 绘制文字 ----
             Component text = Component.literal(markedPosition.name());
@@ -171,7 +170,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (!hovered) return false;
-            if (isSelf || !can_teleport && isFacing_down && pearlEnough) return false;
+            if (isSelf || !can_crossDimension && isFacing_down && pearlEnough) return false;
             mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             selected = !selected;
 
