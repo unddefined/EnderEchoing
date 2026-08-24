@@ -51,7 +51,7 @@ public class ResonatorNameRenderer {
         poseStack.mulPose(Axis.ZP.rotationDegrees(180));
         mc.font.drawInBatch(Component.literal(name), -textWidth, 0,
                 FastColor.ABGR32.color(255, 140, 244, 226), false,
-                poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, FULL_BLOCK
+                poseStack.last().pose(), bufferSource, Font.DisplayMode.SEE_THROUGH, 0, FULL_BLOCK
         );
     }
 

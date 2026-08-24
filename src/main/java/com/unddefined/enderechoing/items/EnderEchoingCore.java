@@ -3,10 +3,7 @@ package com.unddefined.enderechoing.items;
 import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.client.model.EnderEchoingCoreModel;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer;
-import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
-import com.unddefined.enderechoing.network.packet.SetEchoSoundingPosPacket;
-import com.unddefined.enderechoing.network.packet.SetPlayerAnimationPacket;
-import com.unddefined.enderechoing.network.packet.SetTeleportPosPacket;
+import com.unddefined.enderechoing.network.packet.*;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.server.registry.MobEffectRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
@@ -21,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -40,8 +38,11 @@ import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
+import static com.unddefined.enderechoing.EnderEchoing.GZERO;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_POSITION;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
@@ -51,6 +52,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
     private static final String ANIM_USE = "use";
     private static final RawAnimation USE_ANIM = RawAnimation.begin().thenPlay("ender_echoing_core.use");
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+    private int tick = 0;
 
     public EnderEchoingCore(Properties properties) {
         super(properties.stacksTo(2));
@@ -80,10 +82,34 @@ public class EnderEchoingCore extends Item implements GeoItem {
     }
 
     @Override
-    public int getUseDuration(@NotNull ItemStack itemStack, @NotNull LivingEntity livingEntity) {return 40;}
+    public int getUseDuration(@NotNull ItemStack itemStack, @NotNull LivingEntity livingEntity) {
+        return 40;
+    }
 
     @Override
-    public @NotNull UseAnim getUseAnimation(@NotNull ItemStack stack) {return UseAnim.CUSTOM;}
+    public @NotNull UseAnim getUseAnimation(@NotNull ItemStack stack) {
+        return UseAnim.CUSTOM;
+    }
+
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
+        if (!(entity instanceof ServerPlayer S)) return;
+        Map<BlockPos, String> Map = new HashMap<>();
+        if (!isSelected) {
+            tick = 0;
+            PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
+            PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
+            return;
+        }
+        tick++;
+        PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(S.blockPosition()));
+        if (tick < 20) return;
+
+        var manager = MarkedPositionsManager.getManager(S);
+        if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
+        manager.markedPositions().stream().filter(e -> e.dimension().equals(level.dimension()))
+                .forEach(e -> Map.put(e.pos(), e.name()));
+        PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
+    }
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
@@ -104,7 +130,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 return InteractionResultHolder.fail(itemStack);
             // 渲染传送特效
             PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(player.blockPosition()));
-            PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(new GlobalPos(level.dimension(),nearestTeleporterPos.getFirst()), true));
+            PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(new GlobalPos(level.dimension(), nearestTeleporterPos.getFirst()), true));
             // 添加玩家动画
             PacketDistributor.sendToPlayer(S, new SetPlayerAnimationPacket());
             // 添加动画
@@ -133,7 +159,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
         if (level instanceof ServerLevel SL && livingEntity instanceof ServerPlayer S) {
             stopTriggeredAnim(S, GeoItem.getOrAssignId(stack, SL), CONTROLLER_NAME, null);
             PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
-            PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(new GlobalPos(level.dimension(),BlockPos.ZERO), false));
+            PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(GZERO, false));
         }
     }
 
@@ -165,5 +191,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
     }
 
     @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {return cache;}
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
+    }
 }
