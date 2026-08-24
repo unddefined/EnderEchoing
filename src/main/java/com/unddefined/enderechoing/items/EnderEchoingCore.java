@@ -46,6 +46,7 @@ import static com.unddefined.enderechoing.Config.EECORE_TP_DISTANCE;
 import static com.unddefined.enderechoing.EnderEchoing.GZERO;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_POSITION;
+import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoingCore extends Item implements GeoItem {
@@ -97,14 +98,20 @@ public class EnderEchoingCore extends Item implements GeoItem {
         if (!(entity instanceof ServerPlayer S)) return;
         Map<BlockPos, String> Map = new HashMap<>();
         if (!isSelected) {
+            if (tick > 0) {
+                PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
+                PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
+            }
             tick = 0;
-            PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
+            return;
+        }
+        if (S.hasEffect(SCULK_VEIL)) {
             PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
             return;
         }
         tick++;
         PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(S.blockPosition()));
-        if (tick < 20) return;
+        if (tick < 24) return;
 
         var manager = MarkedPositionsManager.getManager(S);
         if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
@@ -140,7 +147,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
             // 添加玩家动画
             PacketDistributor.sendToPlayer(S, new SetPlayerAnimationPacket());
             // 添加动画
-            player.addEffect(new MobEffectInstance(MobEffectRegistry.SCULK_VEIL, 20 * 3, 0, false, true));
+            player.addEffect(new MobEffectInstance(SCULK_VEIL, 20 * 3, 0, false, true));
             if (level instanceof ServerLevel SL) triggerAnim(player, GeoItem.getOrAssignId(itemStack, SL), CONTROLLER_NAME, ANIM_USE);
 
             player.startUsingItem(hand);

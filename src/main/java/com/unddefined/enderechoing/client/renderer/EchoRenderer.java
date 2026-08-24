@@ -96,7 +96,7 @@ public class EchoRenderer {
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
-        if (EchoSoundingPos != null && EchoSoundingPos.equals(BlockPos.ZERO)) EchoSoundingPos = null;
+        if (EchoSoundingPos != null && EchoSoundingPos.equals(BlockPos.ZERO)) reset();
         if (targetPos != null && targetPos.pos().equals(BlockPos.ZERO)) targetPos = null;
         var player = event.getEntity();
         var level = player.level();
@@ -124,14 +124,19 @@ public class EchoRenderer {
                 }
             }
         }
-        echoMap.forEach((p, e) -> {
+        // The callback may add/remove entries (see the teleport branch below),
+        // so iterate over a snapshot instead of modifying HashMap while it is
+        // being traversed.
+        new HashMap<>(echoMap).forEach((p, e) -> {
             if (e.isElementHovering) {
                 teleportTicks++;
                 e.hoveringTicks++;
                 targetPos = new GlobalPos(level.dimension(), p);
                 if (teleportTicks > 40 && !player.isCurrentlyGlowing() && !isTeleporting) {
-                    PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
                     isTeleporting = true;
+                    echoMap.putIfAbsent(EchoSoundingPos, new EchoResponse(EchoSoundingPos));
+                    echoMap.remove(targetPos.pos());
+                    PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
                 }
             }
             if (!targetPreseted && countTicks > responseTime && targetPos != null && targetPos.equals(p) && !e.isElementHovering)
@@ -141,6 +146,7 @@ public class EchoRenderer {
         if (countdownTicks == 0) {
             isCounting = false;
             echoMap.clear();
+            reset();
             return;
         }
         countdownTicks--;
@@ -151,11 +157,11 @@ public class EchoRenderer {
 
     private static void reset() {
         EchoSoundingPos = null;
+        syncedTeleporterPositions.clear();
         targetPreseted = false;
         targetPos = null;
         teleportTicks = 0;
         sculkveilCountTicks = -43;
         isTeleporting = false;
-        echoMap.clear();
     }
 }
