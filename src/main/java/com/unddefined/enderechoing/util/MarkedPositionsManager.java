@@ -51,8 +51,8 @@ public record MarkedPositionsManager(List<MarkedPositionsManager.Teleporters> te
         return true;
     }
 
-    public List<BlockPos> getNearestTeleporter(Level level, BlockPos fromPos) {
-        BlockPos nearestPos = null;
+    public GlobalPos getNearestTeleporter(Level level, BlockPos fromPos) {
+        GlobalPos nearestPos = null;
         double nearestDistance = Double.MAX_VALUE;
         for (MarkedPositionsManager.Teleporters entry : teleporters) {
             // 只检查同一维度的传送器
@@ -60,11 +60,11 @@ public record MarkedPositionsManager(List<MarkedPositionsManager.Teleporters> te
                 double distance = entry.pos().distSqr(fromPos);
                 if (distance < nearestDistance) {
                     nearestDistance = distance;
-                    nearestPos = entry.pos();
+                    nearestPos = entry.globalPos;
                 }
             }
         }
-        return Collections.singletonList(nearestPos);
+        return nearestPos;
     }
 
     public List<BlockPos> getTeleporterPositions(Level level) {

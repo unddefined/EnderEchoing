@@ -20,6 +20,10 @@ public class Config {
             .comment("Cooldown time for the Ender Echoing Core in ticks (20 ticks = 1 second)")
             .defineInRange("EnderEchoingCoreCooldown", 100, 1, Integer.MAX_VALUE);
 
+    public static final ModConfigSpec.IntValue EECORE_TP_DISTANCE = BUILDER
+            .comment("Interval distance for the Ender Echoing Core to teleport (each interval cost 1 ender echo pearl, half adjust)")
+            .defineInRange("EnderEchoingCoreCooldown", 256, 1, Integer.MAX_VALUE);
+
     public static final ModConfigSpec.IntValue ECHO_DRUSE_MAX_GROWTH_VALUE = BUILDER
             .comment( "Max growth value for the Echo Druse")
             .defineInRange("echo druse max growth value", 40000, 4, Integer.MAX_VALUE);
@@ -27,9 +31,11 @@ public class Config {
     public static final ModConfigSpec.DoubleValue ECHO_DRUSE_GENERATION_PROBABILITY = BUILDER
             .comment( "Probability of Echo Druse block generation")
             .defineInRange("echo druse generation probability",  0.3, 0, Double.MAX_VALUE);
+
     public static final ModConfigSpec.IntValue SCULK_WHISPER_COOLDOWN = BUILDER
             .comment( "Cooldown of sculk shrieker's InfrasoundBurst")
             .defineInRange("sculk whisper cooldown",  900, 0, Integer.MAX_VALUE);
+
     private static boolean validateItemName(final Object obj) {
         return obj instanceof String itemName && BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(itemName));
     }

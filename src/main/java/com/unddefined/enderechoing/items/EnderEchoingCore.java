@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static com.unddefined.enderechoing.Config.EECORE_TP_DISTANCE;
 import static com.unddefined.enderechoing.EnderEchoing.GZERO;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_POSITION;
@@ -53,6 +54,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
     private static final RawAnimation USE_ANIM = RawAnimation.begin().thenPlay("ender_echoing_core.use");
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private int tick = 0;
+    private int cost = 0;
 
     public EnderEchoingCore(Properties properties) {
         super(properties.stacksTo(2));
@@ -120,17 +122,21 @@ public class EnderEchoingCore extends Item implements GeoItem {
             // 检查玩家是否发光，如果发光则无法使用
             if (player.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
             // 查找最近的EnderEchoicResonator方块
+
             var manager = MarkedPositionsManager.getManager(player);
+            if (manager.teleporters().stream().filter(e -> e.dimension().equals(level.dimension())).toList().isEmpty())
+                return InteractionResultHolder.fail(itemStack);
             var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
-            if (nearestTeleporterPos.getFirst() == null) return InteractionResultHolder.fail(itemStack);
-            // 检查玩家是否有未保存数据的末影回响珍珠
+            // 检查玩家是否有空白末影回响珍珠
+            cost = (int) (nearestTeleporterPos.pos().distSqr(player.blockPosition()) / EECORE_TP_DISTANCE.getAsInt());
+            if (cost < 1) cost = 1;
             if (!player.getInventory().hasAnyMatching(item ->
                     item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null)
-                    && player.getData(EE_PEARL_AMOUNT.get()) < 1)
+                    && player.getData(EE_PEARL_AMOUNT.get()) < cost)
                 return InteractionResultHolder.fail(itemStack);
             // 渲染传送特效
             PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(player.blockPosition()));
-            PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(new GlobalPos(level.dimension(), nearestTeleporterPos.getFirst()), true));
+            PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(nearestTeleporterPos, true));
             // 添加玩家动画
             PacketDistributor.sendToPlayer(S, new SetPlayerAnimationPacket());
             // 添加动画
@@ -165,21 +171,22 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
     public @NotNull ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity livingEntity) {
         if (level instanceof ServerLevel && livingEntity instanceof ServerPlayer player) {
-            // 再次检查玩家是否有未保存数据的珍珠
+            // 再次检查玩家是否有空白珍珠
             if (!player.getInventory().hasAnyMatching(itemStack ->
                     itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)
-                    && player.getData(EE_PEARL_AMOUNT.get()) < 1) {
+                    && player.getData(EE_PEARL_AMOUNT.get()) < cost) {
                 PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(BlockPos.ZERO));
                 return stack;
             }
-            // 消耗一个没有保存数据的珍珠
-            if (player.getData(EE_PEARL_AMOUNT.get()) > 0) player.setData(EE_PEARL_AMOUNT.get(), player.getData(EE_PEARL_AMOUNT.get()) - 1);
+            // 消耗空白珍珠
+            if (player.getData(EE_PEARL_AMOUNT.get()) > 0) player.setData(EE_PEARL_AMOUNT.get(), player.getData(EE_PEARL_AMOUNT.get()) - cost);
             else player.getInventory().clearOrCountMatchingItems(itemStack ->
                     itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() &&
                             itemStack.get(CUSTOM_NAME) == null, 1, player.inventoryMenu.getCraftSlots());
 
             // 设置冷却时间
             player.getCooldowns().addCooldown(this, Config.ENDER_ECHOING_CORE_COOLDOWN.get());
+            cost = 0;
         }
         if (level.isClientSide() && livingEntity instanceof Player player && !player.isUsingItem()) {
             if (player instanceof AbstractClientPlayer clientPlayer) {
