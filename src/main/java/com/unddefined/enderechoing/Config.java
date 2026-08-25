@@ -1,103 +1,89 @@
 package com.unddefined.enderechoing;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-import java.util.List;
-
-// An example config class. This is not required, but it's a good idea to have one to keep your config organized.
-// Demonstrates how to use Neo's config APIs
+// Common gameplay configuration for Ender Echoing.
 public class Config {
-    //TODO: 配置语言文件
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    // a list of strings that are treated as resource locations for items
-    public static final ModConfigSpec.ConfigValue<List<? extends String>> ITEM_STRINGS = BUILDER
-            .comment("A list of items to log on common setup.")
-            .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), () -> "", Config::validateItemName);
-
     public static final ModConfigSpec.IntValue ENDER_ECHOING_CORE_COOLDOWN = BUILDER
-            .comment("Cooldown time for the Ender Echoing Core in seconds.")
+            .comment("Cooldown of the Ender Echoing Core, in seconds.")
             .defineInRange("EECore_Cooldown", 15, 1, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue EECORE_TP_DISTANCE = BUILDER
-            .comment("Interval distance for the Ender Echoing Core to teleport (each interval cost 1 ender echo pearl, half adjust)")
+            .comment("Distance interval used by the Ender Echoing Core. Each interval consumes one Ender Echo Pearl.")
             .defineInRange("EECore_TP_Distance", 256, 64, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue EECrystal_TP_DISTANCE = BUILDER
-            .comment("Max distance for the Ender Echo Crystal to teleport")
+            .comment("Maximum teleport distance of the Ender Echo Crystal, in blocks.")
             .defineInRange("EECrystal_TP_Distance", 96, 16, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue EECrystal_HEAL_DISTANCE = BUILDER
-            .comment("Max distance for the Ender Echo Crystal and End Crystal to heal the player")
+            .comment("Maximum distance at which an Ender Echo Crystal or End Crystal can heal the player, in blocks.")
             .defineInRange("EECrystal_heal_Distance", 16, 1, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue EECrystal_HEAL_AMOUNT = BUILDER
-            .comment("Amount for the Ender Echo Crystal to heal the player")
+            .comment("Health restored by an Ender Echo Crystal.")
             .defineInRange("EECrystal_Heal_Amount", 2, 1, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue EECrystal_HEAL_XP_COST = BUILDER
-            .comment("XP cost for the Ender Echo Crystal to heal the player")
+            .comment("Experience points consumed by each Ender Echo Crystal heal.")
             .defineInRange("EECrystal_Heal_XPCost", 100, 1, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue EECrystal_HEAL_INTERVAL = BUILDER
-            .comment("Heal interval for the Ender Echo Crystal to heal the player")
+            .comment("Interval between Ender Echo Crystal heals, in seconds.")
             .defineInRange("EECrystal_Heal_Interval", 8, 1, Integer.MAX_VALUE);
 
 
     public static final ModConfigSpec.IntValue EndCrystal_HEAL_AMOUNT = BUILDER
-            .comment("Amount for the End Crystal to heal the player")
+            .comment("Health restored by an End Crystal.")
             .defineInRange("End_Crystal_Heal_Amount", 1, 1, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue EndCrystal_HEAL_XP_COST = BUILDER
-            .comment("XP cost for the End Crystal to heal the player")
+            .comment("Experience points consumed by each End Crystal heal.")
             .defineInRange("End_Crystal_Heal_XPCost", 100, 1, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue EndCrystal_HEAL_INTERVAL = BUILDER
-            .comment("Heal interval for the End Crystal to heal the player")
+            .comment("Interval between End Crystal heals, in seconds.")
             .defineInRange("End_Crystal_Heal_Interval", 8, 1, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue SCULK_VEIL_DARKNESS_DURATION = BUILDER
-            .comment("The duration of darkness effect which gives by sculk veil effect ")
+            .comment("Duration of the Darkness effect applied by Sculk Veil, in seconds.")
             .defineInRange("sculk_veil_darkness_duration", 10, 20, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue SCULK_VEIL_GLOWING_DURATION = BUILDER
-            .comment("The duration of glowing effect which gives by sculk veil effect ")
+            .comment("Duration of the Glowing effect applied by Sculk Veil, in seconds.")
             .defineInRange("sculk_veil_glowing_duration", 25, 20, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue EchoSoundingDistance = BUILDER
-            .comment("Max distance for the ender echo sounding for other resonator.")
+            .comment("Maximum distance at which a resonator can detect another resonator, in blocks.")
             .defineInRange("Echo_Sounding_Distance", 2048, 1, Integer.MAX_VALUE);
 
 
     public static final ModConfigSpec.IntValue ECHO_DRUSE_MAX_GROWTH_VALUE = BUILDER
-            .comment( "Max growth value for the Echo Druse")
+            .comment("Maximum growth value of an Echo Druse.")
             .defineInRange("echo_druse_max_growth_value", 40000, 4, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.DoubleValue ECHO_DRUSE_GENERATION_PROBABILITY = BUILDER
-            .comment( "Probability of Echo Druse block generation")
+            .comment("Chance for an Echo Druse to generate on top of a Sculk Catalyst, from 0.0 to 1.0.")
             .defineInRange("echo_druse_generation_probability",  0.3, 0, Double.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue SCULK_WHISPER_COOLDOWN = BUILDER
-            .comment( "Cooldown of sculk shrieker's InfrasoundBurst")
+            .comment("Cooldown of the Sculk Whisper's infrasound burst, in seconds.")
             .defineInRange("sculk_whisper_cooldown",  45, 1, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue SCULK_WHISPER_HURT_RANGE = BUILDER
-            .comment( "Range of sculk shrieker's InfrasoundBurst hurt entity")
+            .comment("Range of the Sculk Whisper's damaging infrasound burst, in blocks.")
             .defineInRange("sculk_whisper_hurt_range",  8, 1, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue SCULK_WHISPER_AFFECT_RANGE = BUILDER
-            .comment( "Range of sculk shrieker's InfrasoundBurst affect entity")
+            .comment("Range of the Sculk Whisper's status-effect infrasound burst, in blocks.")
             .defineInRange("sculk_whisper_affect_range",  30, 1, Integer.MAX_VALUE);
 
     public static final ModConfigSpec.IntValue SCULK_WHISPER_HURT_DAMAGE = BUILDER
-            .comment( "Damage of sculk shrieker's InfrasoundBurst hurt entity")
+            .comment("Damage dealt by the Sculk Whisper's damaging infrasound burst.")
             .defineInRange("sculk_whisper_hurt_damage",  15, 1, Integer.MAX_VALUE);
 
 
-    private static boolean validateItemName(final Object obj) {
-        return obj instanceof String itemName && BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(itemName));
-    }
     static final ModConfigSpec SPEC = BUILDER.build();
 }
