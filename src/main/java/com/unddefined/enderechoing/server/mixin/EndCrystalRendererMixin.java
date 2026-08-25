@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static com.unddefined.enderechoing.Config.EECrystal_HEAL_DISTANCE;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.ENDER_EYE_OWNER;
 import static net.minecraft.client.renderer.entity.EndCrystalRenderer.getY;
 
@@ -20,7 +21,8 @@ public abstract class EndCrystalRendererMixin {
         var tag = entity.getEntityData();
         if (tag.get(ENDER_EYE_OWNER).isEmpty()) return;
         var player = entity.level().getPlayerByUUID(tag.get(ENDER_EYE_OWNER).get());
-        if (player != null && player.distanceToSqr(entity) < 16 * 16 && player.getHealth() < player.getMaxHealth()) {
+        var D = EECrystal_HEAL_DISTANCE.get();
+        if (player != null && player.distanceToSqr(entity) < D * D && player.getHealth() < player.getMaxHealth()) {
             float dx = (float) (player.getX() - entity.getX());
             float dy = (float) (player.getY() - entity.getY() - player.getBbHeight() * 0.5);
             float dz = (float) (player.getZ() - entity.getZ());

@@ -5,14 +5,12 @@ import com.unddefined.enderechoing.client.model.EnderEchoingCoreModel;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer;
 import com.unddefined.enderechoing.network.packet.*;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
-import com.unddefined.enderechoing.server.registry.MobEffectRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import dev.kosmx.playerAnim.api.layered.AnimationStack;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -122,6 +120,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
         var manager = MarkedPositionsManager.getManager(S);
         if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
         manager.markedPositions().stream().filter(e -> e.dimension().equals(level.dimension()))
+                .filter(e -> e.pos().distSqr(S.blockPosition()) < EECORE_TP_DISTANCE.get() * 2)
                 .forEach(e -> Map.put(e.pos(), e.name()));
         PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
     }
@@ -141,7 +140,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 return InteractionResultHolder.fail(itemStack);
             var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
             // 检查玩家是否有空白末影回响珍珠
-            cost = (int) (nearestTeleporterPos.pos().distSqr(player.blockPosition()) / EECORE_TP_DISTANCE.getAsInt());
+            cost = (int) (nearestTeleporterPos.pos().distSqr(player.blockPosition()) / Config.EECORE_TP_DISTANCE.get());
             if (cost < 1) cost = 1;
             if (!player.getInventory().hasAnyMatching(item ->
                     item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null)
@@ -198,7 +197,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
                             itemStack.get(CUSTOM_NAME) == null, 1, player.inventoryMenu.getCraftSlots());
 
             // 设置冷却时间
-            player.getCooldowns().addCooldown(this, Config.ENDER_ECHOING_CORE_COOLDOWN.get());
+            player.getCooldowns().addCooldown(this, Config.ENDER_ECHOING_CORE_COOLDOWN.get() * 20);
             cost = 0;
         }
         if (level.isClientSide() && livingEntity instanceof Player player && !player.isUsingItem()) {

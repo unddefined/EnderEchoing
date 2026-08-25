@@ -14,6 +14,7 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.GeoBlockRenderer;
 
+import static com.unddefined.enderechoing.Config.EECrystal_HEAL_DISTANCE;
 import static com.unddefined.enderechoing.blocks.EnderEchoCrystalBlock.CHANNEL;
 import static net.minecraft.client.renderer.entity.EnderDragonRenderer.CRYSTAL_BEAM_LOCATION;
 
@@ -29,12 +30,13 @@ public class EnderEchoCrystalBlockRenderer extends GeoBlockRenderer<EnderEchoCry
                                MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight,
                                int packedOverlay, int colour) {
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
-        if (animatable.getLevel() == null || animatable.getPlayerUUID().equals(EnderEchoCrystalBlockEntity.nullUUID)) return;
+        if (animatable.getLevel() == null || animatable.getPlayerUUID().equals(EnderEchoCrystalBlockEntity.zeroUUID)) return;
 
         var tick = animatable.getTick(animatable);
         var player = animatable.getLevel().getPlayerByUUID(animatable.getPlayerUUID());
         var blockPos = animatable.getBlockPos();
-        if (player == null || player.distanceToSqr(blockPos.getCenter()) > 16 * 16 || player.getHealth() > player.getMaxHealth()) return;
+        var D = EECrystal_HEAL_DISTANCE.get();
+        if (player == null || player.distanceToSqr(blockPos.getCenter()) > D * D || player.getHealth() > player.getMaxHealth()) return;
         poseStack.pushPose();
 
         float x = (float) -(Mth.lerp(partialTick, player.xo, player.getX()) - 0.5 - blockPos.getX());

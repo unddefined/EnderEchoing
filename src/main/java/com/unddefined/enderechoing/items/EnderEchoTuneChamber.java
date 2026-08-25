@@ -26,9 +26,7 @@ public class EnderEchoTuneChamber extends Item implements GeoItem {
 
             @Override
             public BlockEntityWithoutLevelRenderer getGeoItemRenderer() {
-                if (this.renderer == null) {
-                    this.renderer = new EnderEchoTuneChamberRenderer();
-                }
+                if (this.renderer == null) this.renderer = new EnderEchoTuneChamberRenderer();
 
                 return this.renderer;
             }

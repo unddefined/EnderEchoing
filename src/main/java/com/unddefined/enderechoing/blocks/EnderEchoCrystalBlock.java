@@ -42,8 +42,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static com.unddefined.enderechoing.Config.EECrystal_TP_DISTANCE;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 import static net.minecraft.world.item.Items.AMETHYST_SHARD;
 import static net.minecraft.world.item.Items.ECHO_SHARD;
@@ -141,7 +145,8 @@ public class EnderEchoCrystalBlock extends Block implements EntityBlock {
         if (entity.isCurrentlyGlowing()) return;
         PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
         Map<BlockPos, String> posList = new HashMap<>();
-        crystals.stream().filter(p -> p.pos().pos().distSqr(pos) <= 96 * 96).filter(
+        var D = EECrystal_TP_DISTANCE.get();
+        crystals.stream().filter(p -> p.pos().pos().distSqr(pos) <= D * D).filter(
                 p -> level.getBlockState(p.pos().pos()).getValue(CHANNEL).equals(state.getValue(CHANNEL))
         ).forEach(p -> posList.put(p.pos().pos(),p.name()));
         PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList.keySet().stream().toList()));

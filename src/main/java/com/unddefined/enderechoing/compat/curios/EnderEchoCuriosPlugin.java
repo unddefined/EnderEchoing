@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.unddefined.enderechoing.Config.*;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.ENDER_EYE_OWNER;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.MARKED_POSITIONS_CACHE;
 import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_EYE;
@@ -33,8 +34,6 @@ public class EnderEchoCuriosPlugin {
     public static void registerCapabilities(final RegisterCapabilitiesEvent evt) {
         evt.registerItem(CuriosCapability.ITEM,
                 (stack, context) -> new ICurio() {
-                    private static final int HEAL_INTERVAL = 50; // 5s
-                    private static final int XP_COST = 50;
                     private EndCrystal crystal;
 
                     @Override
@@ -58,8 +57,9 @@ public class EnderEchoCuriosPlugin {
                     public void curioTick(SlotContext slotContext) {
                         if (!(slotContext.entity() instanceof ServerPlayer player)) return;
                         showResonatorName(player);
-                        if (player.totalExperience < XP_COST || player.getHealth() >= player.getMaxHealth()) return;
-                        crystal = enderEyeCurioHealTick(player, XP_COST, HEAL_INTERVAL);
+                        if (player.totalExperience < EndCrystal_HEAL_XP_COST.getAsInt()
+                                || player.getHealth() >= player.getMaxHealth()) return;
+                        crystal = enderEyeCurioHealTick(player);
                     }
 
                     @Override
@@ -70,11 +70,11 @@ public class EnderEchoCuriosPlugin {
                 }, Items.ENDER_EYE);
     }
 
-    public static EndCrystal enderEyeCurioHealTick(ServerPlayer player, int XP_COST, int HEAL_INTERVAL) {
+    public static EndCrystal enderEyeCurioHealTick(ServerPlayer player) {
         var level = (ServerLevel) player.level();
         if (level.getDragonFight() != null) return null;
 
-        EndCrystal crystal = level.getEntitiesOfClass(EndCrystal.class, player.getBoundingBox().inflate(16))
+        EndCrystal crystal = level.getEntitiesOfClass(EndCrystal.class, player.getBoundingBox().inflate(EECrystal_HEAL_DISTANCE.get()))
                 .stream().min(Comparator.comparingDouble(c -> c.distanceToSqr(player))).orElse(null);
         if (crystal == null) return null;
         var tag = crystal.getEntityData().get(ENDER_EYE_OWNER);
@@ -82,9 +82,9 @@ public class EnderEchoCuriosPlugin {
 
         crystal.getEntityData().set(ENDER_EYE_OWNER, Optional.of(player.getUUID()));
 
-        if (level.getGameTime() % HEAL_INTERVAL != 0) return crystal;
-        player.giveExperiencePoints(-XP_COST);
-        player.heal(1.0F);
+        if (level.getGameTime() % EndCrystal_HEAL_INTERVAL.get() * 10 != 0) return crystal;
+        player.giveExperiencePoints(-EndCrystal_HEAL_XP_COST.get());
+        player.heal(EndCrystal_HEAL_AMOUNT.get());
         return crystal;
     }
 

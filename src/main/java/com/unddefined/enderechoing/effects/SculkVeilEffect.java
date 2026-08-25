@@ -12,6 +12,8 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 
+import static com.unddefined.enderechoing.Config.SCULK_VEIL_DARKNESS_DURATION;
+
 public class SculkVeilEffect extends MobEffect {
     private int countdownTicks = 0;
     private int duration = 0;
@@ -68,7 +70,7 @@ public class SculkVeilEffect extends MobEffect {
             MobEffectInstance[] effects = {WEAKNESS, DIG_SLOWDOWN, HUNGER, MOVEMENT_SLOWDOWN, DEAFNESS};
             entity.addEffect(effects[firstEffectIndex]);
             entity.addEffect(effects[secondEffectIndex]);
-            entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300, 1));
+            entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, SCULK_VEIL_DARKNESS_DURATION.get() * 20, 1));
         }
         // 检查实体是否发光，如果发光则取消影匿效果
         return !entity.isCurrentlyGlowing();

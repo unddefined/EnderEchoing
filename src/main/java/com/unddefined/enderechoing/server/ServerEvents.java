@@ -24,6 +24,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.Comparator;
 
+import static com.unddefined.enderechoing.Config.SCULK_VEIL_GLOWING_DURATION;
 import static com.unddefined.enderechoing.EnderEchoing.LOGGER;
 import static com.unddefined.enderechoing.effects.AttackScatteredEffect.attack_scattered_modifier_id;
 import static com.unddefined.enderechoing.effects.StaggerEffect.stagger_modifier_id;
@@ -68,7 +69,7 @@ public class ServerEvents {
         if (!E.hasEffect(ATTACK_SCATTERED) && E.getAttribute(ATTACK_SPEED) != null) {
             E.getAttribute(ATTACK_SPEED).removeModifier(attack_scattered_modifier_id);
         }
-        if (!E.hasEffect(SCULK_VEIL)) E.addEffect(new MobEffectInstance(GLOWING,600));
+        if (!E.hasEffect(SCULK_VEIL)) E.addEffect(new MobEffectInstance(GLOWING, SCULK_VEIL_GLOWING_DURATION.get() * 20));
 
     }
 

@@ -30,10 +30,10 @@ public class InfrasoundDamage extends DamageSource {
         super(type, directEntity, causingEntity, damageSourcePosition);
     }
 
-    public static void InfrasoundBurst(ServerLevel level, Vec3 center, float hurt_range, float effect_range, int damage, Entity causingEntity) {
+    public static void InfrasoundBurst(ServerLevel level, Vec3 center, float hurt_range, float affect_range, int damage, Entity causingEntity) {
         // 获取范围内的所有生物实体
         List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class,
-                net.minecraft.world.phys.AABB.ofSize(center, effect_range * 2, effect_range * 2, effect_range * 2));
+                net.minecraft.world.phys.AABB.ofSize(center, affect_range * 2, affect_range * 2, affect_range * 2));
 
         for (LivingEntity entity : entities) {
             // 计算实体与中心点的距离
@@ -45,17 +45,16 @@ public class InfrasoundDamage extends DamageSource {
                 Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(INFRASOUND_DAMAGE);
                 DamageSource damageSource = new InfrasoundDamage(damageTypeHolder, null, causingEntity, center);
 
-                // 造成effect_range点真实伤害（忽略护甲）
+                // 造成damage点真实伤害（忽略护甲）
                 entity.hurt(damageSource, damage);
                 if (entity instanceof Player player)
-                    player.getWardenSpawnTracker()
-                            .ifPresent(tracker -> tracker.setWarningLevel(tracker.getWarningLevel() - 1));
+                    player.getWardenSpawnTracker().ifPresent(t -> t.setWarningLevel(t.getWarningLevel() - 1));
             }
 
-            // 对在effect_range范围内的生物应用debuff效果
-            if (distanceSqrt <= effect_range) {
-                // 计算持续时间 = effect_range - 与中心的距离
-                int duration = (int) (effect_range - distanceSqrt);
+            // 对在affect_range范围内的生物应用debuff效果
+            if (distanceSqrt <= affect_range) {
+                // 计算持续时间 = affect_range - 与中心的距离
+                int duration = (int) (affect_range - distanceSqrt);
 
                 // 应用多种debuff效果
                 entity.addEffect(new MobEffectInstance(ATTACK_SCATTERED, duration * 20, 1));
@@ -68,6 +67,6 @@ public class InfrasoundDamage extends DamageSource {
         }
 
         // 向所有客户端发送粒子效果数据包
-        PacketDistributor.sendToAllPlayers(new InfrasoundParticlePacket(center, effect_range, false));
+        PacketDistributor.sendToAllPlayers(new InfrasoundParticlePacket(center, affect_range, false));
     }
 }

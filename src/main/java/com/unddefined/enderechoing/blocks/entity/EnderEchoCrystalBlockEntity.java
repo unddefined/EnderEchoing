@@ -20,10 +20,12 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.UUID;
 
+import static com.unddefined.enderechoing.Config.EECrystal_HEAL_DISTANCE;
+
 public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlockEntity {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    public static final UUID nullUUID = new UUID(0, 0);
-    private UUID playerUUID = nullUUID;
+    public static final UUID zeroUUID = new UUID(0, 0);
+    private UUID playerUUID = zeroUUID;
 
     public EnderEchoCrystalBlockEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityRegistry.ENDER_ECHO_CRYSTAL.get(), pos, blockState);
@@ -41,10 +43,11 @@ public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlock
 
     public static void tick(Level level, BlockPos pos, BlockState state, EnderEchoCrystalBlockEntity self) {
         if (level == null || level.isClientSide) return;
-        if (self.playerUUID == null || self.playerUUID.equals(nullUUID)) return;
+        if (self.playerUUID == null || self.playerUUID.equals(zeroUUID)) return;
         var player = level.getPlayerByUUID(self.playerUUID);
-        if (player == null || player.distanceToSqr(pos.getCenter()) > 16 * 16 || player.getHealth() >= player.getMaxHealth())
-            self.setPlayerUUID(nullUUID);
+        var D = EECrystal_HEAL_DISTANCE.get();
+        if (player == null || player.distanceToSqr(pos.getCenter()) > D * D || player.getHealth() >= player.getMaxHealth())
+            self.setPlayerUUID(zeroUUID);
     }
 
     @Override

@@ -20,6 +20,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static com.unddefined.enderechoing.Config.*;
+
 public class SculkWhisperBlock extends Block implements EntityBlock {
     public SculkWhisperBlock() {
         super(Properties.of()
@@ -57,6 +59,6 @@ public class SculkWhisperBlock extends Block implements EntityBlock {
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         super.onRemove(state, level, pos, newState, isMoving);
         if ( level instanceof ServerLevel serverLevel)
-            InfrasoundDamage.InfrasoundBurst(serverLevel, pos.above().getCenter(), 5.0f, 20.0f, 12,null);
+            InfrasoundDamage.InfrasoundBurst(serverLevel, pos.above().getCenter(), SCULK_WHISPER_HURT_RANGE.get() / 1.5f, SCULK_WHISPER_AFFECT_RANGE.get() / 1.5f, SCULK_WHISPER_HURT_DAMAGE.get() / 2,null);
     }
 }

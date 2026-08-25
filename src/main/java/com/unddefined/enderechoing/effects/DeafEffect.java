@@ -19,12 +19,6 @@ public class DeafEffect extends MobEffect {
     @SubscribeEvent
     public static void onSoundPlay(PlaySoundEvent event) {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null) {
-            if (player.hasEffect(DEAFNESS)) {
-                // 完全阻止声音播放
-                event.setSound(null);
-            }
-
-        }
+        if (player != null) if (player.hasEffect(DEAFNESS)) event.setSound(null);
     }
 }

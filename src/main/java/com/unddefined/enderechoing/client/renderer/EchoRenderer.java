@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.unddefined.enderechoing.Config.EchoSoundingDistance;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 
 @EventBusSubscriber(modid = EnderEchoing.MODID, value = Dist.CLIENT)
@@ -120,7 +121,7 @@ public class EchoRenderer {
             if (echoMap.isEmpty() && !syncedTeleporterPositions.isEmpty()) {
                 for (BlockPos pos : syncedTeleporterPositions) {
                     if (pos.equals(EchoSoundingPos)) continue;
-                    if (!new AABB(EchoSoundingPos).inflate(4096).contains(Vec3.atCenterOf(pos))) continue;
+                    if (!new AABB(EchoSoundingPos).inflate(EchoSoundingDistance.get()).contains(Vec3.atCenterOf(pos))) continue;
                     echoMap.putIfAbsent(pos, new EchoResponse(pos));
                 }
             }

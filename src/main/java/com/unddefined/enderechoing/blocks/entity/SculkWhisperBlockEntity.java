@@ -26,7 +26,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
-import static com.unddefined.enderechoing.Config.SCULK_WHISPER_COOLDOWN;
+import static com.unddefined.enderechoing.Config.*;
 
 public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEntity, VibrationSystem, GameEventListener.Provider<VibrationSystem.Listener> {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -36,7 +36,6 @@ public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEnti
 
     // 添加冷却计时器
     private int cooldownTicks = 0;
-    private static final int DEFAULT_COOLDOWN = SCULK_WHISPER_COOLDOWN.get();
 
     public SculkWhisperBlockEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityRegistry.SCULK_WHISPER.get(), pos, blockState);
@@ -71,7 +70,7 @@ public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEnti
         if (level instanceof ServerLevel serverLevel) {
             VibrationSystem.Ticker.tick(serverLevel, blockEntity.vibrationData, blockEntity.vibrationUser);
             // 更新冷却计时器
-            float radius = (float) (DEFAULT_COOLDOWN - blockEntity.cooldownTicks) * 0.00025f;
+            float radius = (float) (SCULK_WHISPER_COOLDOWN.get() * 20 - blockEntity.cooldownTicks) * 0.00025f;
             if (blockEntity.cooldownTicks > 0) blockEntity.cooldownTicks--;
 
             PacketDistributor.sendToAllPlayers(new InfrasoundParticlePacket(Vec3.atCenterOf(pos), radius, true));
@@ -111,10 +110,10 @@ public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEnti
         @Override
         public void onReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, @Nullable Entity entity, @Nullable Entity playerEntity, float distance) {
             Vec3 center = Vec3.atCenterOf(this.blockEntity.getBlockPos().above());
-            InfrasoundDamage.InfrasoundBurst(level, center, 10.0f, 30.0f, 18, entity);
+            InfrasoundDamage.InfrasoundBurst(level, center, SCULK_WHISPER_HURT_RANGE.getAsInt(), SCULK_WHISPER_AFFECT_RANGE.getAsInt(), SCULK_WHISPER_HURT_DAMAGE.getAsInt(), entity);
 
             // 触发后设置冷却时间
-            this.blockEntity.cooldownTicks = DEFAULT_COOLDOWN;
+            this.blockEntity.cooldownTicks = SCULK_WHISPER_COOLDOWN.get() * 20;
         }
 
         @Override
