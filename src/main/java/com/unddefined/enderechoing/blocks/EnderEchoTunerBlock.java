@@ -75,7 +75,9 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
     public MenuProvider getMenuProvider(BlockState state, Level level, BlockPos pos) {
         return new MenuProvider() {
             @Override
-            public @NotNull Component getDisplayName() {return Component.translatable("menu.title.enderechoing.tunermenu");}
+            public @NotNull Component getDisplayName() {
+                return Component.translatable("menu.title.enderechoing.tunermenu");
+            }
 
             @Override
             public @NotNull AbstractContainerMenu createMenu(int containerId, net.minecraft.world.entity.player.Inventory playerInventory, Player player) {
@@ -84,7 +86,7 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
 
             @Override
             public void writeClientSideData(AbstractContainerMenu menu, net.minecraft.network.RegistryFriendlyByteBuf buf) {
-                if (menu instanceof TunerMenu tunerMenu) tunerMenu.writeClientSideData(buf, new GlobalPos(level.dimension(),pos));
+                if (menu instanceof TunerMenu tunerMenu) tunerMenu.writeClientSideData(buf, new GlobalPos(level.dimension(), pos));
             }
         };
     }
@@ -98,21 +100,22 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
             return ItemInteractionResult.SUCCESS;
         }
         if (hand != InteractionHand.MAIN_HAND) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        if (!stack.is(ENDER_ECHOING_PEARL.get())) {
-            if (player instanceof ServerPlayer P) P.openMenu(state.getMenuProvider(level, pos));
+        if (stack.is(ENDER_ECHOING_PEARL.get())) {
+            var stackPos = stack.get(POSITION);
+            boolean result = stackPos != null && MarkedPositionsManager.getManager(player)
+                    .addMarkedPosition(stackPos.dimension(), stackPos.pos(), stack.get(CUSTOM_NAME).getString(), 0, Boolean.TRUE.equals(stack.get(TBOUND)));
+            player.setData(EE_PEARL_AMOUNT, player.getData(EE_PEARL_AMOUNT) + stack.getCount() - (result ? 1 : 0));
+            stack.shrink(stack.getCount());
             return ItemInteractionResult.SUCCESS;
         }
-        var stackPos = stack.get(POSITION);
-        boolean result = stackPos != null && MarkedPositionsManager.getManager(player)
-                .addMarkedPosition(stackPos.dimension(), stackPos.pos(), stack.get(CUSTOM_NAME).getString(), 0, Boolean.TRUE.equals(stack.get(TBOUND)));
-        player.setData(EE_PEARL_AMOUNT.get(), player.getData(EE_PEARL_AMOUNT.get()) + stack.getCount() - (result ? 1 : 0));
-        stack.shrink(stack.getCount());
-
+        if (player instanceof ServerPlayer P) P.openMenu(state.getMenuProvider(level, pos));
         return ItemInteractionResult.SUCCESS;
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {builder.add(FACING, CHARGED);}
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(FACING, CHARGED);
+    }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
@@ -134,10 +137,14 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {return RenderShape.ENTITYBLOCK_ANIMATED;}
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.ENTITYBLOCK_ANIMATED;
+    }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {return new EnderEchoTunerBlockEntity(pos, state);}
+    public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new EnderEchoTunerBlockEntity(pos, state);
+    }
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {

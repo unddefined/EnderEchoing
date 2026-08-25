@@ -122,8 +122,8 @@ public class EchoResponse {
                 it.remove(); // 生命周期结束
                 continue;
             }
-            float scale2 = Math.abs(0.2f + age / 54f); // 控制半径增大
-            float alpha = Math.max(0f, 0.9f - age / 85f); // 随半径增大透明度逐渐减小
+            float scale2 = Math.abs(0.2f + age / 80f); // 控制半径增大
+            float alpha = Math.max(0f, 0.9f - age / 90f); // 随半径增大透明度逐渐减小
             poseStack.pushPose();
             poseStack.scale(scale2, scale2, 0); // 缩放波纹平面
             var vertexConsumer = bufferSource.getBuffer(WAVE_RENDER_TYPE);

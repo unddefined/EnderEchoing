@@ -78,7 +78,7 @@ public class EnderEchoCrystalBlockRenderer extends GeoBlockRenderer<EnderEchoCry
         poseStack.popPose();
         poseStack.popPose();
     }
-
+//TODO bug: iris光影会导致这里的Amethyst不渲染
     @Override
     public void renderRecursively(PoseStack poseStack, EnderEchoCrystalBlockEntity animatable, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
         if (bone.getName().equals("Amethyst")) {
