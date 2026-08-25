@@ -112,7 +112,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
     protected int getScrollbarPosition() {return this.getX() + this.width;}
 
     @Override
-    public int getRowWidth() {return this.width - 12;}
+    public int getRowWidth() {return this.width - 10;}
 
     public static class WaypointEntry extends ContainerObjectSelectionList.Entry<WaypointEntry> {
         private static final WidgetSprites SPRITES = new WidgetSprites(
@@ -128,7 +128,6 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         public boolean selected;
         private boolean hovered;
         private final boolean isFacing_down;
-        private final boolean pearlEnough;
 
         public WaypointEntry(WaypointList parent, MarkedPositionsManager.MarkedPositions M) {
             this.parent = parent;
@@ -136,8 +135,8 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
             this.isFacing_down = parent.screen.getMenu().isFacing_down();
             this.isSelf = markedPosition.pos().above(2).equals(parent.screen.getMenu().getTunerPos().pos());
             this.can_crossDimension = (parent.screen.getMenu().getTunerPos().dimension().equals(markedPosition.dimension())) || parent.screen.getMenu().isMultiBlocked();
-            this.pearlEnough = parent.screen.getMenu().ee_pearl_amount > 1;
         }
+        private boolean isPearlEnough(){return parent.screen.getMenu().ee_pearl_amount > 0;}
 
         public MarkedPositionsManager.MarkedPositions getMarkedPosition() {return markedPosition;}
 
@@ -148,7 +147,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
             selected = parent.selectedPosition == markedPosition;
             int width = entryWidth - 6;
 
-            gfx.blitSprite(SPRITES.get((!isSelf && can_crossDimension && pearlEnough) || !isFacing_down, this.hovered || this.selected), left + 3, top, width - 4, height);
+            gfx.blitSprite(SPRITES.get((!isSelf && can_crossDimension && isPearlEnough()) || !isFacing_down, this.hovered || this.selected), left + 3, top, width - 4, height);
 
             // ---- 绘制文字 ----
             Component text = Component.literal(markedPosition.name());
@@ -170,7 +169,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (!hovered) return false;
-            if (isSelf || !can_crossDimension && isFacing_down && pearlEnough) return false;
+            if (isSelf || !isFacing_down || !can_crossDimension || !isPearlEnough()) return false;
             mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             selected = !selected;
 

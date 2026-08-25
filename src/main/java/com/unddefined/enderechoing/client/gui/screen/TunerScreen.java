@@ -58,7 +58,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
         selectedTab = menu.selected_tuner_tab;
         int listLeft = this.width / 2 - 107;
-        int listWidth = 204;
+        int listWidth = 210;
         int listTop = (int) (this.height * 0.5);
         int listBottom = (int) (this.height * 0.3);
         this.imageWidth = this.width;
@@ -130,6 +130,8 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     @Override
     public void containerTick() {
+        if (waypointList.getMaxScroll() > 0) waypointList.setWidth(204);
+        else waypointList.setWidth(210);
         imageWidth = changeIcon ? this.width / 4 : width;
         this.nameField.visible = changeIcon;
         ACCEPT_BUTTON.visible = changeIcon;
