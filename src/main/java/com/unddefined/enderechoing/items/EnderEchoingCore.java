@@ -55,6 +55,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
     private static final RawAnimation USE_ANIM = RawAnimation.begin().thenPlay("ender_echoing_core.use");
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private int tick = 0;
+    private int tick2 = 0;
     private int cost = 0;
 
     public EnderEchoingCore(Properties properties) {
@@ -97,16 +98,21 @@ public class EnderEchoingCore extends Item implements GeoItem {
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         if (!(entity instanceof ServerPlayer S)) return;
         Map<BlockPos, String> Map = new HashMap<>();
+        if (S.hasEffect(SCULK_VEIL)) {
+            PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
+            tick2 = 60;
+            return;
+        }
+        if (tick2 > 0) {
+            tick2--;
+            return;
+        }
         if (!isSelected) {
             if (tick > 0) {
                 PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
                 PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
             }
             tick = 0;
-            return;
-        }
-        if (S.hasEffect(SCULK_VEIL)) {
-            PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
             return;
         }
         tick++;

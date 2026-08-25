@@ -104,9 +104,10 @@ public class EchoRenderer {
         else sculkveilCountTicks = -43;
         if (teleportTicks > 82 && !player.isCurrentlyGlowing() && !isTeleporting) {
             PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
+            echoMap.remove(targetPos.pos());
             isTeleporting = true;
         }
-        if (targetPos != null && targetPreseted) {
+        if (targetPos != null && targetPreseted && !isTeleporting) {
             if (level.dimension().equals(targetPos.dimension()))
                 echoMap.putIfAbsent(targetPos.pos(), new EchoResponse(targetPos.pos()));
             teleportTicks++;
@@ -139,7 +140,7 @@ public class EchoRenderer {
                     PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
                 }
             }
-            if (!targetPreseted && countTicks > responseTime && targetPos != null && targetPos.equals(p) && !e.isElementHovering)
+            if (!targetPreseted && countTicks > responseTime && targetPos != null && targetPos.pos().equals(p) && !e.isElementHovering)
                 teleportTicks = 0;
         });
         countTicks = isCounting ? countTicks + 1 : 0;
@@ -161,7 +162,7 @@ public class EchoRenderer {
         targetPreseted = false;
         targetPos = null;
         teleportTicks = 0;
-        sculkveilCountTicks = -43;
+//        sculkveilCountTicks = -43;
         isTeleporting = false;
     }
 }
