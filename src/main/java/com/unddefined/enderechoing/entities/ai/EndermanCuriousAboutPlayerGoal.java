@@ -18,12 +18,12 @@ import top.theillusivec4.curios.api.CuriosApi;
 import java.util.EnumSet;
 
 public class EndermanCuriousAboutPlayerGoal extends Goal {
-    private static final double MAX_DISTANCE = 32.0;
+    private static final double MAX_DISTANCE = 40.0;
     private static final double MIN_RADIUS = 3.0;
     private static final double MAX_RADIUS = 9.0;
-    private static final int MIN_IDLE = 20;   // 1 秒
-    private static final int MAX_IDLE = 100;   // 3 秒
-    private int attractionCooldown = 60;
+    private static final int MIN_IDLE = 20;
+    private static final int MAX_IDLE = 100;
+    private int attractionCooldown = 30;
     private final EnderMan enderman;
     private int idleTicks = 0;
     private int teleportCooldown = 0;
@@ -48,7 +48,7 @@ public class EndermanCuriousAboutPlayerGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        return target != null && target.isAlive() && !enderman.isAggressive() && enderman.distanceTo(target) <= MAX_DISTANCE / 2;
+        return target != null && target.isAlive() && !enderman.isAggressive() && enderman.distanceTo(target) <= MAX_DISTANCE;
     }
 
     @Override
@@ -64,24 +64,21 @@ public class EndermanCuriousAboutPlayerGoal extends Goal {
         enderman.getLookControl().setLookAt(target, 30.0F, 30.0F);
 
         if (isLookingAtMe(target)) {
+            teleportCooldown = 0;
             if (teleportAwayFromPlayer()) teleportCooldown = 80;
             target = null;
-            attractionCooldown = 300;
+            attractionCooldown = 120;
             return;
         }
 
         if (teleportCooldown > 0) teleportCooldown--;
 
-        if (idleTicks < 15 && enderman.getRandom().nextFloat() < 0.03F) {
-            if (teleportAwayFromPlayer()) teleportCooldown = 30;
-            attractionCooldown = 100;
-            return;
-        }
-
-        if (idleTicks == 0 && enderman.distanceTo(target) < 7 && enderman.getRandom().nextFloat() < 0.5F) enderman.getNavigation().stop();
+        if (idleTicks == 0 && enderman.distanceTo(target) < 7 && enderman.getRandom().nextFloat() < 0.5F)
+            enderman.getNavigation().stop();
+        if (enderman.getNavigation().isDone()) idleTicks = Mth.nextInt(enderman.getRandom(), MIN_IDLE, MAX_IDLE);
 
         if (enderman.distanceTo(target) < 2.5) {
-            if (teleportAwayFromPlayer()) teleportCooldown = 40; // 2 秒冷却
+            if (teleportAwayFromPlayer()) teleportCooldown = 40;
             return;
         }
 
@@ -90,14 +87,11 @@ public class EndermanCuriousAboutPlayerGoal extends Goal {
             idleTicks--;
             return;
         }
-        if (idleTicks == 0 && enderman.getRandom().nextFloat() < 0.3F) {// 30% 概率直接结束本 Goal
+        if (idleTicks == 0 && enderman.getRandom().nextFloat() < 0.3F) {
             if (teleportAwayFromPlayer()) teleportCooldown = 60;
-            attractionCooldown = 200;
+            attractionCooldown = 40;
             target = null;
-            return;
         }
-        // 刚走完一段路，进入 idle
-        if (enderman.getNavigation().isDone()) idleTicks = Mth.nextInt(enderman.getRandom(), MIN_IDLE, MAX_IDLE);
     }
 
     private boolean isLookingAtMe(Player player) {

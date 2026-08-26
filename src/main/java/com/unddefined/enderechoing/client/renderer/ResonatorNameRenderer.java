@@ -65,7 +65,7 @@ public class ResonatorNameRenderer {
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
         poseStack.mulPose(Axis.ZP.rotationDegrees(180));
         // 固定大小
-        float screenScale = 0.06f * (float) Math.min(distance, MAX_RENDER_DISTANCE);
+        float screenScale = 0.1f * (float) Math.min(distance, MAX_RENDER_DISTANCE);
         if (screenScale < 1f) screenScale = 1f;
         poseStack.scale(screenScale, screenScale, screenScale);
         poseStack.scale(0.033f, 0.033f, 0.033f);

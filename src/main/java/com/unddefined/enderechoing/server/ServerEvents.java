@@ -2,17 +2,28 @@ package com.unddefined.enderechoing.server;
 
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.blocks.EnderEchoCrystalBlock;
+import com.unddefined.enderechoing.network.packet.RenderEchoNamesPacket;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
@@ -20,9 +31,14 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
+import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.unddefined.enderechoing.Config.SCULK_VEIL_GLOWING_DURATION;
 import static com.unddefined.enderechoing.EnderEchoing.LOGGER;
@@ -32,6 +48,7 @@ import static com.unddefined.enderechoing.effects.TinnitusEffect.tinnitus_modifi
 import static com.unddefined.enderechoing.server.registry.BlockRegistry.ENDER_ECHOIC_RESONATOR;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.MARKED_POSITIONS_CACHE;
+import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_EYE;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
 import static net.minecraft.world.effect.MobEffects.GLOWING;
 import static net.minecraft.world.entity.ai.attributes.Attributes.*;
@@ -112,7 +129,24 @@ public class ServerEvents {
                 }
             }
         }
-        if (entity.hasEffect(SCULK_VEIL)) entity.removeEffect(SCULK_VEIL);
+
+    }
+
+    @SubscribeEvent
+    public static void onPlayerAttackEntity(AttackEntityEvent event) {
+        var player = event.getEntity();
+        var target = event.getTarget();
+        if (!(target instanceof EnderMan enderMan)) return;
+        CuriosApi.getCuriosInventory(player).flatMap(h -> h.findCurios(ItemRegistry.ENDER_ECHOING_EYE.get())
+                .stream().findFirst()).ifPresent(slot -> {
+            double d0 = enderMan.getAttributeValue(Attributes.FOLLOW_RANGE) / 2;
+            var aabb = AABB.unitCubeFromLowerCorner(enderMan.position()).inflate(d0, 10.0F, d0);
+            player.level().getEntitiesOfClass(EnderMan.class, aabb, EntitySelector.NO_SPECTATORS).stream()
+                    .filter(e -> e != enderMan).filter(e -> e.getTarget() == null)
+                    .filter(e -> !e.isAlliedTo(player)).forEach(e -> e.setTarget(player));
+            slot.stack().shrink(1);
+            player.level().playSound(player,player.blockPosition(), SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS,1f,1f);
+        });
     }
 
     @SubscribeEvent
@@ -122,7 +156,7 @@ public class ServerEvents {
         var level = player.level();
         if (!(level.getBlockState(pos).getBlock() instanceof EnderEchoCrystalBlock)) return;
         EnderEchoCrystalSavedData.get((ServerLevel) level).getAll()
-                .stream().filter(p ->p.pos().dimension().equals(level.dimension() ) && p.pos().pos().getX() == pos.getX() && p.pos().pos().getZ() == pos.getZ() && p.pos().pos().getY() > pos.getY())
+                .stream().filter(p -> p.pos().dimension().equals(level.dimension()) && p.pos().pos().getX() == pos.getX() && p.pos().pos().getZ() == pos.getZ() && p.pos().pos().getY() > pos.getY())
                 .min(Comparator.comparingInt(p -> p.pos().pos().getY()))
                 .ifPresent(p -> player.teleportTo(p.pos().pos().getX() + 0.5, p.pos().pos().getY() + 0.5, p.pos().pos().getZ() + 0.5));
     }

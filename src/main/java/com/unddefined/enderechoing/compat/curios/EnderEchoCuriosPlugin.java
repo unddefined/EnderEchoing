@@ -108,6 +108,5 @@ public class EnderEchoCuriosPlugin {
         Map<BlockPos, String> posName = new java.util.HashMap<>();
         PacketDistributor.sendToPlayer(player, new RenderEchoNamesPacket(posName));
         if (crystal != null) crystal.getEntityData().set(ENDER_EYE_OWNER, Optional.empty());
-        showResonatorName(player);
     }
 }

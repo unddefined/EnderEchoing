@@ -116,11 +116,11 @@ public class EnderEchoingCore extends Item implements GeoItem {
         tick++;
         PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(S.blockPosition()));
         if (tick < 24) return;
-
+        int D = EECORE_TP_DISTANCE.get();
         var manager = MarkedPositionsManager.getManager(S);
         if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
         manager.markedPositions().stream().filter(e -> e.dimension().equals(level.dimension()))
-                .filter(e -> e.pos().distSqr(S.blockPosition()) < EECORE_TP_DISTANCE.get() * 2)
+                .filter(e -> e.pos().distSqr(S.blockPosition()) < D * D * 4)
                 .forEach(e -> Map.put(e.pos(), e.name()));
         PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
     }
@@ -140,7 +140,8 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 return InteractionResultHolder.fail(itemStack);
             var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
             // 检查玩家是否有空白末影回响珍珠
-            cost = (int) (nearestTeleporterPos.pos().distSqr(player.blockPosition()) / Config.EECORE_TP_DISTANCE.get());
+            int D = EECORE_TP_DISTANCE.get();
+            cost = (int) (nearestTeleporterPos.pos().distSqr(player.blockPosition()) / D * D);
             if (cost < 1) cost = 1;
             if (!player.getInventory().hasAnyMatching(item ->
                     item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null)
