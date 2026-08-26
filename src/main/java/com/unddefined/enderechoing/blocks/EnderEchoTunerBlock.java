@@ -120,7 +120,7 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         Direction direction = context.getNearestLookingDirection().getOpposite();
-        return this.defaultBlockState().setValue(FACING, direction);
+        return this.defaultBlockState().setValue(FACING, direction).setValue(CHARGED, false);
     }
 
     @Override

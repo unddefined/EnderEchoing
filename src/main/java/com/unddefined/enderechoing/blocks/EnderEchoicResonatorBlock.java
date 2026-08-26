@@ -17,10 +17,14 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -32,9 +36,11 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -42,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.unddefined.enderechoing.EnderEchoing.GZERO;
+import static com.unddefined.enderechoing.EnderEchoing.MODID;
+import static com.unddefined.enderechoing.blocks.EnderEchoTunerBlock.CHARGED;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
@@ -58,12 +66,12 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
                 .destroyTime(1.5F)
                 .pushReaction(PushReaction.DESTROY)
         );
-        this.registerDefaultState(this.stateDefinition.any().setValue(CoolDown, true));
+        this.registerDefaultState(this.stateDefinition.any().setValue(CoolDown, true).setValue(CHARGED, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(CoolDown);
+        builder.add(CoolDown,CHARGED);
     }
 
     @Nullable
@@ -103,6 +111,17 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, @NotNull Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (level.isClientSide()) return ItemInteractionResult.FAIL;
+        if (stack.is(Items.DRAGON_BREATH) && !state.getValue(CHARGED)) {
+            level.setBlock(pos, state.setValue(CHARGED, true), 3);
+            stack.shrink(1);
+            return ItemInteractionResult.SUCCESS;
+        }
+        return ItemInteractionResult.FAIL;
+    }
+
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         level.setBlock(pos, state.setValue(CoolDown, true), 3);
     }
@@ -113,11 +132,11 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         if (entity.isCurrentlyGlowing()) return;
         var manager = MarkedPositionsManager.getManager(player);
         if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
-        level.scheduleTick(pos, this, 50);
+        level.scheduleTick(pos, this, 40);
         if (!state.getValue(CoolDown)) return;
         PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
-        player.addEffect(new MobEffectInstance(SCULK_VEIL, 60));
-        level.setBlock(pos, state.setValue(CoolDown, false), 3);
+        player.addEffect(new MobEffectInstance(SCULK_VEIL, state.getValue(CHARGED) ? 300 : 60));
+        level.setBlock(pos, state.setValue(CoolDown, false).setValue(CHARGED, false), 3);
         //获取目的地名称
         var posList = manager.getTeleporterPositions(level);
         var map = manager.getMarkedTeleportersMap(level);

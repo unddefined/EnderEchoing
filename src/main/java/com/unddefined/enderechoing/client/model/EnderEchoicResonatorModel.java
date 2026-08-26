@@ -6,6 +6,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.DefaultedBlockGeoModel;
 
+import static com.unddefined.enderechoing.blocks.EnderEchoTunerBlock.CHARGED;
+
 public class EnderEchoicResonatorModel extends DefaultedBlockGeoModel<EnderEchoicResonatorBlockEntity> {
     private final ResourceLocation R = ResourceLocation.fromNamespaceAndPath( "enderechoing", "calibrated_sculk_shrieker");
     
@@ -20,7 +22,8 @@ public class EnderEchoicResonatorModel extends DefaultedBlockGeoModel<EnderEchoi
     
     @Override
     public ResourceLocation getTextureResource(EnderEchoicResonatorBlockEntity animatable) {
-        return buildFormattedTexturePath(R);
+        return animatable.getBlockState().getValue(CHARGED) ? buildFormattedTexturePath(R.withSuffix("_charged"))
+                : buildFormattedTexturePath(R);
     }
 
     @Override
