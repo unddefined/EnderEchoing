@@ -12,6 +12,7 @@ import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -129,6 +130,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
         var itemStack = player.getItemInHand(hand);
+        var manager = MarkedPositionsManager.getManager(player);
         if (!player.isShiftKeyDown() && player instanceof ServerPlayer S) {
             // 检查是否在冷却中
             if (player.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(itemStack);
@@ -136,7 +138,6 @@ public class EnderEchoingCore extends Item implements GeoItem {
             if (player.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
             // 查找最近的EnderEchoicResonator方块
 
-            var manager = MarkedPositionsManager.getManager(player);
             if (manager.teleporters().stream().filter(e -> e.dimension().equals(level.dimension())).toList().isEmpty())
                 return InteractionResultHolder.fail(itemStack);
             var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
@@ -163,6 +164,10 @@ public class EnderEchoingCore extends Item implements GeoItem {
             boolean A = level.getBlockEntity(player.blockPosition()) instanceof EnderEchoicResonatorBlockEntity;
             boolean B = player.getData(EE_PEARL_AMOUNT.get()) > 0;
             String name = A ? (B ? ">÷<" : "><") : (B ? "÷" : "");
+            if (A) manager.teleporters().stream().filter(e -> e.dimension().equals(level.dimension()))
+                    .filter(e -> e.pos().equals(player.blockPosition())).findFirst()
+                    .ifPresent(e -> manager.teleporters().add(new MarkedPositionsManager.Teleporters(new GlobalPos(level.dimension(), player.blockPosition()))));
+
             if (!level.isClientSide()) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket(name, player.blockPosition()));
             player.setData(EE_PEARL_POSITION.get(), player.blockPosition());
         }

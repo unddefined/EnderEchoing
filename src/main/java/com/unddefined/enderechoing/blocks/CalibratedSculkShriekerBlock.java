@@ -89,7 +89,7 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
         // 方块转换
-        if (stack.getItem() == ItemRegistry.ENDER_ECHOING_CORE.get()) {
+        if (stack.is(ItemRegistry.ENDER_ECHOING_CORE.get())) {
             if (!player.isCreative()) stack.shrink(1);
             level.setBlock(pos, BlockRegistry.ENDER_ECHOIC_RESONATOR.get().defaultBlockState(), 3);
             MarkedPositionsManager.getManager(player).addTeleporter(level, pos);
@@ -103,12 +103,12 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
             }
             return ItemInteractionResult.SUCCESS;
         }
-        if (stack.getItem() == ItemRegistry.ENDER_ECHO_TUNE_CHAMBER.get()) {
+        if (stack.is(ItemRegistry.ENDER_ECHO_TUNE_CHAMBER.get())) {
             if (!player.isCreative()) stack.shrink(1);
             level.setBlock(pos, BlockRegistry.ENDER_ECHO_TUNER.get().getStateDefinition().any().setValue(FACING, state.getValue(FACING)).setValue(CHARGED, false), 3);
             return ItemInteractionResult.SUCCESS;
         }
-        if (stack.getItem() == ItemRegistry.ENDER_ECHO_CRYSTAL.get()) {
+        if (stack.is(ItemRegistry.ENDER_ECHO_CRYSTAL.get())) {
             if (!player.isCreative()) stack.shrink(1);
             level.setBlock(pos, BlockRegistry.ENDER_ECHO_CRYSTAL.get().defaultBlockState(), 3);
             level.addFreshEntity(new EnderEchoCrystalEntity(level, pos));
