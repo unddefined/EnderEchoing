@@ -64,7 +64,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         this.imageWidth = this.width;
         this.imageHeight = this.height;
         editBarX = listLeft + 1;
-        editBarY = this.height / 5 - 27;
+        editBarY = this.height / 5 - 17;
         tabBar = new TabBar(listLeft + 29, listBottom - 30, this);
         waypointList = new WaypointList(this.minecraft, listWidth, listTop, listLeft, listBottom, 24, this);
 
@@ -101,6 +101,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
     public void onClose() {
         if (menu.getIconList().get(selectedTab).isEmpty()) menu.getIconList().set(selectedTab, previousIcon);
         PacketDistributor.sendToServer(new SyncTunerDataPacket(menu.getIconList(), MarkedPositionsCache, menu.ee_pearl_amount));
+        if (!menu.isFacing_down()) menu.setSelectedPosition(null);
         super.onClose();
     }
 
@@ -130,6 +131,8 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     @Override
     public void containerTick() {
+        tabBar.selectedTab = selectedTab;
+        tabBar.ee_pearl_amount = menu.ee_pearl_amount;
         if (waypointList.getMaxScroll() > 0) waypointList.setWidth(204);
         else waypointList.setWidth(210);
         imageWidth = changeIcon ? this.width / 4 : width;

@@ -137,5 +137,17 @@ public class ModNetwork {
                 SetUnchargedPacket.STREAM_CODEC,
                 SetUnchargedPacket::handle
         );
+
+        registrar.playToServer(
+                RequestPlayerDataPacket.TYPE,
+                RequestPlayerDataPacket.STREAM_CODEC,
+                RequestPlayerDataPacket::handle
+        );
+        registrar.playToClient(
+                ReplyPlayerDataPacket.TYPE,
+                ReplyPlayerDataPacket.STREAM_CODEC,
+                ReplyPlayerDataPacket::handle
+        );
+
     }
 }

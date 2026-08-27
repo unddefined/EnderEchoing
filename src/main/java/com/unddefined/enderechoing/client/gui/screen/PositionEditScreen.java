@@ -2,6 +2,7 @@ package com.unddefined.enderechoing.client.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.unddefined.enderechoing.client.gui.widgets.DimensionSelecter;
+import com.unddefined.enderechoing.client.gui.widgets.TabBar;
 import com.unddefined.enderechoing.network.packet.PearlRenamePacket;
 import com.unddefined.enderechoing.network.packet.RequestDimensionListPacket;
 import com.unddefined.enderechoing.network.packet.RequestStructureInfoPacket;
@@ -24,14 +25,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static com.unddefined.enderechoing.blocks.EnderEchoTunerBlock.CHARGED;
-
 public class PositionEditScreen extends Screen {
     private final Screen lastScreen;
     private final BlockPos pos;
     public String fieldValue;
     public Font font;
     private EditBox nameField;
+    public TabBar tabBar;
     private EditBox posX;
     private EditBox posY;
     private EditBox posZ;
@@ -57,9 +57,13 @@ public class PositionEditScreen extends Screen {
 
     @Override
     protected void init() {
+        if (fieldValue.contains("÷")) {
+            fieldValue = fieldValue.replace("÷", "");
+            tabBar = new TabBar(width / 2 - 76, height / 2 - 38, this);
+        }
         // 添加文本输入框
         this.font = super.font;
-        this.nameField = new EditBox(this.font, this.width / 2 - 101, this.height / 2 - 10, 180, 20, Component.translatable("screen.enderechoing.enter_name"));
+        this.nameField = new EditBox(this.font, this.width / 2 - 105, this.height / 2 - 10, 188, 20, Component.translatable("screen.enderechoing.enter_name"));
         this.nameField.setMaxLength(50);
         this.nameField.setValue(fieldValue);
         this.addWidget(this.nameField);
@@ -77,7 +81,7 @@ public class PositionEditScreen extends Screen {
         }
         // 添加插入按钮
         var insertBtn = Button.builder(Component.literal("+"), (button) -> insertVisible = !insertVisible)
-                .bounds(this.width / 2 + 82, this.height / 2 - 10, 20, 20).build();
+                .bounds(this.width / 2 + 86, this.height / 2 - 10, 20, 20).build();
         insertBtn.setTooltip(Tooltip.create(Component.translatable("screen.enderechoing.insert_info")));
         this.addRenderableWidget(insertBtn);
         if (lastScreen instanceof TunerScreen tunerScreen) {
@@ -126,11 +130,11 @@ public class PositionEditScreen extends Screen {
 
         // 添加完成按钮
         this.doneBtn = Button.builder(Component.translatable("screen.enderechoing.done"), (button) ->
-                this.onDone()).bounds(this.width / 2 - 102, this.height / 2 + 25 + (isCharged ? 43 : 0), 100, 20).build();
+                this.onDone()).bounds(this.width / 2 - 106, this.height / 2 + 20 + (isCharged ? 43 : 0), 100, 20).build();
         this.addRenderableWidget(doneBtn);
         // 添加取消按钮
         this.cancelBtn = Button.builder(Component.translatable("screen.enderechoing.cancel"), (button) ->
-                this.onClose()).bounds(this.width / 2 + 2, this.height / 2 + 25 + (isCharged ? 43 : 0), 100, 20).build();
+                this.onClose()).bounds(this.width / 2 + 6, this.height / 2 + 20 + (isCharged ? 43 : 0), 100, 20).build();
         this.addRenderableWidget(cancelBtn);
     }
 
@@ -138,10 +142,12 @@ public class PositionEditScreen extends Screen {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+        int tab = tabBar != null ? 24 : 0;
 
         // 渲染标题
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 30, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 30 - tab, 0xFFFFFF);
 
+        if (tabBar != null) tabBar.render(guiGraphics, mouseX, mouseY, partialTick);
         this.nameField.render(guiGraphics, mouseX, mouseY, partialTick);
         if (posX != null) {
             posX.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -175,20 +181,28 @@ public class PositionEditScreen extends Screen {
 
     private void onDone() {
         String name = this.nameField.getValue().trim();
-        if (name.equals("")) name = fieldValue;
+        if (name.isEmpty()) name = fieldValue;
 
         if (lastScreen instanceof TunerScreen tunerScreen) {
             var M = tunerScreen.getFocusingEntry().getMarkedPosition();
             var newPos = isCharged ? new BlockPos(Integer.parseInt(posX.getValue()), Integer.parseInt(posY.getValue()), Integer.parseInt(posZ.getValue())) : M.pos();
             var newDimension = isCharged ? DimensionSelecter.dimension : M.dimension();
-            var newM = new MarkedPositionsManager.MarkedPositions(newDimension, newPos, name, M.iconIndex(), M.teleporterBound());
+            var newM = new MarkedPositionsManager.MarkedPositions(newDimension, newPos, name,
+                    tabBar != null ? tabBar.selectedTab : M.iconIndex(), M.teleporterBound());
             tunerScreen.getMarkedPositionsCache().set(tunerScreen.getMarkedPositionsCache().indexOf(M), newM);
             tunerScreen.populateWaypointList();
             if (isCharged && !newPos.equals(M.pos()) || !newDimension.equals(M.dimension()))
                 PacketDistributor.sendToServer(new SetUnchargedPacket(tunerScreen.getMenu().getTunerPos().pos()));
-        } else PacketDistributor.sendToServer(new PearlRenamePacket(name));
+        } else PacketDistributor.sendToServer(new PearlRenamePacket(name, tabBar != null ? tabBar.selectedTab : -1));
+
 
         this.onClose();
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (tabBar != null) tabBar.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override

@@ -1,16 +1,22 @@
 package com.unddefined.enderechoing.client.gui.widgets;
 
-import com.unddefined.enderechoing.client.gui.TunerMenu;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
+import com.unddefined.enderechoing.network.packet.RequestPlayerDataPacket;
 import com.unddefined.enderechoing.network.packet.SetTunerSelectedTabPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.ICON_LIST;
 import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
 import static net.minecraft.client.gui.screens.Screen.hasShiftDown;
 import static net.minecraft.core.registries.BuiltInRegistries.ITEM;
@@ -23,41 +29,49 @@ public class TabBar {
     private final int x;
     private final int y;
     private final ContextMenu contextMenu;
-    private final TunerScreen screen;
-    private final TunerMenu menu;
+    private final Screen screen;
     private boolean tabLocked = false;
     private boolean dragging = false;
     private boolean tabClicked = false;
+    public int selectedTab = 0;
+    private List<ItemStack> iconList = new ArrayList<>();
+    public int ee_pearl_amount = 0;
 
-    public TabBar(int x, int y, TunerScreen screen) {
+    public TabBar(int x, int y, Screen screen) {
         this.x = x;
         this.y = y;
         this.contextMenu = new ContextMenu();
         this.screen = screen;
-        this.menu = screen.getMenu();
-        if (menu.selected_tuner_tab > 0) tabLocked = true;
+        if (screen instanceof TunerScreen S) {
+            if (S.getMenu().selected_tuner_tab > 0) tabLocked = true;
+            iconList = S.getMenu().getIconList();
+            ee_pearl_amount = S.getMenu().ee_pearl_amount;
+        } else if (Minecraft.getInstance().player != null) {
+            iconList = Minecraft.getInstance().player.getData(ICON_LIST.get());
+            ee_pearl_amount = Minecraft.getInstance().player.getData(EE_PEARL_AMOUNT.get());
+            PacketDistributor.sendToServer(new RequestPlayerDataPacket());
+        }
     }
 
     public void render(GuiGraphics G, int mouseX, int mouseY, float partialTick) {
 
         G.blitSprite(HOTBAR_SPRITE, x, y, 182, 22);
         G.blitSprite(HOTBAR_OFFHAND_LEFT_SPRITE, x - 29, y - 1, 29, 24);
-        G.blitSprite(HOTBAR_SELECTION_SPRITE, x - 30 + screen.selectedTab * 20 + (screen.selectedTab > 0 ? 9 : 0), y - 1, 24, 23);
+        G.blitSprite(HOTBAR_SELECTION_SPRITE, x - 30 + selectedTab * 20 + (selectedTab > 0 ? 9 : 0), y - 1, 24, 23);
 
-        this.renderSlot(G, x - 26, y + 3, menu.getIconList().getFirst());
-        for (int i1 = 1; i1 <= 9; i1++) this.renderSlot(G, x - 20 + i1 * 20 + 3, y + 3, menu.getIconList().get(i1));
+        this.renderSlot(G, x - 26, y + 3, iconList.getFirst());
+        for (int i1 = 1; i1 <= 9; i1++) this.renderSlot(G, x - 20 + i1 * 20 + 3, y + 3, iconList.get(i1));
 
-        if (dragging) G.renderFakeItem(menu.getIconList().get(screen.selectedTab), mouseX - 8, mouseY - 8);
+        if (dragging) G.renderFakeItem(iconList.get(selectedTab), mouseX - 8, mouseY - 8);
 
         contextMenu.render(G, 0, 0, partialTick);
     }
 
     private void renderSlot(GuiGraphics guiGraphics, int x, int y, ItemStack stack) {
-        if (stack.isEmpty() || (contextMenu.isVisible() && !stack.equals(menu.getIconList().get(screen.selectedTab)) && !stack.equals(menu.getIconList().getFirst())))
-            return;
+        if (stack.isEmpty() || (contextMenu.isVisible() && !stack.equals(iconList.get(selectedTab)) && !stack.equals(iconList.getFirst()))) return;
 
-        guiGraphics.renderFakeItem(dragging && menu.getIconList().get(screen.selectedTab).equals(stack) ? ItemStack.EMPTY : stack, x, y);
-        ItemStack pearl = stack.is(ENDER_ECHOING_PEARL) ? new ItemStack(ENDER_ECHOING_PEARL.get(), menu.ee_pearl_amount) : stack;
+        guiGraphics.renderFakeItem(dragging && iconList.get(selectedTab).equals(stack) ? ItemStack.EMPTY : stack, x, y);
+        ItemStack pearl = stack.is(ENDER_ECHOING_PEARL) ? new ItemStack(ENDER_ECHOING_PEARL.get(), ee_pearl_amount) : stack;
         guiGraphics.renderItemDecorations(screen.getMinecraft().font, pearl, x, y);
     }
 
@@ -69,42 +83,46 @@ public class TabBar {
 
             if (!(mouseX >= tx && mouseX < tx + slotSize && mouseY >= ty && mouseY < ty + slotSize)) continue;
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 0.7F));
-            screen.selectedTab = i;
+            selectedTab = i;
             tabClicked = true;
-            screen.populateWaypointList();
+            if (screen instanceof TunerScreen screen) {
+                var menu = screen.getMenu();
+                screen.selectedTab = i;
+                screen.populateWaypointList();
 
-            if (button == 1) {
-                // 右键 → 弹出菜单
-                if (i == 0) {
-                    menu.givePlayerPearl(new ItemStack(ENDER_ECHOING_PEARL.get(), Math.min(menu.ee_pearl_amount, 8)));
+                if (button == 1) {
+                    // 右键 → 弹出菜单
+                    if (i == 0) {
+                        menu.givePlayerPearl(new ItemStack(ENDER_ECHOING_PEARL.get(), Math.min(menu.ee_pearl_amount, 8)));
+                        return true;
+                    }
+                    contextMenu.clear();
+
+                    contextMenu.addItem("screen.enderechoing.lock", () -> {
+                        PacketDistributor.sendToServer(new SetTunerSelectedTabPacket(screen.selectedTab));
+                        tabLocked = true;
+                    });
+
+                    if (tabLocked) contextMenu.addItem("screen.enderechoing.unlock", () -> {
+                        PacketDistributor.sendToServer(new SetTunerSelectedTabPacket(0));
+                        tabLocked = false;
+                        screen.selectedTab = 0;
+                        screen.populateWaypointList();
+                    });
+
+                    int finalI = i;
+                    contextMenu.addItem("screen.enderechoing.change_icon", () -> {
+                        screen.changeIcon = true;
+                        screen.previousIcon = menu.getIconList().get(finalI).isEmpty() ? new ItemStack(STONE) : menu.getIconList().get(finalI);
+                        screen.nameField.setValue(ITEM.getKey(menu.getIconList().get(finalI).getItem()).toString());
+                    });
+
+                    contextMenu.open((int) mouseX, (int) mouseY, (idx, item) -> {
+                        // 回调：菜单项被点击
+                    });
+
                     return true;
                 }
-                contextMenu.clear();
-
-                contextMenu.addItem("screen.enderechoing.lock", () -> {
-                    PacketDistributor.sendToServer(new SetTunerSelectedTabPacket(screen.selectedTab));
-                    tabLocked = true;
-                });
-
-                if (tabLocked) contextMenu.addItem("screen.enderechoing.unlock", () -> {
-                    PacketDistributor.sendToServer(new SetTunerSelectedTabPacket(0));
-                    tabLocked = false;
-                    screen.selectedTab = 0;
-                    screen.populateWaypointList();
-                });
-
-                int finalI = i;
-                contextMenu.addItem("screen.enderechoing.change_icon", () -> {
-                    screen.changeIcon = true;
-                    screen.previousIcon = menu.getIconList().get(finalI).isEmpty() ? new ItemStack(STONE) : menu.getIconList().get(finalI);
-                    screen.nameField.setValue(ITEM.getKey(menu.getIconList().get(finalI).getItem()).toString());
-                });
-
-                contextMenu.open((int) mouseX, (int) mouseY, (idx, item) -> {
-                    // 回调：菜单项被点击
-                });
-
-                return true;
             }
         }
         // 检查是否点击了上下文菜单
@@ -112,6 +130,8 @@ public class TabBar {
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (!(screen instanceof TunerScreen screen)) return false;
+        var menu = screen.getMenu();
         var currentIcon = menu.getIconList().get(screen.selectedTab);
         if (screen.selectedTab == 0) return false;
         // 左右方向键交换选中tab位置
@@ -122,6 +142,7 @@ public class TabBar {
                 menu.getIconList().set(hasShiftDown() ? 1 : screen.selectedTab - 1, currentIcon);
                 menu.getIconList().set(screen.selectedTab, leftIcon);
                 screen.selectedTab = hasShiftDown() ? 1 : screen.selectedTab - 1;
+                selectedTab = screen.selectedTab;
                 return true;
             }
         } else if (keyCode == 262) { // 右箭头键
@@ -131,6 +152,7 @@ public class TabBar {
                 menu.getIconList().set(hasShiftDown() ? 9 : screen.selectedTab + 1, currentIcon);
                 menu.getIconList().set(screen.selectedTab, rightIcon);
                 screen.selectedTab = hasShiftDown() ? 9 : screen.selectedTab + 1;
+                selectedTab = screen.selectedTab;
                 return true;
             }
         }
@@ -139,6 +161,8 @@ public class TabBar {
     }
 
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (!(screen instanceof TunerScreen screen)) return false;
+        var menu = screen.getMenu();
         tabClicked = false;
         if (!dragging) return false;
         dragging = false;
@@ -160,6 +184,7 @@ public class TabBar {
     }
 
     public boolean mouseDragged(int button) {
+        if (!(screen instanceof TunerScreen screen)) return false;
         if (button != 0) return false;
         if (screen.selectedTab < 1) return false;
         if (!dragging && !tabClicked) return false;
@@ -171,5 +196,9 @@ public class TabBar {
         return contextMenu;
     }
 
+    public void setPlayerData(int a, List<ItemStack> b){
+        ee_pearl_amount = a;
+        iconList = b;
+    }
 }
 

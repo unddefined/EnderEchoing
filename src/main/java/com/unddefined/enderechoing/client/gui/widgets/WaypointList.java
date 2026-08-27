@@ -169,7 +169,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (!hovered) return false;
-            if (isSelf || !isFacing_down || !can_crossDimension || !isPearlEnough()) return false;
+            if (isSelf || isFacing_down && (!can_crossDimension || !isPearlEnough())) return false;
             mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             selected = !selected;
 

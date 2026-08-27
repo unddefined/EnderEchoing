@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.items;
 
 import com.unddefined.enderechoing.Config;
+import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.client.model.EnderEchoingCoreModel;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer;
 import com.unddefined.enderechoing.network.packet.*;
@@ -159,7 +160,10 @@ public class EnderEchoingCore extends Item implements GeoItem {
             player.startUsingItem(hand);
         } else if (player.getData(EE_PEARL_AMOUNT.get()) > 0 || player.getInventory().hasAnyMatching(stack ->
                 stack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && stack.get(CUSTOM_NAME) == null)) {
-            if (!level.isClientSide()) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket("", player.blockPosition()));
+            boolean A = level.getBlockEntity(player.blockPosition()) instanceof EnderEchoicResonatorBlockEntity;
+            boolean B = player.getData(EE_PEARL_AMOUNT.get()) > 0;
+            String name = A ? (B ? ">÷<" : "><") : (B ? "÷" : "");
+            if (!level.isClientSide()) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket(name, player.blockPosition()));
             player.setData(EE_PEARL_POSITION.get(), player.blockPosition());
         }
 
