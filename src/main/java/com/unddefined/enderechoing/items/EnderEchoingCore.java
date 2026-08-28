@@ -70,10 +70,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
             @Override
             public BlockEntityWithoutLevelRenderer getGeoItemRenderer() {
-                if (this.renderer == null) {
-                    this.renderer = new EnderEchoingCoreRenderer(new EnderEchoingCoreModel());
-                }
-
+                if (this.renderer == null) this.renderer = new EnderEchoingCoreRenderer(new EnderEchoingCoreModel());
                 return this.renderer;
             }
         });
@@ -143,7 +140,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
             var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
             // 检查玩家是否有空白末影回响珍珠
             int D = EECORE_TP_DISTANCE.get();
-            cost = (int) (nearestTeleporterPos.pos().distSqr(player.blockPosition()) / D * D);
+            cost = (int)Math.round(Math.sqrt(nearestTeleporterPos.pos().distSqr(player.blockPosition())) / D);
             if (cost < 1) cost = 1;
             if (!player.getInventory().hasAnyMatching(item ->
                     item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null)

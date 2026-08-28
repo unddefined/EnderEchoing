@@ -52,7 +52,7 @@ public class SculkVeilEffect extends MobEffect {
 
     @Override
     public boolean applyEffectTick(LivingEntity entity, int pAmplifier) {
-        entity.setInvisible(true);
+//        entity.setInvisible(true);
         if (countdownTicks-- <= 0 && entity.level() instanceof ServerLevel) {
             countdownTicks = duration + 40;
             MobEffectInstance WEAKNESS = new MobEffectInstance(MobEffects.WEAKNESS, duration);
