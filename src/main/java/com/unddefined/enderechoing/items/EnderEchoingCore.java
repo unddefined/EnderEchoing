@@ -24,6 +24,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -41,6 +42,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static com.unddefined.enderechoing.Config.EECORE_TP_DISTANCE;
@@ -56,12 +58,17 @@ public class EnderEchoingCore extends Item implements GeoItem {
     private static final String ANIM_USE = "use";
     private static final RawAnimation USE_ANIM = RawAnimation.begin().thenPlay("ender_echoing_core.use");
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    private int tick = 0;
-    private int tick2 = 0;
-    private int cost = 0;
+    private final Map<UUID, PlayerState> playerStates = new HashMap<>();
+
+    private static class PlayerState {
+        int tick;
+        int tick2;
+        int cost;
+        int selectedSlot = -1;
+    }
 
     public EnderEchoingCore(Properties properties) {
-        super(properties.stacksTo(2));
+        super(properties.stacksTo(2).rarity(Rarity.UNCOMMON));
         SingletonGeoAnimatable.registerSyncedAnimatable(this);
     }
 
@@ -96,32 +103,42 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         if (!(entity instanceof ServerPlayer S)) return;
+        PlayerState state = playerStates.computeIfAbsent(S.getUUID(), ignored -> new PlayerState());
+
+        // inventoryTick is called once for every occupied inventory slot.
+        // Non-selected stacks must not reset the selected stack's state.
+        if (!isSelected) {
+            if (S.getMainHandItem().getItem() != this && state.tick > 0) {
+                PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
+                PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(new HashMap<>()));
+                state.tick = 0;
+                state.selectedSlot = -1;
+            }
+            return;
+        }
+        if (state.selectedSlot != slotId) {
+            state.selectedSlot = slotId;
+            state.tick = 0;
+        }
+
         Map<BlockPos, String> Map = new HashMap<>();
         if (S.hasEffect(SCULK_VEIL) || level.getBlockState(S.blockPosition()).is(ENDER_ECHO_CRYSTAL)) {
             PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
-            tick2 = 60;
+            state.tick2 = 60;
             return;
         }
-        if (tick2 > 0) {
-            tick2--;
+        if (state.tick2 > 0) {
+            state.tick2--;
             return;
         }
-        if (!isSelected) {
-            if (tick > 0) {
-                PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
-                PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
-            }
-            tick = 0;
-            return;
-        }
-        tick++;
+        state.tick++;
         PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(S.blockPosition()));
-        if (tick < 24) return;
+        if (state.tick < 24) return;
         int D = EECORE_TP_DISTANCE.get();
         var manager = MarkedPositionsManager.getManager(S);
         if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
         manager.markedPositions().stream().filter(e -> e.dimension().equals(level.dimension()))
-                .filter(e -> e.pos().distSqr(S.blockPosition()) < D * D * 4)
+                .filter(e -> Math.sqrt(e.pos().distSqr(S.blockPosition())) < D * 4)
                 .forEach(e -> Map.put(e.pos(), e.name()));
         PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
     }
@@ -143,8 +160,10 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
                 // 检查玩家是否有空白末影回响珍珠
                 int D = EECORE_TP_DISTANCE.get();
-                cost = (int) Math.round(Math.sqrt(nearestTeleporterPos.pos().distSqr(player.blockPosition())) / D);
+                PlayerState state = playerStates.computeIfAbsent(S.getUUID(), ignored -> new PlayerState());
+                int cost = (int) Math.round(Math.sqrt(nearestTeleporterPos.pos().distSqr(player.blockPosition())) / D);
                 if (cost < 1) cost = 1;
+                state.cost = cost;
                 if (!player.getInventory().hasAnyMatching(item ->
                         item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null)
                         && player.getData(EE_PEARL_AMOUNT.get()) < cost)
@@ -194,6 +213,8 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
     public @NotNull ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity livingEntity) {
         if (level instanceof ServerLevel && livingEntity instanceof ServerPlayer player) {
+            PlayerState state = playerStates.computeIfAbsent(player.getUUID(), ignored -> new PlayerState());
+            int cost = state.cost;
             // 再次检查玩家是否有空白珍珠
             if (!player.getInventory().hasAnyMatching(itemStack ->
                     itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && itemStack.get(CUSTOM_NAME) == null)
@@ -205,11 +226,11 @@ public class EnderEchoingCore extends Item implements GeoItem {
             if (player.getData(EE_PEARL_AMOUNT.get()) > 0) player.setData(EE_PEARL_AMOUNT.get(), player.getData(EE_PEARL_AMOUNT.get()) - cost);
             else player.getInventory().clearOrCountMatchingItems(itemStack ->
                     itemStack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() &&
-                            itemStack.get(CUSTOM_NAME) == null, 1, player.inventoryMenu.getCraftSlots());
+                            itemStack.get(CUSTOM_NAME) == null, cost, player.inventoryMenu.getCraftSlots());
 
             // 设置冷却时间
             player.getCooldowns().addCooldown(this, Config.ENDER_ECHOING_CORE_COOLDOWN.get() * 20);
-            cost = 0;
+            state.cost = 0;
         }
         if (level.isClientSide() && livingEntity instanceof Player player && !player.isUsingItem()) {
             if (player instanceof AbstractClientPlayer clientPlayer) {

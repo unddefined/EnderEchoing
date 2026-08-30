@@ -6,10 +6,8 @@ import com.unddefined.enderechoing.client.model.item.WarpCoreModel;
 import com.unddefined.enderechoing.client.renderer.item.WarpCoreRenderer;
 import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import com.unddefined.enderechoing.network.packet.RenderEchoNamesPacket;
-import com.unddefined.enderechoing.network.packet.ReplyPlayerDataPacket;
 import com.unddefined.enderechoing.network.packet.SetEchoSoundingPosPacket;
 import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
-import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -30,10 +28,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoItem;
+import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
@@ -42,23 +40,29 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static com.unddefined.enderechoing.Config.EECORE_TP_DISTANCE;
 import static com.unddefined.enderechoing.server.registry.BlockRegistry.ENDER_ECHO_CRYSTAL;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.*;
-import static com.unddefined.enderechoing.server.registry.DataRegistry.TBOUND;
 import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 import static net.minecraft.world.item.Rarity.EPIC;
 
 public class WarpCore extends Item implements GeoItem {
-    private int tick = 0;
-    private int tick2 = 0;
+    private final Map<UUID, PlayerState> playerStates = new HashMap<>();
+
+    private static class PlayerState {
+        int tick;
+        int tick2;
+        int selectedSlot = -1;
+    }
 
     public WarpCore(Properties properties) {
         super(properties.stacksTo(1).rarity(EPIC));
+        SingletonGeoAnimatable.registerSyncedAnimatable(this);
     }
 
     @Override
@@ -78,32 +82,42 @@ public class WarpCore extends Item implements GeoItem {
 
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         if (!(entity instanceof ServerPlayer S)) return;
+        PlayerState state = playerStates.computeIfAbsent(S.getUUID(), ignored -> new PlayerState());
+
+        // inventoryTick is called once for every occupied inventory slot.
+        // Non-selected stacks must not reset the selected stack's state.
+        if (!isSelected) {
+            if (S.getMainHandItem().getItem() != this && state.tick > 0) {
+                PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
+                PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(new HashMap<>()));
+                state.tick = 0;
+                state.selectedSlot = -1;
+            }
+            return;
+        }
+        if (state.selectedSlot != slotId) {
+            state.selectedSlot = slotId;
+            state.tick = 0;
+        }
+
         Map<BlockPos, String> Map = new HashMap<>();
         if (S.hasEffect(SCULK_VEIL) || level.getBlockState(S.blockPosition()).is(ENDER_ECHO_CRYSTAL)) {
             PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
-            tick2 = 60;
+            state.tick2 = 60;
             return;
         }
-        if (tick2 > 0) {
-            tick2--;
+        if (state.tick2 > 0) {
+            state.tick2--;
             return;
         }
-        if (!isSelected) {
-            if (tick > 0) {
-                PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
-                PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
-            }
-            tick = 0;
-            return;
-        }
-        tick++;
+        state.tick++;
         PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(S.blockPosition()));
-        if (tick < 24) return;
+        if (state.tick < 24) return;
         int D = EECORE_TP_DISTANCE.get();
         var manager = MarkedPositionsManager.getManager(S);
         if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
         manager.markedPositions().stream().filter(e -> e.dimension().equals(level.dimension()))
-                .filter(e -> e.pos().distSqr(S.blockPosition()) < D * D * 4)
+                .filter(e -> Math.sqrt(e.pos().distSqr(S.blockPosition())) < D * 4)
                 .forEach(e -> Map.put(e.pos(), e.name()));
         PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
     }
