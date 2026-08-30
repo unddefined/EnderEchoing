@@ -1,5 +1,6 @@
 package com.unddefined.enderechoing.network.packet;
 
+import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
@@ -15,13 +16,14 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.unddefined.enderechoing.EnderEchoing.GZERO;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
+import static com.unddefined.enderechoing.server.registry.ItemRegistry.WARP_CORE;
 
-public record TeleportRequestPacket(GlobalPos targetPos) implements CustomPacketPayload {
+public record TeleportRequestPacket(GlobalPos targetPos, boolean canWarp) implements CustomPacketPayload {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(EnderEchoing.MODID, "teleporter_request");
     public static final Type<TeleportRequestPacket> TYPE = new Type<>(ID);
     public static final StreamCodec<FriendlyByteBuf, TeleportRequestPacket> STREAM_CODEC = StreamCodec.ofMember(
-            (msg, buf) -> buf.writeGlobalPos(msg.targetPos),
-             buf -> new TeleportRequestPacket(buf.readGlobalPos())
+            (msg, buf) ->{buf.writeGlobalPos(msg.targetPos);buf.writeBoolean(msg.canWarp);},
+             buf -> new TeleportRequestPacket(buf.readGlobalPos(),buf.readBoolean())
     );
 
     public static void handle(TeleportRequestPacket msg, IPayloadContext ctx) {
@@ -43,8 +45,12 @@ public record TeleportRequestPacket(GlobalPos targetPos) implements CustomPacket
             }
 
             // 只有传送成功后才扣除费用。
-            int cost = (needsPearl ? 1 : 0) + (crossDimension ? 1 : 0);
+            int cost = (needsPearl && !msg.canWarp ? 1 : 0) + (crossDimension ? 1 : 0);
             if (cost > 0) player.setData(EE_PEARL_AMOUNT, player.getData(EE_PEARL_AMOUNT) - cost);
+            if (msg.canWarp){
+                player.getCooldowns().addCooldown(WARP_CORE.asItem(), Config.ENDER_ECHOING_CORE_COOLDOWN.get() * 5);
+                return;
+            }
             if (crossDimension && blockEntity instanceof EnderEchoTunerBlockEntity tuner) tuner.consumeAnchorCharge();
             if (blockEntity instanceof EnderEchoTunerBlockEntity tuner) tuner.setSelectedPosition(GZERO, "");
         });

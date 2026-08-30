@@ -13,6 +13,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -129,34 +130,36 @@ public class EnderEchoingCore extends Item implements GeoItem {
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
         var itemStack = player.getItemInHand(hand);
         var manager = MarkedPositionsManager.getManager(player);
-        if (!player.isShiftKeyDown() && player instanceof ServerPlayer S) {
-            // 检查是否在冷却中
-            if (player.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(itemStack);
-            // 检查玩家是否发光，如果发光则无法使用
-            if (player.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
-            // 查找最近的EnderEchoicResonator方块
+        if (!player.isShiftKeyDown()) {
+            if (player instanceof ServerPlayer S) {
+                // 检查是否在冷却中
+                if (S.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(itemStack);
+                // 检查玩家是否发光，如果发光则无法使用
+                if (S.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
+                // 查找最近的EnderEchoicResonator方块
 
-            if (manager.teleporters().stream().filter(e -> e.dimension().equals(level.dimension())).toList().isEmpty())
-                return InteractionResultHolder.fail(itemStack);
-            var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
-            // 检查玩家是否有空白末影回响珍珠
-            int D = EECORE_TP_DISTANCE.get();
-            cost = (int)Math.round(Math.sqrt(nearestTeleporterPos.pos().distSqr(player.blockPosition())) / D);
-            if (cost < 1) cost = 1;
-            if (!player.getInventory().hasAnyMatching(item ->
-                    item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null)
-                    && player.getData(EE_PEARL_AMOUNT.get()) < cost)
-                return InteractionResultHolder.fail(itemStack);
-            // 渲染传送特效
-            PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(player.blockPosition()));
-            PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(nearestTeleporterPos, true));
-            // 添加玩家动画
-            PacketDistributor.sendToPlayer(S, new SetPlayerAnimationPacket());
-            // 添加动画
-            player.addEffect(new MobEffectInstance(SCULK_VEIL, 20 * 3, 0, false, true));
-            if (level instanceof ServerLevel SL) triggerAnim(player, GeoItem.getOrAssignId(itemStack, SL), CONTROLLER_NAME, ANIM_USE);
+                if (manager.teleporters().stream().filter(e -> e.dimension().equals(level.dimension())).toList().isEmpty())
+                    return InteractionResultHolder.fail(itemStack);
+                var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());
+                // 检查玩家是否有空白末影回响珍珠
+                int D = EECORE_TP_DISTANCE.get();
+                cost = (int) Math.round(Math.sqrt(nearestTeleporterPos.pos().distSqr(player.blockPosition())) / D);
+                if (cost < 1) cost = 1;
+                if (!player.getInventory().hasAnyMatching(item ->
+                        item.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && item.get(CUSTOM_NAME) == null)
+                        && player.getData(EE_PEARL_AMOUNT.get()) < cost)
+                    return InteractionResultHolder.fail(itemStack);
+                // 渲染传送特效
+                PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(player.blockPosition()));
+                PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(nearestTeleporterPos, true));
+                // 添加玩家动画
+                PacketDistributor.sendToPlayer(S, new SetPlayerAnimationPacket());
+                // 添加动画
+                player.addEffect(new MobEffectInstance(SCULK_VEIL, 20 * 3, 0, false, true));
+                if (level instanceof ServerLevel SL) triggerAnim(S, GeoItem.getOrAssignId(itemStack, SL), CONTROLLER_NAME, ANIM_USE);
 
-            player.startUsingItem(hand);
+                player.startUsingItem(hand);
+            }
         } else if (player.getData(EE_PEARL_AMOUNT.get()) > 0 || player.getInventory().hasAnyMatching(stack ->
                 stack.getItem() == ItemRegistry.ENDER_ECHOING_PEARL.get() && stack.get(CUSTOM_NAME) == null)) {
             boolean A = level.getBlockEntity(player.blockPosition()) instanceof EnderEchoicResonatorBlockEntity;
@@ -168,7 +171,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
 
             if (!level.isClientSide()) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket(name, player.blockPosition()));
             player.setData(EE_PEARL_POSITION.get(), player.blockPosition());
-        }
+        } else player.displayClientMessage(Component.translatable("pearl_not_enough"), true);
 
         return InteractionResultHolder.consume(itemStack);
     }

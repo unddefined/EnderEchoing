@@ -208,6 +208,8 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (mouseX < (double) this.width / 2 - 107 || mouseX > (double) this.width / 2 - 107 + 210 || mouseY < this.height * 0.2 || mouseY > this.height * 0.8) return false;
+
         if (changeIcon && jeiItem.isEmpty()) jeiItem = getItemFromJei();
         if (waypointList.getContextMenu().isVisible() || tabBar.getContextMenu().isVisible()) return false;
         if (button != 0) return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);

@@ -17,10 +17,7 @@
   "item.enderechoing.echo_druse_stage3": "Echo Druse",
   "item.enderechoing.echo_druse_stage4": "Echo Druse",
   "item.enderechoing.calibrated_sculk_shrieker": "Calibrated Sculk Shrieker",
-  "item.enderechoing.ender_echoing_core.no_ender_pearl": "You need an Ender Pearl to use this item!",
   "item.enderechoing.ender_echoing_core.no_resonator": "No resonator found!",
-  "item.enderechoing.ender_echoing_core.success": "Teleported successfully!",
-  "item.enderechoing.ender_echoing_core.cooldown": "Item is on cooldown!",
   "item.enderechoing.ender_echoing_pearl": "Ender Echoing Pearl",
   "item.enderechoing.ender_echoing_eye": "Ender Echoing Eye",
   "item.enderechoing.ender_echoing_pearl.position": "Position: %s, %s",
@@ -66,6 +63,8 @@
   "effect.enderechoing.attack_scattered": "Attack Scattered",
   "effect.enderechoing.sculk_veil": "Sculk Veil",
   "menu.title.enderechoing.tunermenu": "Ender Echo Tuner",
+  "menu.title.enderechoing.warpmenu": "Select a destination",
+  "screen.enderechoing.warp":"Warp",
   "screen.enderechoing.dimension": "Dimension",
   "screen.enderechoing.biome": "Biome",
   "screen.enderechoing.structure": "Structure",
@@ -73,5 +72,6 @@
   "screen.enderechoing.last_death": "Last Death",
   "screen.enderechoing.previous_death": "Previous Death",
   "screen.enderechoing.earlier_death": "Earlier Death",
-  "screen.enderechoing.even_earlier_death": "Even Earlier Death"
+  "screen.enderechoing.even_earlier_death": "Even Earlier Death",
+  "pearl_not_enough": "Ender Echoing Pearl not enough"
 }

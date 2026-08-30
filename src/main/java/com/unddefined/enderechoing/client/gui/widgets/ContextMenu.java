@@ -2,6 +2,7 @@ package com.unddefined.enderechoing.client.gui.widgets;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -13,8 +14,11 @@ public class ContextMenu {
     private boolean visible;
     private int x, y;
     private MenuHandler handler;
+    public boolean enableWarp;
 
-    public void addItem(String name, Runnable action) {items.add(new Item(name, action));}
+    public void addItem(String name, Runnable action) {
+        items.add(new Item(name, action));
+    }
 
     public void clear() {
         items.clear();
@@ -37,6 +41,10 @@ public class ContextMenu {
 
                 if (!item.name.equals("screen.enderechoing.remove")) close();
             }).bounds(x, y + i * 20, 100, 20).build();
+            if (item.name.equals("screen.enderechoing.warp")) {
+                button.active = enableWarp;
+                if (!enableWarp) button.setTooltip(Tooltip.create(Component.translatable("pearl_not_enough")));
+            }
             buttons.add(button);
         }
     }
@@ -71,9 +79,14 @@ public class ContextMenu {
         clear();
     }
 
-    public boolean isVisible() {return visible;}
+    public boolean isVisible() {
+        return visible;
+    }
 
-    public interface MenuHandler { void onClick(int index, Component item);}
+    public interface MenuHandler {
+        void onClick(int index, Component item);
+    }
 
-    record Item(String name, Runnable action) {}
+    record Item(String name, Runnable action) {
+    }
 }

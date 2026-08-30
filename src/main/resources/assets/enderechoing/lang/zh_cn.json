@@ -17,10 +17,7 @@
   "item.enderechoing.echo_druse_stage3": "回响晶簇",
   "item.enderechoing.echo_druse_stage4": "回响晶簇",
   "item.enderechoing.calibrated_sculk_shrieker": "校频幽匿尖啸体",
-  "item.enderechoing.ender_echoing_core.no_ender_pearl": "你需要末影珍珠来使用此物品",
   "item.enderechoing.ender_echoing_core.no_resonator": "No resonator found!",
-  "item.enderechoing.ender_echoing_core.success": "传送成功",
-  "item.enderechoing.ender_echoing_core.cooldown": "物品正在冷却中",
   "item.enderechoing.ender_echoing_pearl": "末影回响珍珠",
   "item.enderechoing.ender_echoing_eye": "末影回响之眼",
   "item.enderechoing.ender_echoing_pearl.position": "位于: %s, %s",
@@ -73,5 +70,8 @@
   "screen.enderechoing.last_death": "上次死亡地点",
   "screen.enderechoing.previous_death": "此前死亡地点",
   "screen.enderechoing.earlier_death":  "更早的死亡地点",
-  "screen.enderechoing.even_earlier_death":  "更更早的死亡地点"
+  "screen.enderechoing.even_earlier_death":  "更更早的死亡地点",
+  "menu.title.enderechoing.warpmenu": "选择一个目的地",
+  "screen.enderechoing.warp": "折跃",
+  "pearl_not_enough": "末影回响珍珠不足"
 }

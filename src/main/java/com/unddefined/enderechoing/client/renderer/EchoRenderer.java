@@ -104,7 +104,7 @@ public class EchoRenderer {
         if (SculkVeilRenderer.fadeProgress != 0f) sculkveilCountTicks++;
         else sculkveilCountTicks = -43;
         if (teleportTicks > 82 && !player.isCurrentlyGlowing() && !isTeleporting) {
-            PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
+            PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos,false));
             echoMap.remove(targetPos.pos());
             isTeleporting = true;
         }
@@ -138,7 +138,7 @@ public class EchoRenderer {
                     isTeleporting = true;
                     echoMap.putIfAbsent(EchoSoundingPos, new EchoResponse(EchoSoundingPos));
                     echoMap.remove(targetPos.pos());
-                    PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos));
+                    PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos,false));
                 }
             }
             if (!targetPreseted && countTicks > responseTime && targetPos != null && targetPos.pos().equals(p) && !e.isElementHovering)

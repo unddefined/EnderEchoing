@@ -1,19 +1,36 @@
 package com.unddefined.enderechoing.items;
 
+import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
+import com.unddefined.enderechoing.client.gui.TunerMenu;
 import com.unddefined.enderechoing.client.model.item.WarpCoreModel;
 import com.unddefined.enderechoing.client.renderer.item.WarpCoreRenderer;
+import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
 import com.unddefined.enderechoing.network.packet.RenderEchoNamesPacket;
+import com.unddefined.enderechoing.network.packet.ReplyPlayerDataPacket;
 import com.unddefined.enderechoing.network.packet.SetEchoSoundingPosPacket;
 import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
+import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoItem;
@@ -29,7 +46,11 @@ import java.util.function.Consumer;
 
 import static com.unddefined.enderechoing.Config.EECORE_TP_DISTANCE;
 import static com.unddefined.enderechoing.server.registry.BlockRegistry.ENDER_ECHO_CRYSTAL;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.*;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.TBOUND;
+import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
+import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 import static net.minecraft.world.item.Rarity.EPIC;
 
 public class WarpCore extends Item implements GeoItem {
@@ -85,6 +106,72 @@ public class WarpCore extends Item implements GeoItem {
                 .filter(e -> e.pos().distSqr(S.blockPosition()) < D * D * 4)
                 .forEach(e -> Map.put(e.pos(), e.name()));
         PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
+    }
+
+    @Override
+    public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
+        var stack = player.getItemInHand(hand);
+        if (!player.isShiftKeyDown()) {
+            if (player instanceof ServerPlayer S) S.openMenu(new MenuProvider() {
+                @Override
+                public @NotNull Component getDisplayName() {
+                    return Component.translatable("menu.title.enderechoing.warpmenu");
+                }
+
+                @Override
+                public @NotNull AbstractContainerMenu createMenu(int containerId, net.minecraft.world.entity.player.Inventory playerInventory, Player player) {
+                    return new TunerMenu(containerId, playerInventory,
+                            ContainerLevelAccess.create(level, player.blockPosition()), true);
+                }
+
+                @Override
+                public void writeClientSideData(AbstractContainerMenu menu, net.minecraft.network.RegistryFriendlyByteBuf buf) {
+                    if (menu instanceof TunerMenu t) t.writeClientSideData(buf, new GlobalPos(level.dimension(), player.blockPosition()), true);
+                }
+            });
+        } else if (player.getData(EE_PEARL_AMOUNT) > 0 || player.getInventory().hasAnyMatching(s ->
+                s.getItem() == ENDER_ECHOING_PEARL.get() && s.get(CUSTOM_NAME) == null)) {
+            boolean A = level.getBlockEntity(player.blockPosition()) instanceof EnderEchoicResonatorBlockEntity;
+            boolean B = player.getData(EE_PEARL_AMOUNT) > 0;
+            var manager = MarkedPositionsManager.getManager(player);
+            String name = A ? (B ? ">÷<" : "><") : (B ? "÷" : "");
+            if (A) manager.teleporters().stream().filter(e -> e.dimension().equals(level.dimension()))
+                    .filter(e -> e.pos().equals(player.blockPosition())).findFirst()
+                    .ifPresent(e -> manager.teleporters().add(new MarkedPositionsManager.Teleporters(new GlobalPos(level.dimension(), player.blockPosition()))));
+
+            if (!level.isClientSide()) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket(name, player.blockPosition()));
+            player.setData(EE_PEARL_POSITION.get(), player.blockPosition());
+        } else player.displayClientMessage(Component.translatable("pearl_not_enough"),true);
+        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+    }
+    // 此操作在创造模式下不生效
+    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack other, Slot slot, ClickAction action, Player player, SlotAccess access) {
+        if (stack.getCount() != 1) return false;
+        if (action != ClickAction.SECONDARY) return false;
+        if (!other.is(ENDER_ECHOING_PEARL.asItem())) return false;
+        addPearls(player, other);
+        return true;
+    }
+
+    @Override
+    public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction action, Player player) {
+        if (stack.getCount() != 1) return false;
+        if (action != ClickAction.SECONDARY) return false;
+
+        ItemStack other = slot.getItem();
+        if (!other.is(ENDER_ECHOING_PEARL.asItem())) return false;
+        addPearls(player, other);
+        slot.setChanged();
+        return true;
+    }
+
+    private void addPearls(Player player, ItemStack other) {
+        var stackPos = other.get(POSITION);
+        boolean result = stackPos != null && MarkedPositionsManager.getManager(player)
+                .addMarkedPosition(stackPos.dimension(), stackPos.pos(), other.get(CUSTOM_NAME).getString(),
+                        0, Boolean.TRUE.equals(other.get(TBOUND)));
+        player.setData(EE_PEARL_AMOUNT, player.getData(EE_PEARL_AMOUNT) + other.getCount() - (result ? 1 : 0));
+        other.shrink(other.getCount());
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.unddefined.enderechoing.client.gui.widgets;
 
 import com.unddefined.enderechoing.client.gui.screen.PositionEditScreen;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
+import com.unddefined.enderechoing.network.packet.TeleportRequestPacket;
 import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -45,7 +47,16 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
     public void openContextMenu(int mouseX, int mouseY, MarkedPositionsManager.MarkedPositions M, WaypointEntry entry) {
         contextMenu.clear();
 
-        contextMenu.addItem("screen.enderechoing.rename", () -> Minecraft.getInstance().setScreen(new PositionEditScreen(screen, M.name(), M.pos())));
+        if (screen.getMenu().canWarp()){
+            contextMenu.enableWarp = screen.getMenu().ee_pearl_amount > 0;
+            contextMenu.addItem("screen.enderechoing.warp",() -> {
+            screen.onClose();
+            PacketDistributor.sendToServer(
+                    new TeleportRequestPacket(new GlobalPos(M.dimension(), M.pos()), true));
+        });}
+
+        contextMenu.addItem("screen.enderechoing.rename",
+                () -> Minecraft.getInstance().setScreen(new PositionEditScreen(screen, M.name(), M.pos())));
 
         contextMenu.addItem("screen.enderechoing.copy", () -> {
             screen.getMenu().ee_pearl_amount--;
@@ -125,13 +136,15 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         private final MarkedPositionsManager.MarkedPositions markedPosition;
         private final boolean isSelf;
         private final boolean can_crossDimension;
-        public boolean selected;
+        public boolean selected = false;
         private boolean hovered;
+        private final boolean canWarp;
         private final boolean isFacing_down;
 
         public WaypointEntry(WaypointList parent, MarkedPositionsManager.MarkedPositions M) {
             this.parent = parent;
             this.markedPosition = M;
+            this.canWarp = parent.screen.getMenu().canWarp();
             this.isFacing_down = parent.screen.getMenu().isFacing_down();
             this.isSelf = markedPosition.pos().above(2).equals(parent.screen.getMenu().getTunerPos().pos());
             this.can_crossDimension = (parent.screen.getMenu().getTunerPos().dimension().equals(markedPosition.dimension())) || parent.screen.getMenu().isMultiBlocked();
@@ -143,11 +156,12 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         @Override
         public void render(GuiGraphics gfx, int index, int top, int left, int entryWidth, int height,
                            int mouseX, int mouseY, boolean hovered, float partialTick) {
-            this.hovered = hovered;
+            this.hovered = hovered && !parent.getContextMenu().isVisible();
             selected = parent.selectedPosition == markedPosition;
             int width = entryWidth - 6;
 
-            gfx.blitSprite(SPRITES.get((!isSelf && can_crossDimension && isPearlEnough()) || !isFacing_down, this.hovered || this.selected), left + 3, top, width - 4, height);
+            gfx.blitSprite(SPRITES.get((!isSelf && can_crossDimension && isPearlEnough()) || !isFacing_down || (canWarp && isPearlEnough()),
+                    this.hovered || this.selected), left + 3, top, width - 4, height);
 
             // ---- 绘制文字 ----
             Component text = Component.literal(markedPosition.name());
@@ -169,12 +183,12 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (!hovered) return false;
-            if (isSelf || isFacing_down && (!can_crossDimension || !isPearlEnough())) return false;
+            if (isSelf || isFacing_down && (!canWarp || (!can_crossDimension || !isPearlEnough()))) return false;
             mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             selected = !selected;
 
             if (button == 1) {
-                selected = !selected;
+                selected = true;
                 parent.openContextMenu((int) mouseX, (int) mouseY, markedPosition, this);
             }
             parent.selectedPosition = selected ? markedPosition : null;

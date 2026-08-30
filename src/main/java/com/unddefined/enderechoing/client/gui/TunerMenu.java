@@ -33,10 +33,11 @@ public class TunerMenu extends AbstractContainerMenu {
     private boolean multi_blocked = false;
     private boolean tuner_charged = false;
     private boolean facing_down = false;
+    private final boolean canWarp;
     private List<ItemStack> iconList = new ArrayList<>();
     private List<MarkedPositionsManager.MarkedPositions> markedPositionsCache;
     private GlobalPos tunerPos;
-    private GlobalPos selectedPos;
+    private GlobalPos selectedPos = GZERO;
 
     public TunerMenu(int c, Inventory i, FriendlyByteBuf buf) {this(c, i, ContainerLevelAccess.NULL, buf);}
 
@@ -50,13 +51,15 @@ public class TunerMenu extends AbstractContainerMenu {
         this.multi_blocked = buf.readBoolean();
         this.tuner_charged = buf.readBoolean();
         this.facing_down = buf.readBoolean();
+        this.canWarp = buf.readBoolean();
         for (int i = 0; i < 10; i++) this.iconList.add(new ItemStack(ITEM.get(buf.readResourceLocation())));
         this.markedPositionsCache = buf.readList(MarkedPositionsManager.MarkedPositions.STREAM_CODEC);
     }
 
-    public TunerMenu(int containerId, Inventory playerInv, ContainerLevelAccess A) {
+    public TunerMenu(int containerId, Inventory playerInv, ContainerLevelAccess A, boolean canWarp) {
         super(TUNER_MENU.get(), containerId);
         this.access = A;
+        this.canWarp = canWarp;
         A.execute((level, pos) -> {
             this.selected_tuner_tab = playerInv.player.getData(SELECTED_TUNER_TAB.get());
             this.ee_pearl_amount = playerInv.player.getData(EE_PEARL_AMOUNT.get());
@@ -74,6 +77,7 @@ public class TunerMenu extends AbstractContainerMenu {
     }
 
     public void setSelectedPosition(MarkedPositionsManager.MarkedPositions M) {
+        if (canWarp) return;
         if (M == null) PacketDistributor.sendToServer(new SetSelectedPositionPacket(tunerPos.pos(), GZERO, ""));
         else PacketDistributor.sendToServer(new SetSelectedPositionPacket(tunerPos.pos(), new GlobalPos(M.dimension(), M.pos()), M.name()));
     }
@@ -88,7 +92,9 @@ public class TunerMenu extends AbstractContainerMenu {
     public ItemStack quickMoveStack(Player player, int index) {return ItemStack.EMPTY;}
 
     @Override
-    public boolean stillValid(Player player) {return AbstractContainerMenu.stillValid(this.access, player, ENDER_ECHO_TUNER.get());}
+    public boolean stillValid(Player player) {
+        return canWarp || AbstractContainerMenu.stillValid(this.access, player, ENDER_ECHO_TUNER.get());
+    }
 
     public List<ItemStack> getIconList() {return iconList;}
 
@@ -102,17 +108,23 @@ public class TunerMenu extends AbstractContainerMenu {
 
     public boolean isFacing_down() {return facing_down;}
 
+    public boolean canWarp() {
+        return canWarp;
+    }
+
     public List<MarkedPositionsManager.MarkedPositions> getMarkedPositionsCache() {return markedPositionsCache;}
 
-    public void writeClientSideData(RegistryFriendlyByteBuf buf, GlobalPos pos) {
+    public void writeClientSideData(RegistryFriendlyByteBuf buf, GlobalPos pos, Boolean canWarp) {
         buf.writeInt(selected_tuner_tab);
         buf.writeInt(ee_pearl_amount);
         buf.writeGlobalPos(pos);
-        buf.writeGlobalPos(selectedPos);
+        buf.writeGlobalPos(selectedPos == null ? GZERO : selectedPos);
         buf.writeBoolean(multi_blocked);
         buf.writeBoolean(tuner_charged);
         buf.writeBoolean(facing_down);
+        buf.writeBoolean(canWarp);
         for (ItemStack stack : iconList) buf.writeResourceLocation(ITEM.getKey(stack.getItem()));
         buf.writeCollection(markedPositionsCache, MarkedPositionsManager.MarkedPositions.STREAM_CODEC);
     }
+
 }

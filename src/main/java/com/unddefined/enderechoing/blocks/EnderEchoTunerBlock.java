@@ -81,12 +81,12 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
 
             @Override
             public @NotNull AbstractContainerMenu createMenu(int containerId, net.minecraft.world.entity.player.Inventory playerInventory, Player player) {
-                return new TunerMenu(containerId, playerInventory, ContainerLevelAccess.create(level, pos));
+                return new TunerMenu(containerId, playerInventory, ContainerLevelAccess.create(level, pos),false);
             }
 
             @Override
             public void writeClientSideData(AbstractContainerMenu menu, net.minecraft.network.RegistryFriendlyByteBuf buf) {
-                if (menu instanceof TunerMenu tunerMenu) tunerMenu.writeClientSideData(buf, new GlobalPos(level.dimension(), pos));
+                if (menu instanceof TunerMenu tunerMenu) tunerMenu.writeClientSideData(buf, new GlobalPos(level.dimension(), pos), false);
             }
         };
     }
