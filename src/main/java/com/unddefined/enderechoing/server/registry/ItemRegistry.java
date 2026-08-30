@@ -2,8 +2,10 @@ package com.unddefined.enderechoing.server.registry;
 
 import com.unddefined.enderechoing.blocks.EchoDruseBlock;
 import com.unddefined.enderechoing.items.*;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -19,6 +21,8 @@ public class ItemRegistry {
     public static final DeferredItem<Item> ENDER_ECHOING_PEARL = ITEMS.registerItem("ender_echoing_pearl", EnderEchoingPearl::new);
     public static final DeferredItem<Item> ENDER_ECHOING_EYE = ITEMS.registerItem("ender_echoing_eye", EnderEchoingEye::new);
     public static final DeferredItem<Item> WARP_CORE = ITEMS.registerItem("warp_core", WarpCore::new);
+    public static final DeferredItem<Item> RHYME_SHARD = ITEMS.registerSimpleItem("rhyme_shard", new Item.Properties()
+            .rarity(Rarity.UNCOMMON).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
 
     public static final DeferredItem<BlockItem> CALIBRATED_SCULK_SHRIEKER_ITEM = ITEMS.registerSimpleBlockItem("calibrated_sculk_shrieker", BlockRegistry.CALIBRATED_SCULK_SHRIEKER);
     public static final DeferredItem<BlockItem> SCULK_WHISPER_ITEM = ITEMS.registerSimpleBlockItem("sculk_whisper", BlockRegistry.SCULK_WHISPER);

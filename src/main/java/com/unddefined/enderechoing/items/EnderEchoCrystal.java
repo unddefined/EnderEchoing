@@ -1,18 +1,13 @@
 package com.unddefined.enderechoing.items;
 
-import com.mojang.logging.LogUtils;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoCrystalRenderer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.Rarity;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
@@ -22,7 +17,7 @@ public class EnderEchoCrystal extends Item implements GeoItem {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     public EnderEchoCrystal(Properties properties) {
-        super(properties.stacksTo(4));
+        super(properties.stacksTo(4).rarity(Rarity.UNCOMMON));
     }
 
     @Override

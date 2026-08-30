@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PAP",
+    "ABA",
+    "PAP"
+  ],
+  "key": {
+    "A": {
+      "item": "enderechoing:rhyme_shard"
+    },
+    "P": {
+      "item": "minecraft:shulker_shell"
+    },
+    "B": {
+      "item": "enderechoing:ender_echo_tune_chamber"
+    }
+  },
+  "result": {
+    "id": "enderechoing:warp_core",
+    "count": 1
+  }
+}

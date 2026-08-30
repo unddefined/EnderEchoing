@@ -3,6 +3,7 @@ package com.unddefined.enderechoing.items;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoTuneChamberRenderer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
@@ -16,7 +17,7 @@ import java.util.function.Consumer;
 public class EnderEchoTuneChamber extends Item implements GeoItem {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     public EnderEchoTuneChamber(Properties properties) {
-        super(properties.stacksTo(1));
+        super(properties.stacksTo(1).rarity(Rarity.RARE));
         SingletonGeoAnimatable.registerSyncedAnimatable(this);
     }
     @Override

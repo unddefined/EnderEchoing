@@ -29,7 +29,7 @@ public abstract class EndCrystalMixin {
         var D = EECrystal_HEAL_DISTANCE.get();
         if (tag.get(ENDER_EYE_OWNER).isEmpty()) return;
         var player = level.getPlayerByUUID(tag.get(ENDER_EYE_OWNER).get());
-        if (player == null || player.distanceToSqr(self) > D * D || player.getHealth() >= player.getMaxHealth())
+        if (player == null || Math.sqrt(player.distanceToSqr(self)) > D || player.getHealth() >= player.getMaxHealth())
             tag.set(ENDER_EYE_OWNER, Optional.empty());
 
     }

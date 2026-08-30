@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PDP",
+    "ABA",
+    "PEP"
+  ],
+  "key": {
+    "D": {
+      "item": "enderechoing:ender_echoing_eye"
+    },
+    "A": {
+      "item": "minecraft:echo_shard"
+    },
+    "P": {
+      "item": "minecraft:phantom_membrane"
+    },
+    "B": {
+      "item": "minecraft:end_crystal"
+    },
+    "E": {
+      "item": "minecraft:ghast_tear"
+    }
+  },
+  "result": {
+    "id": "enderechoing:ender_echo_crystal",
+    "count": 1
+  }
+}

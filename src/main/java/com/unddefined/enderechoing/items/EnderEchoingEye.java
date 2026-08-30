@@ -56,7 +56,7 @@ public class EnderEchoingEye extends Item implements ICurioItem {
         var D = EECrystal_HEAL_DISTANCE.get();
         EnderEchoCrystalSavedData.get(level).crystals.stream().filter(c -> c.pos().dimension().equals(level.dimension()))
                 .min(Comparator.comparingDouble(c -> c.pos().pos().distToCenterSqr(player.getX(), player.getY(), player.getZ())))
-                .filter(c -> c.pos().pos().distToCenterSqr(player.getX(), player.getY(), player.getZ()) < D * D)
+                .filter(c -> Math.sqrt(c.pos().pos().distToCenterSqr(player.getX(), player.getY(), player.getZ())) < D)
                 .ifPresentOrElse(c -> EECrystal = (EnderEchoCrystalBlockEntity) level.getBlockEntity(c.pos().pos()), () -> EECrystal = null);
         if (EECrystal == null) return;
 
