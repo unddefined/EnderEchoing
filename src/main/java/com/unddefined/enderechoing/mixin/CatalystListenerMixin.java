@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.server.mixin;
+package com.unddefined.enderechoing.mixin;
 
 import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.blocks.entity.EchoDruseBlockEntity;

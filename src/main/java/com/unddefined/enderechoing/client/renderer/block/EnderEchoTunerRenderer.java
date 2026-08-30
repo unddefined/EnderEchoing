@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.unddefined.enderechoing.blocks.EnderEchoTunerBlock;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
-import com.unddefined.enderechoing.client.model.EnderEchoTunerModel;
+import com.unddefined.enderechoing.client.model.block.EnderEchoTunerModel;
 import com.unddefined.enderechoing.client.renderer.layer.EnderEchoTunerLayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -18,8 +18,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoBlockRenderer;
-
-import java.util.Objects;
 
 import static com.unddefined.enderechoing.EnderEchoing.GZERO;
 import static net.minecraft.client.renderer.LightTexture.FULL_BLOCK;

@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.server.mixin;
+package com.unddefined.enderechoing.mixin;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;

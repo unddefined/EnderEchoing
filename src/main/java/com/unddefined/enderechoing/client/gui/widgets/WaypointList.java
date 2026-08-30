@@ -2,7 +2,7 @@ package com.unddefined.enderechoing.client.gui.widgets;
 
 import com.unddefined.enderechoing.client.gui.screen.PositionEditScreen;
 import com.unddefined.enderechoing.client.gui.screen.TunerScreen;
-import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;

@@ -2,11 +2,11 @@ package com.unddefined.enderechoing.items;
 
 import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
-import com.unddefined.enderechoing.client.model.EnderEchoingCoreModel;
+import com.unddefined.enderechoing.client.model.item.EnderEchoingCoreModel;
 import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer;
 import com.unddefined.enderechoing.network.packet.*;
+import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
-import com.unddefined.enderechoing.util.MarkedPositionsManager;
 import dev.kosmx.playerAnim.api.layered.AnimationStack;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -44,6 +44,7 @@ import java.util.function.Consumer;
 
 import static com.unddefined.enderechoing.Config.EECORE_TP_DISTANCE;
 import static com.unddefined.enderechoing.EnderEchoing.GZERO;
+import static com.unddefined.enderechoing.server.registry.BlockRegistry.ENDER_ECHO_CRYSTAL;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_POSITION;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
@@ -95,7 +96,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         if (!(entity instanceof ServerPlayer S)) return;
         Map<BlockPos, String> Map = new HashMap<>();
-        if (S.hasEffect(SCULK_VEIL)) {
+        if (S.hasEffect(SCULK_VEIL) || level.getBlockState(S.blockPosition()).is(ENDER_ECHO_CRYSTAL)) {
             PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
             tick2 = 60;
             return;

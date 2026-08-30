@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.client.model;
+package com.unddefined.enderechoing.client.model.block;
 
 import com.unddefined.enderechoing.items.EnderEchoCrystal;
 import net.minecraft.client.renderer.RenderType;

@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.client.model;
+package com.unddefined.enderechoing.client.model.block;
 
 import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import net.minecraft.client.renderer.RenderType;

@@ -2,7 +2,6 @@ package com.unddefined.enderechoing.network.packet;
 
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -30,7 +29,8 @@ public record TeleportRequestPacket(GlobalPos targetPos) implements CustomPacket
             var blockEntity = player.level().getBlockEntity(player.blockPosition().above(2));
             if (player.level().dimension().equals(msg.targetPos.dimension()))
                 player.teleportTo(pos.getCenter().x, pos.getCenter().y, pos.getCenter().z);
-            else player.changeDimension(new DimensionTransition(player.level().getServer().getLevel(msg.targetPos.dimension()),pos.getCenter(), player.getDeltaMovement(), player.getYRot(), player.getXRot(), DimensionTransition.DO_NOTHING));
+            else player.changeDimension(new DimensionTransition(player.level().getServer().getLevel(msg.targetPos.dimension()),
+                    pos.getCenter(), player.getDeltaMovement(), player.getYRot(), player.getXRot(), DimensionTransition.PLAY_PORTAL_SOUND));
             if (blockEntity instanceof EnderEchoTunerBlockEntity tuner) tuner.setSelectedPosition(GZERO, "");
         });
     }

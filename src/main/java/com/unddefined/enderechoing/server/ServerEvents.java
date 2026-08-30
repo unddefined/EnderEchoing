@@ -2,16 +2,13 @@ package com.unddefined.enderechoing.server;
 
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.blocks.EnderEchoCrystalBlock;
-import com.unddefined.enderechoing.network.packet.RenderEchoNamesPacket;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
+import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
-import com.unddefined.enderechoing.util.MarkedPositionsManager;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -21,7 +18,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -33,12 +29,9 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.unddefined.enderechoing.Config.SCULK_VEIL_GLOWING_DURATION;
 import static com.unddefined.enderechoing.EnderEchoing.LOGGER;
@@ -48,7 +41,6 @@ import static com.unddefined.enderechoing.effects.TinnitusEffect.tinnitus_modifi
 import static com.unddefined.enderechoing.server.registry.BlockRegistry.ENDER_ECHOIC_RESONATOR;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.MARKED_POSITIONS_CACHE;
-import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_EYE;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
 import static net.minecraft.world.effect.MobEffects.GLOWING;
 import static net.minecraft.world.entity.ai.attributes.Attributes.*;

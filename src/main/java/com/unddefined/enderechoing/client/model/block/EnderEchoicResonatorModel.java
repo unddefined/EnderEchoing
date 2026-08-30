@@ -1,6 +1,5 @@
-package com.unddefined.enderechoing.client.model;
+package com.unddefined.enderechoing.client.model.block;
 
-import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;

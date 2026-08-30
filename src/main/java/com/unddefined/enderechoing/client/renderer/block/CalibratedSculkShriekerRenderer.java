@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.unddefined.enderechoing.blocks.CalibratedSculkShriekerBlock;
 import com.unddefined.enderechoing.blocks.entity.CalibratedSculkShriekerBlockEntity;
-import com.unddefined.enderechoing.client.model.CalibratedSculkShriekerModel;
+import com.unddefined.enderechoing.client.model.block.CalibratedSculkShriekerModel;
 import com.unddefined.enderechoing.client.renderer.layer.CalibratedSculkShriekerLayer;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;

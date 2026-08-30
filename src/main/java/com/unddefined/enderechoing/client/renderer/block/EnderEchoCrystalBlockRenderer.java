@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity;
-import com.unddefined.enderechoing.client.model.EnderEchoCrystalBlockModel;
+import com.unddefined.enderechoing.client.model.block.EnderEchoCrystalBlockModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.FastColor;

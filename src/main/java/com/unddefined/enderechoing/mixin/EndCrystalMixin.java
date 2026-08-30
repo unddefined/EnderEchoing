@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.server.mixin;
+package com.unddefined.enderechoing.mixin;
 
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;

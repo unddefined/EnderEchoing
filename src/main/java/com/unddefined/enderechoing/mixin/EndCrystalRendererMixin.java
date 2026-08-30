@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.server.mixin;
+package com.unddefined.enderechoing.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;

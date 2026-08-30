@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.client.model;
+package com.unddefined.enderechoing.client.model.item;
 
 import com.unddefined.enderechoing.items.EnderEchoTuneChamber;
 import net.minecraft.client.renderer.RenderType;

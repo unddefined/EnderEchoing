@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.server.mixin;
+package com.unddefined.enderechoing.mixin;
 
 import com.unddefined.enderechoing.entities.ai.EndermanCuriousAboutPlayerGoal;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;

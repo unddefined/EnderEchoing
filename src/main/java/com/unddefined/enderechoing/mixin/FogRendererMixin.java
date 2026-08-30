@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.server.mixin;
+package com.unddefined.enderechoing.mixin;
 
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.util.Mth;

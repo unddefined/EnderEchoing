@@ -3,7 +3,7 @@ package com.unddefined.enderechoing.client.renderer.block;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
-import com.unddefined.enderechoing.client.model.EnderEchoicResonatorModel;
+import com.unddefined.enderechoing.client.model.block.EnderEchoicResonatorModel;
 import com.unddefined.enderechoing.client.renderer.layer.EnderEchoicResonatorLayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;

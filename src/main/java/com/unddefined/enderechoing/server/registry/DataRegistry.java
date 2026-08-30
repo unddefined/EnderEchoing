@@ -2,7 +2,7 @@ package com.unddefined.enderechoing.server.registry;
 
 import com.mojang.serialization.Codec;
 import com.unddefined.enderechoing.server.DataComponents.EntityData;
-import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;

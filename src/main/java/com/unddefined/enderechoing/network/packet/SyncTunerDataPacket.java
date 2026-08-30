@@ -1,7 +1,7 @@
 package com.unddefined.enderechoing.network.packet;
 
 import com.unddefined.enderechoing.EnderEchoing;
-import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

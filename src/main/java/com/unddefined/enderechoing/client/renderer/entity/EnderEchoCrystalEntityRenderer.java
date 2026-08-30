@@ -2,7 +2,7 @@ package com.unddefined.enderechoing.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.unddefined.enderechoing.client.model.EnderEchoCrystalEntityModel;
+import com.unddefined.enderechoing.client.model.entity.EnderEchoCrystalEntityModel;
 import com.unddefined.enderechoing.entities.EnderEchoCrystalEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;

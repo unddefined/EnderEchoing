@@ -1,4 +1,4 @@
-package com.unddefined.enderechoing.client.model;
+package com.unddefined.enderechoing.client.model.block;
 
 import com.unddefined.enderechoing.blocks.entity.SculkWhisperBlockEntity;
 import net.minecraft.resources.ResourceLocation;

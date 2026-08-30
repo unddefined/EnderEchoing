@@ -1,10 +1,10 @@
 package com.unddefined.enderechoing.items;
 
-import com.unddefined.enderechoing.client.model.WarpCoreModel;
+import com.unddefined.enderechoing.client.model.item.WarpCoreModel;
 import com.unddefined.enderechoing.client.renderer.item.WarpCoreRenderer;
 import com.unddefined.enderechoing.network.packet.RenderEchoNamesPacket;
 import com.unddefined.enderechoing.network.packet.SetEchoSoundingPosPacket;
-import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.unddefined.enderechoing.Config.EECORE_TP_DISTANCE;
+import static com.unddefined.enderechoing.server.registry.BlockRegistry.ENDER_ECHO_CRYSTAL;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 import static net.minecraft.world.item.Rarity.EPIC;
 
@@ -57,7 +58,7 @@ public class WarpCore extends Item implements GeoItem {
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         if (!(entity instanceof ServerPlayer S)) return;
         Map<BlockPos, String> Map = new HashMap<>();
-        if (S.hasEffect(SCULK_VEIL)) {
+        if (S.hasEffect(SCULK_VEIL) || level.getBlockState(S.blockPosition()).is(ENDER_ECHO_CRYSTAL)) {
             PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
             tick2 = 60;
             return;
@@ -85,7 +86,6 @@ public class WarpCore extends Item implements GeoItem {
                 .forEach(e -> Map.put(e.pos(), e.name()));
         PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(Map));
     }
-
 
     @Override
     public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {

@@ -7,7 +7,7 @@ import com.unddefined.enderechoing.network.packet.PearlRenamePacket;
 import com.unddefined.enderechoing.network.packet.RequestDimensionListPacket;
 import com.unddefined.enderechoing.network.packet.RequestStructureInfoPacket;
 import com.unddefined.enderechoing.network.packet.SetUnchargedPacket;
-import com.unddefined.enderechoing.util.MarkedPositionsManager;
+import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
