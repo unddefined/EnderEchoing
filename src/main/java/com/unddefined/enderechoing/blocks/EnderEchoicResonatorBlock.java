@@ -47,7 +47,6 @@ import java.util.List;
 
 import static com.unddefined.enderechoing.EnderEchoing.GZERO;
 import static com.unddefined.enderechoing.blocks.EnderEchoTunerBlock.CHARGED;
-import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
@@ -153,14 +152,8 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
             if (!B.getSelectedPos().equals(GZERO) && (B.getSelectedPos().dimension().equals(level.dimension()) || B.checkMultiblock()))
                 targetPos = B.getSelectedPos();
         // 传送
-        if (targetPos != null) {
-            if (!map.containsKey(targetPos.pos())) player.setData(EE_PEARL_AMOUNT,player.getData(EE_PEARL_AMOUNT) - 1);
-            if (!targetPos.dimension().equals(level.dimension())){
-                if (tuner instanceof EnderEchoTunerBlockEntity B) B.consumeAnchorCharge();
-                player.setData(EE_PEARL_AMOUNT,player.getData(EE_PEARL_AMOUNT) - 1);
-            }
-            PacketDistributor.sendToPlayer(player, new SetTeleportPosPacket(targetPos, true));
-        } else PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList));
+        if (targetPos != null) PacketDistributor.sendToPlayer(player, new SetTeleportPosPacket(targetPos, true));
+        else PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList));
     }
 
     @Override
