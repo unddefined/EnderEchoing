@@ -114,7 +114,7 @@ public class TabBar {
                     contextMenu.addItem("screen.enderechoing.change_icon", () -> {
                         screen.changeIcon = true;
                         screen.previousIcon = menu.getIconList().get(finalI).isEmpty() ? new ItemStack(STONE) : menu.getIconList().get(finalI);
-                        screen.nameField.setValue(ITEM.getKey(menu.getIconList().get(finalI).getItem()).toString());
+                        screen.itemField.setValue(ITEM.getKey(menu.getIconList().get(finalI).getItem()).toString());
                     });
 
                     contextMenu.open((int) mouseX, (int) mouseY, (idx, item) -> {

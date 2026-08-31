@@ -143,15 +143,15 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
 
         public WaypointEntry(WaypointList parent, MarkedPositionsManager.MarkedPositions M) {
             this.parent = parent;
+            var menu = parent.screen.getMenu();
             this.markedPosition = M;
-            this.canWarp = parent.screen.getMenu().canWarp();
-            this.isFacing_down = parent.screen.getMenu().isFacing_down();
-            this.isSelf = markedPosition.pos().above(2).equals(parent.screen.getMenu().getTunerPos().pos());
-            this.can_crossDimension = (parent.screen.getMenu().getTunerPos().dimension().equals(markedPosition.dimension())) || parent.screen.getMenu().isMultiBlocked();
+            this.canWarp = menu.canWarp();
+            this.isFacing_down = menu.isFacing_down();
+            this.isSelf = markedPosition.pos().above(2).equals(menu.getTunerPos().pos())
+                    ||(canWarp && (menu.canWarp() && menu.getTunerPos().pos().distSqr(M.pos()) < 4)
+                    && menu.getTunerPos().dimension().equals(M.dimension()));
+            this.can_crossDimension = (menu.getTunerPos().dimension().equals(markedPosition.dimension())) || menu.isMultiBlocked();
         }
-        private boolean isPearlEnough(){return parent.screen.getMenu().ee_pearl_amount > 0;}
-
-        public MarkedPositionsManager.MarkedPositions getMarkedPosition() {return markedPosition;}
 
         @Override
         public void render(GuiGraphics gfx, int index, int top, int left, int entryWidth, int height,
@@ -160,8 +160,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
             selected = parent.selectedPosition == markedPosition;
             int width = entryWidth - 6;
 
-            gfx.blitSprite(SPRITES.get((!isSelf && can_crossDimension && isPearlEnough()) || !isFacing_down || (canWarp && isPearlEnough()),
-                    this.hovered || this.selected), left + 3, top, width - 4, height);
+            gfx.blitSprite(SPRITES.get(canSelect(), this.hovered || this.selected), left + 3, top, width - 4, height);
 
             // ---- 绘制文字 ----
             Component text = Component.literal(markedPosition.name());
@@ -178,12 +177,8 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
         }
 
         @Override
-        public List<? extends GuiEventListener> children() {return List.of();}
-
-        @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (!hovered) return false;
-            if (isSelf || isFacing_down && (!canWarp || (!can_crossDimension || !isPearlEnough()))) return false;
+            if (!hovered || !canSelect()) return false;
             mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             selected = !selected;
 
@@ -197,6 +192,16 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
 
             return true;
         }
+
+        private boolean canSelect() {
+            return !isSelf && (!isFacing_down
+                    || (parent.screen.getMenu().ee_pearl_amount > 0 && (can_crossDimension || canWarp)));
+        }
+
+        public MarkedPositionsManager.MarkedPositions getMarkedPosition() {return markedPosition;}
+
+        @Override
+        public List<? extends GuiEventListener> children() {return List.of();}
 
         @Override
         public List<? extends NarratableEntry> narratables() {return List.of();}

@@ -16,8 +16,11 @@ public class EnderEchoJeiPlugin implements IModPlugin {
 
     public static ItemStack getItemFromJei() {
         if (RUNTIME == null) return ItemStack.EMPTY;
-        var overlay = RUNTIME.getIngredientListOverlay();
 
+        var bookmarkItem = RUNTIME.getBookmarkOverlay().getItemStackUnderMouse();
+        if (bookmarkItem != null && !bookmarkItem.isEmpty()) return bookmarkItem;
+
+        var overlay = RUNTIME.getIngredientListOverlay();
         if (!overlay.isListDisplayed()) return ItemStack.EMPTY;
 
         return overlay.getIngredientUnderMouse().flatMap(ITypedIngredient::getItemStack).orElse(ItemStack.EMPTY);
@@ -33,4 +36,3 @@ public class EnderEchoJeiPlugin implements IModPlugin {
         RUNTIME = runtime;
     }
 }
-

@@ -21,7 +21,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import static com.unddefined.enderechoing.compat.jei.EnderEchoJeiPlugin.getItemFromJei;
@@ -31,12 +33,16 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
     private final List<MarkedPositionsManager.MarkedPositions> MarkedPositionsCache;
     private final WidgetSprites ACCEPT_SPRITE = new WidgetSprites(ResourceLocation.withDefaultNamespace("pending_invite/accept_highlighted"), ResourceLocation.withDefaultNamespace("pending_invite/accept"));
     private final WidgetSprites REJECT_SPRITE = new WidgetSprites(ResourceLocation.withDefaultNamespace("pending_invite/reject_highlighted"), ResourceLocation.withDefaultNamespace("pending_invite/reject"));
+    private static final ResourceLocation SORT_MANUAL_SPRITE = ResourceLocation.fromNamespaceAndPath("enderechoing", "textures/gui/sort_manual.png");
+    private static final ResourceLocation SORT_DISTANCE_SPRITE = ResourceLocation.fromNamespaceAndPath("enderechoing", "textures/gui/sort_distance.png");
+    private static final ResourceLocation SORT_NAME_SPRITE = ResourceLocation.fromNamespaceAndPath("enderechoing", "textures/gui/sort_name.png");
     private final int editBarWidth = 240;
     private final int editBarHeight = 20;
     public int selectedTab = 0;
     public boolean changeIcon = false;
     public ItemStack previousIcon;
-    public EditBox nameField;
+    public EditBox itemField;
+    public EditBox searchField;
     private ItemStack jeiItem = ItemStack.EMPTY;
     private int editBarX, editBarY;
     private WaypointList waypointList;
@@ -46,6 +52,8 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
     private boolean isValidString;
     private ImageButton ACCEPT_BUTTON;
     private ImageButton REJECT_BUTTON;
+    private ImageButton SortButton;
+    private int sortMode = 0;
 
     public TunerScreen(TunerMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -71,11 +79,31 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         populateWaypointList();
         this.addWidget(waypointList);
 
-        this.nameField = new EditBox(this.font, editBarX, editBarY, editBarWidth - 66, editBarHeight, Component.translatable("screen.enderechoing.enter_registry_name"));
-        this.nameField.setMaxLength(50);
-        this.setInitialFocus(this.nameField);
-        this.nameField.setTooltip(Tooltip.create(Component.translatable("screen.enderechoing.enter_registry_name")));
-        this.addWidget(this.nameField);
+        this.itemField = new EditBox(this.font, editBarX, editBarY, editBarWidth - 66, editBarHeight, Component.translatable("screen.enderechoing.enter_registry_name"));
+        this.itemField.setMaxLength(50);
+        this.setInitialFocus(this.itemField);
+        this.itemField.setTooltip(Tooltip.create(Component.translatable("screen.enderechoing.enter_registry_name")));
+        this.addWidget(this.itemField);
+
+        searchField = new EditBox(this.font, editBarX, editBarY, editBarWidth - 51, editBarHeight, Component.literal("search"));
+        searchField.setMaxLength(50);
+        searchField.setResponder(s -> populateWaypointList());
+        this.addWidget(this.searchField);
+
+        SortButton = this.addRenderableWidget(new ImageButton(editBarX + 192, editBarY + 1, 18, 18,
+                new WidgetSprites(
+                        ResourceLocation.withDefaultNamespace("widget/button"),
+                        ResourceLocation.withDefaultNamespace("widget/button_disabled"),
+                        ResourceLocation.withDefaultNamespace("widget/button_highlighted")), btn -> {
+            sortMode = (sortMode + 1) % 3;
+            populateWaypointList();
+        }) {
+            @Override
+            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
+                guiGraphics.blit(getSortSprite(), getX() + 1, getY() + 1, 0, 0, 16, 16, 16, 16);
+            }
+        });
 
         // 添加确定和取消按钮
         ACCEPT_BUTTON = this.addRenderableWidget(new ImageButton(editBarX + 110 + 66, editBarY, 18, 18,
@@ -93,8 +121,38 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     public void populateWaypointList() {
         waypointList.children().clear();
-        MarkedPositionsCache.stream().filter(entry -> entry.iconIndex() == selectedTab).toList()
+        waypointList.setScrollAmount(0);
+        String search = searchField == null ? "" : searchField.getValue().trim().toLowerCase(Locale.ROOT);
+        MarkedPositionsCache.stream()
+                .filter(e -> e.iconIndex() == selectedTab)
+                .filter(e -> search.isEmpty() || e.name().toLowerCase(Locale.ROOT).contains(search))
+                .sorted(getWaypointComparator())
                 .forEach(e -> waypointList.addWaypoint(e));
+    }
+
+    private Comparator<MarkedPositionsManager.MarkedPositions> getWaypointComparator() {
+        Comparator<MarkedPositionsManager.MarkedPositions> comparator =
+                Comparator.comparing(this::isSelfWaypoint).reversed();
+        if (sortMode == 1) {
+            comparator = comparator.thenComparingDouble(e -> e.pos().distSqr(menu.getTunerPos().pos()));
+        } else if (sortMode == 2) {
+            comparator = comparator.thenComparing(e -> e.name().toLowerCase(Locale.ROOT));
+        }
+        return comparator;
+    }
+
+    private ResourceLocation getSortSprite() {
+        return switch (sortMode) {
+            case 1 -> SORT_DISTANCE_SPRITE;
+            case 2 -> SORT_NAME_SPRITE;
+            default -> SORT_MANUAL_SPRITE;
+        };
+    }
+
+    private boolean isSelfWaypoint(MarkedPositionsManager.MarkedPositions M) {
+        return M.pos().above(2).equals(menu.getTunerPos().pos())
+                || (menu.canWarp() && (menu.getTunerPos().pos().distSqr(M.pos()) < 4)
+                && menu.getTunerPos().dimension().equals(M.dimension()));
     }
 
     @Override
@@ -109,7 +167,9 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
-        this.nameField.render(guiGraphics, mouseX, mouseY, partialTick);
+        this.searchField.render(guiGraphics, mouseX, mouseY, partialTick);
+        this.itemField.render(guiGraphics, mouseX, mouseY, partialTick);
+        SortButton.render(guiGraphics, mouseX, mouseY, partialTick);
 
         waypointList.render(guiGraphics, mouseX, mouseY, partialTick);
 
@@ -121,7 +181,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
         // 渲染标题
         guiGraphics.drawString(this.font, this.title, width / 2 + 2 - (this.font.width(this.title) / 2),
-                this.height / 7 - (changeIcon ? 21 : 0), 0xd1d6b6, false);
+                this.height / 7 - 11, 0xd1d6b6, false);
 
         waypointList.getContextMenu().render(guiGraphics, mouseX, mouseY, partialTick);
         tabBar.getContextMenu().render(guiGraphics, mouseX, mouseY, partialTick);
@@ -136,23 +196,42 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         if (waypointList.getMaxScroll() > 0) waypointList.setWidth(204);
         else waypointList.setWidth(210);
         imageWidth = changeIcon ? this.width / 4 : width;
-        this.nameField.visible = changeIcon;
+        this.itemField.visible = changeIcon;
+        this.searchField.visible = !changeIcon;
+        SortButton.visible = !changeIcon;
         ACCEPT_BUTTON.visible = changeIcon;
         REJECT_BUTTON.visible = changeIcon;
         if (selectedTab == 0) changeIcon = false;
         if (!changeIcon) return;
 
-        String value = this.nameField.getValue();
+        String value = this.itemField.getValue();
         isValidString = Pattern.compile("[a-z0-9:_.-]+").matcher(value).matches();
         if (isValidString) {
             var location = ResourceLocation.tryParse(value);
             if (location != null) menu.getIconList().set(selectedTab, ITEM.get(location).getDefaultInstance());
         }
-        this.nameField.setTextColor(!isValidString || menu.getIconList().get(selectedTab).isEmpty() ? 0xFF0000 : 0xFFFFFF);
+        this.itemField.setTextColor(!isValidString || menu.getIconList().get(selectedTab).isEmpty() ? 0xFF0000 : 0xFFFFFF);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (!changeIcon && button == 1 && searchField.isMouseOver(mouseX, mouseY)) {
+            searchField.setValue("");
+            searchField.setFocused(true);
+            setFocused(searchField);
+            return true;
+        }
+        if (changeIcon && button == 1 && itemField.isMouseOver(mouseX, mouseY)) {
+            itemField.setValue("");
+            itemField.setFocused(true);
+            setFocused(itemField);
+            return true;
+        }
+
+        if (!changeIcon && !searchField.isMouseOver(mouseX, mouseY)) searchField.setFocused(false);
+        if (!changeIcon && !SortButton.isMouseOver(mouseX, mouseY)) SortButton.setFocused(false);
+
+
         if (changeIcon && jeiItem.isEmpty() && !(mouseX >= editBarX && mouseX < editBarX + editBarWidth && mouseY >= editBarY && mouseY < editBarY + editBarHeight)) {
             menu.getIconList().set(selectedTab, previousIcon);
             changeIcon = false;
@@ -173,7 +252,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (changeIcon && !jeiItem.isEmpty() && (mouseX >= editBarX && mouseX < editBarX + editBarWidth && mouseY >= editBarY && mouseY < editBarY + editBarHeight))
-            nameField.setValue(ITEM.getKey(jeiItem.getItem()).toString());
+            itemField.setValue(ITEM.getKey(jeiItem.getItem()).toString());
         jeiItem = ItemStack.EMPTY;
         if (tabBar.mouseReleased(mouseX, mouseY, button)) return true;
         if (!dragging) return true;
@@ -199,7 +278,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         }
         // 交换位置
         var swapEntry = waypointList.getEntryFromMouse(mouseX, mouseY);
-        if (swapEntry != null && swapEntry != focusingEntry) {
+        if (swapEntry != null && swapEntry != focusingEntry && sortMode == 0) {
             waypointList.swapInMainList(M, swapEntry.getMarkedPosition());
             populateWaypointList();
         }
@@ -208,8 +287,6 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (mouseX < (double) this.width / 2 - 107 || mouseX > (double) this.width / 2 - 107 + 210 || mouseY < this.height * 0.2 || mouseY > this.height * 0.8) return false;
-
         if (changeIcon && jeiItem.isEmpty()) jeiItem = getItemFromJei();
         if (waypointList.getContextMenu().isVisible() || tabBar.getContextMenu().isVisible()) return false;
         if (button != 0) return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
