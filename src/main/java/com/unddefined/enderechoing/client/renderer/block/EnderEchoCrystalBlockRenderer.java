@@ -20,8 +20,20 @@ import static net.minecraft.client.renderer.entity.EnderDragonRenderer.CRYSTAL_B
 
 public class EnderEchoCrystalBlockRenderer extends GeoBlockRenderer<EnderEchoCrystalBlockEntity> {
     private static final RenderType BEAM = RenderType.entitySmoothCutout(CRYSTAL_BEAM_LOCATION);
-    private static final int[] CHANNEL_COLORS = {0xFFFFFF, 0xFF5555, 0xF9801D, 0xFFFF55, 0x55FF55, 0x5555FF,
-            0x1D1D21, 0x55FF55, 0x55FFFF, 0xFF55FF, 0x835432, 0xAA00AA, 0x00AAAA
+    private static final int[] CHANNEL_COLORS = {
+            FastColor.ABGR32.color(255, 255, 255, 255),
+            FastColor.ABGR32.color(255, 255, 85, 85),
+            FastColor.ABGR32.color(255, 249, 128, 29),
+            FastColor.ABGR32.color(255, 255, 255, 85),
+            FastColor.ABGR32.color(255, 85, 255, 85),
+            FastColor.ABGR32.color(255, 85, 85, 255),
+            FastColor.ABGR32.color(255, 29, 29, 33),
+            FastColor.ABGR32.color(255, 85, 255, 85),
+            FastColor.ABGR32.color(255, 85, 255, 255),
+            FastColor.ABGR32.color(255, 255, 85, 255),
+            FastColor.ABGR32.color(255, 131, 84, 50),
+            FastColor.ABGR32.color(255, 170, 0, 170),
+            FastColor.ABGR32.color(255, 0, 170, 170)
     };
     public EnderEchoCrystalBlockRenderer() {super(new EnderEchoCrystalBlockModel());}
 
@@ -80,12 +92,13 @@ public class EnderEchoCrystalBlockRenderer extends GeoBlockRenderer<EnderEchoCry
         poseStack.popPose();
         poseStack.popPose();
     }
-//TODO bug: iris光影会导致这里的Amethyst不渲染
+
     @Override
     public void renderRecursively(PoseStack poseStack, EnderEchoCrystalBlockEntity animatable, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
         if (bone.getName().equals("Amethyst")) {
             buffer = bufferSource.getBuffer(RenderType.entitySolid(getTextureLocation(animatable)));
-            super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, CHANNEL_COLORS[animatable.getBlockState().getValue(CHANNEL)]);
+            super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick,
+                    packedLight, packedOverlay, CHANNEL_COLORS[animatable.getBlockState().getValue(CHANNEL)]);
             return;
         }
         super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
