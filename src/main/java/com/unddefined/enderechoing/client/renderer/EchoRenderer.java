@@ -2,8 +2,8 @@ package com.unddefined.enderechoing.client.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.unddefined.enderechoing.EnderEchoing;
+import com.unddefined.enderechoing.client.particles.EchoResponding;
 import com.unddefined.enderechoing.client.particles.EchoResponse;
-import com.unddefined.enderechoing.client.particles.EchoResponsing;
 import com.unddefined.enderechoing.client.particles.EchoSounding;
 import com.unddefined.enderechoing.network.packet.TeleportRequestPacket;
 import net.minecraft.client.Minecraft;
@@ -71,7 +71,7 @@ public class EchoRenderer {
             if (targetPos != null && echoMap.containsKey(targetPos.pos())) {
                 echoMap.getOrDefault(targetPos.pos(), null)
                         .render(mc.player, PoseStack, bufferSource, teleportTicks - 80, false, null);
-                if (teleportTicks > 60) EchoResponsing.render(PoseStack, bufferSource, targetPos.pos(), teleportTicks);
+                if (teleportTicks > 60) EchoResponding.render(PoseStack, bufferSource, targetPos.pos(), teleportTicks);
             }
         }
 
@@ -82,7 +82,7 @@ public class EchoRenderer {
             echoMap.forEach((p, e) -> {
                 boolean isElementHovering = e.render(mc.player, PoseStack, bufferSource, countTicks - 40 - responseTime,
                         countdownTicks < 59, MarkedPositionNames.getOrDefault(p, null));
-                if (isElementHovering && !mc.player.isCurrentlyGlowing()) EchoResponsing.render(PoseStack, bufferSource, p, teleportTicks);
+                if (isElementHovering && !mc.player.isCurrentlyGlowing()) EchoResponding.render(PoseStack, bufferSource, p, teleportTicks);
             });
         }
 

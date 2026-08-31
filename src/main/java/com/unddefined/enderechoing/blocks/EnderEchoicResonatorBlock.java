@@ -128,7 +128,7 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         if (entity.isCurrentlyGlowing()) return;
         var manager = MarkedPositionsManager.getManager(player);
         if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
-        level.scheduleTick(pos, this, 60);
+        level.scheduleTick(pos, this, 40);
         if (!state.getValue(CoolDown)) return;
         PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
         player.addEffect(new MobEffectInstance(SCULK_VEIL, state.getValue(CHARGED) ? 300 : 60));

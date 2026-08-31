@@ -24,8 +24,8 @@ import java.util.function.Function;
 import static net.minecraft.client.renderer.LightTexture.FULL_BRIGHT;
 
 @OnlyIn(Dist.CLIENT)
-public class EchoResponsing {
-    private static final Function<ResourceLocation, RenderType> RESPONSING = Util.memoize((r)-> RenderType.create(
+public class EchoResponding {
+    private static final Function<ResourceLocation, RenderType> RESPONDING = Util.memoize(r-> RenderType.create(
             "ender_echoic_responsing",
             DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
             VertexFormat.Mode.QUADS,
@@ -72,7 +72,7 @@ public class EchoResponsing {
         int frameCount = 14;
         int frameDuration = 3;
         int frameIndex = frameCount - 1 - (ticks / frameDuration) % frameCount;
-        VertexConsumer vc = bufferSource.getBuffer(RESPONSING.apply(
+        VertexConsumer vc = bufferSource.getBuffer(RESPONDING.apply(
                 ResourceLocation.fromNamespaceAndPath("enderechoing", "textures/misc/sonic_boom_" + frameIndex + ".png")));
         int color =  FastColor.ABGR32.color(255, 140, 244, 226);
         Matrix4f mat = poseStack.last().pose();
