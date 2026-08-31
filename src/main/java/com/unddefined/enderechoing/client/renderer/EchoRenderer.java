@@ -1,6 +1,8 @@
 package com.unddefined.enderechoing.client.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.particles.EchoResponding;
 import com.unddefined.enderechoing.client.particles.EchoResponse;
@@ -19,6 +21,7 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,49 +48,73 @@ public class EchoRenderer {
     private static boolean isCounting = false;
     private static boolean isTeleporting = false;
 
-    //TODO:兼容iris
     @SubscribeEvent
     public static void renderEcho(RenderLevelStageEvent event) {
         if (mc.player == null) return;
         float PartialTicks = event.getPartialTick().getGameTimeDeltaTicks();
         SculkVeilRenderer.updateFadeProgress(mc.player.hasEffect(SCULK_VEIL), PartialTicks);
         if (!isCounting && SculkVeilRenderer.fadeProgress == 0f) return;
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) return;
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
+        // AFTER_LEVEL 在 LevelRenderer.renderLevel 返回后才触发：此时世界渲染已完成，
+        // 主 framebuffer 里是最终画面（Iris 的 composite + final pass 也已写入其中），
+        // 之后脚本还有 drawInHand / GUI 等，因此这里是"不被光影影响且能叠加到画面上"的唯一安全时机。
+        // world-render 矩阵在 AFTER_LEVEL 时不再存在于 RenderSystem 中（renderLevel 已把栈 pop 掉，
+        // Iris 模式下更是被换成了全屏四边形/合成用的正交矩阵）。存下来以便在渲染前显式恢复。
+        renderWorldEffects(event.getPoseStack(), PartialTicks, event.getModelViewMatrix(), event.getProjectionMatrix());
+    }
 
+    private static void renderWorldEffects(PoseStack poseStack,
+                                           float partialTicks, Matrix4f modelView,
+                                           Matrix4f projection) {
         int tick = countdownTicks < 59 ? countdownTicks : countTicks;
-        var PoseStack = event.getPoseStack();
         var bufferSource = mc.renderBuffers().bufferSource();
+        if (modelView != null && projection != null && SculkVeilRenderer.fadeProgress != 0f)
+            SculkVeilRenderer.renderSculkVeil(sculkveilCountTicks, partialTicks, modelView, projection);
 
-        var originalTarget = mc.getMainRenderTarget();
-        if (SculkVeilRenderer.fadeProgress != 0f)
-            SculkVeilRenderer.renderSculkVeil(sculkveilCountTicks, PartialTicks, event.getModelViewMatrix(), event.getProjectionMatrix());
-        originalTarget.bindWrite(false);
+        // 立即模式四边形（EchoSounding/EchoResponse/EchoResponding）在 endBatch() 刷入 GPU 时，
+        // 使用的始终是 RenderSystem.getModelViewMatrix()/getProjectionMatrix()（见 BufferUploader），
+        // 而不是我们缓存的矩阵。因此必须显式把世界渲染矩阵恢复到 RenderSystem，否则渲染空间会错。
+        var modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushMatrix();
+        if (modelView != null) modelViewStack.mul(modelView);
+        RenderSystem.applyModelViewMatrix();
+        RenderSystem.backupProjectionMatrix();
+        if (projection != null)
+            RenderSystem.setProjectionMatrix(projection, VertexSorting.DISTANCE_TO_ORIGIN);
 
-        RenderSystem.disableDepthTest();
+        try {
+            mc.getMainRenderTarget().bindWrite(false);
+            RenderSystem.disableDepthTest();
 
-        if (targetPreseted) {
-            EchoSounding.render(PoseStack, bufferSource, PartialTicks, tick - 20, LightTexture.FULL_BRIGHT);
-            //定向传送
-            if (targetPos != null && echoMap.containsKey(targetPos.pos())) {
-                echoMap.getOrDefault(targetPos.pos(), null)
-                        .render(mc.player, PoseStack, bufferSource, teleportTicks - 80, false, null);
-                if (teleportTicks > 60) EchoResponding.render(PoseStack, bufferSource, targetPos.pos(), teleportTicks);
+            if (targetPreseted) {
+                EchoSounding.render(poseStack, bufferSource, partialTicks, tick - 20, LightTexture.FULL_BRIGHT);
+                if (targetPos != null && echoMap.containsKey(targetPos.pos())) {
+                    echoMap.get(targetPos.pos()).render(mc.player, poseStack, bufferSource,
+                            teleportTicks - 80, false, null);
+                    if (teleportTicks > 60)
+                        EchoResponding.render(poseStack, bufferSource, targetPos.pos(), teleportTicks);
+                }
             }
+            if (tick > 20)
+                EchoSounding.render(poseStack, bufferSource, partialTicks, tick - 20, LightTexture.FULL_BRIGHT);
+
+            if (!targetPreseted && countTicks > responseTime && !echoMap.isEmpty()) {
+                echoMap.forEach((p, e) -> {
+                    boolean hovering = e.render(mc.player, poseStack, bufferSource,
+                            countTicks - 40 - responseTime, countdownTicks < 59,
+                            MarkedPositionNames.getOrDefault(p, null));
+                    if (hovering && !mc.player.isCurrentlyGlowing())
+                        EchoResponding.render(poseStack, bufferSource, p, teleportTicks);
+                });
+            }
+            bufferSource.endBatch();
+        } finally {
+            RenderSystem.enableDepthTest();
+            // 恢复 RenderSystem 状态，避免影响后续手部/GUI 渲染。
+            RenderSystem.restoreProjectionMatrix();
+            modelViewStack.popMatrix();
+            RenderSystem.applyModelViewMatrix();
         }
-
-        if (tick > 20) EchoSounding.render(PoseStack, bufferSource, PartialTicks, tick - 20, LightTexture.FULL_BRIGHT);
-
-        if (!targetPreseted && countTicks > responseTime && !echoMap.isEmpty()) {
-            // 渲染EchoResponse
-            echoMap.forEach((p, e) -> {
-                boolean isElementHovering = e.render(mc.player, PoseStack, bufferSource, countTicks - 40 - responseTime,
-                        countdownTicks < 59, MarkedPositionNames.getOrDefault(p, null));
-                if (isElementHovering && !mc.player.isCurrentlyGlowing()) EchoResponding.render(PoseStack, bufferSource, p, teleportTicks);
-            });
-        }
-
-        bufferSource.endBatch();
-        RenderSystem.enableDepthTest();
     }
 
     @SubscribeEvent

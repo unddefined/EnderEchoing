@@ -25,7 +25,7 @@ import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
 public class EnderEchoingPearl extends Item {
     public EnderEchoingPearl(Properties properties) {
-        super(properties.stacksTo(8));
+        super(properties.stacksTo(16));
     }
 
     public static void handleSetDataRequest(ServerPlayer player, String name,int iconIndex, ItemStack handStack, Level level) {

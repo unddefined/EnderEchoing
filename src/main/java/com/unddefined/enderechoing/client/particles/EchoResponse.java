@@ -58,6 +58,7 @@ public class EchoResponse {
         unShiftPos = pos;
     }
 
+
     public boolean render(Player player, PoseStack poseStack, MultiBufferSource bufferSource, int ticks, boolean isCountingDown, String posName) {
         if (player.isShiftKeyDown() && EchoSoundingPos != null && !Shifted) {
             // 使用 Shift 键触发Y随机偏移，以避免多个传送点渲染重叠
@@ -126,6 +127,10 @@ public class EchoResponse {
             float alpha = Math.max(0f, 0.9f - age / 90f); // 随半径增大透明度逐渐减小
             poseStack.pushPose();
             poseStack.scale(scale2, scale2, 0); // 缩放波纹平面
+            if (bufferSource == null) {
+                poseStack.popPose();
+                continue;
+            }
             var vertexConsumer = bufferSource.getBuffer(WAVE_RENDER_TYPE);
             var matrix4f = poseStack.last().pose();
             int color = isElementHovering ? FastColor.ABGR32.color((int) (alpha * 255), 140, 244, 226)
@@ -143,7 +148,7 @@ public class EchoResponse {
         }
 
         // 渲染位置名称
-        if (posName != null && ticks > 0) {
+        if (bufferSource != null && posName != null && ticks > 0) {
             poseStack.pushPose();
             // 渲染文本
             Font font = Minecraft.getInstance().font;
