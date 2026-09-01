@@ -19,7 +19,12 @@
     { "name": "OutSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
     { "name": "CameraPos", "type": "float", "count": 3, "values": [ 0.0, 0.0, 0.0 ] },
     { "name": "GameTime", "type": "float", "count": 1, "values": [ 1.0 ] },
-    { "name": "fadeProgress", "type": "float", "count": 1, "values": [ 0.0 ] }
+    { "name": "fadeProgress", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "fogRadius", "type": "float", "count": 1, "values": [ 7.5 ] },
+    { "name": "fogSteps", "type": "int", "count": 1, "values": [ 1 ] },
+    { "name": "fogDensityStrength", "type": "float", "count": 1, "values": [ 3.0 ] },
+    { "name": "fogColor", "type": "float", "count": 3, "values": [ 0.043137, 0.301961, 0.258824 ] },
+    { "name": "darknessStrength", "type": "float", "count": 1, "values": [ 1.0 ] }
 
   ]
 }

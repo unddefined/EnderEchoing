@@ -20,6 +20,10 @@ import static com.unddefined.enderechoing.client.EnderEchoingClient.sculkVeilPos
 public class SculkVeilRenderer {
     private static final Minecraft mc = Minecraft.getInstance();
     private static int lastWidth = -1;
+    // 雾颜色（0-255），会自动 /255 传入 shader。
+    public static float[] FOG_COLOR = {7f,71f,73f};
+    // 黑雾开关/强度：0 = 关闭，1 = 全开，可在运行时直接改。
+    public static float DARKNESS_STRENGTH = 1f;
     private static int lastHeight = -1;
     public static float fadeProgress = 0.0f;
 
@@ -31,6 +35,44 @@ public class SculkVeilRenderer {
         applyUniforms(tick, Camera.getPosition(), M, P);
     }
 
+    public static void updateFadeProgress(boolean fadeIO, float delta) {
+        float speed = 0.007f;
+        if (fadeIO) fadeProgress += speed * delta;
+        else fadeProgress -= speed * delta;
+
+        fadeProgress = Mth.clamp(fadeProgress, 0.0f, 1.0f);
+    }
+
+    private static void applyUniforms(int tick, Vec3 cameraPos, Matrix4f M, Matrix4f P) {
+        List<PostPass> passes = getPasses();
+        if (!passes.isEmpty()) {
+
+//            RenderTarget renderTarget = mc.getMainRenderTarget();
+//            float width = renderTarget.width > 0 ? (float) renderTarget.width : (float) renderTarget.viewWidth;
+//            float height = renderTarget.height > 0 ? (float) renderTarget.height : (float) renderTarget.viewHeight;
+            Iterator<PostPass> var16 = passes.iterator();
+
+            while (true) {
+                if (!var16.hasNext()) return;
+                var pass = var16.next();
+                var effect = pass.getEffect();
+
+                effect.safeGetUniform("ModelViewMat").set(M);
+                effect.safeGetUniform("InverseProjectionMatrix").set(P.invert());
+                effect.safeGetUniform("InverseModelViewMatrix").set(M.invert());
+                effect.safeGetUniform("CameraPos").set(cameraPos.toVector3f());
+                effect.safeGetUniform("GameTime").set((float) tick);
+                effect.safeGetUniform("fadeProgress").set(fadeProgress);
+                effect.safeGetUniform("fadeProgress").set(fadeProgress);
+                effect.safeGetUniform("fogRadius").set(12f);
+                effect.safeGetUniform("fogSteps").set(3);
+                effect.safeGetUniform("fogDensityStrength").set(0.05f);
+                effect.safeGetUniform("fogColor").set(FOG_COLOR[0] / 255f, FOG_COLOR[1] / 255f, FOG_COLOR[2] / 255f);
+                effect.safeGetUniform("darknessStrength").set(DARKNESS_STRENGTH);
+                effect.setSampler("DepthSampler", pass.inTarget::getDepthTextureId);
+            }
+        }
+    }
     private static Field findPassesField() {
         try {
             return ObfuscationReflectionHelper.findField(PostChain.class, "passes");
@@ -65,31 +107,6 @@ public class SculkVeilRenderer {
         }
     }
 
-    private static void applyUniforms(int tick, Vec3 cameraPos, Matrix4f M, Matrix4f P) {
-        List<PostPass> passes = getPasses();
-        if (!passes.isEmpty()) {
-
-//            RenderTarget renderTarget = mc.getMainRenderTarget();
-//            float width = renderTarget.width > 0 ? (float) renderTarget.width : (float) renderTarget.viewWidth;
-//            float height = renderTarget.height > 0 ? (float) renderTarget.height : (float) renderTarget.viewHeight;
-            Iterator<PostPass> var16 = passes.iterator();
-
-            while (true) {
-                if (!var16.hasNext()) return;
-                var pass = var16.next();
-                var effect = pass.getEffect();
-
-                effect.safeGetUniform("ModelViewMat").set(M);
-                effect.safeGetUniform("InverseProjectionMatrix").set(P.invert());
-                effect.safeGetUniform("InverseModelViewMatrix").set(M.invert());
-                effect.safeGetUniform("CameraPos").set(cameraPos.toVector3f());
-                effect.safeGetUniform("GameTime").set((float) tick);
-                effect.safeGetUniform("fadeProgress").set(fadeProgress);
-                effect.setSampler("DepthSampler", pass.inTarget::getDepthTextureId);
-            }
-        }
-    }
-
     public static void safeResize(PostChain chain) {
         int w = mc.getWindow().getWidth();
         int h = mc.getWindow().getHeight();
@@ -100,11 +117,4 @@ public class SculkVeilRenderer {
         }
     }
 
-    public static void updateFadeProgress(boolean fadeIO, float delta) {
-        float speed = 0.007f;
-        if (fadeIO) fadeProgress += speed * delta;
-        else fadeProgress -= speed * delta;
-
-        fadeProgress = Mth.clamp(fadeProgress, 0.0f, 1.0f);
-    }
 }

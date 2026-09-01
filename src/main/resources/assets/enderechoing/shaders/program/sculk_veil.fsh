@@ -8,14 +8,14 @@ uniform mat4 InverseModelViewMatrix;
 uniform vec3 CameraPos;
 uniform float GameTime;
 uniform float fadeProgress;
+uniform float fogRadius;
+uniform int   fogSteps;
+uniform float fogDensityStrength;
+uniform vec3  fogColor;
+uniform float darknessStrength;
 
 in vec2 texCoord;
-
 out vec4 fragColor;
-
-const float FOG_RADIUS = 15;
-const int   STEPS = 1;
-const float STEP_SIZE = FOG_RADIUS / float(STEPS);// 平均分布步长
 
 vec3 getWorldRayDir(vec2 uv) {
     // ndc at far plane (z = 1.0) -> view pos -> world pos
@@ -140,24 +140,44 @@ void main() {
     vec3 surfacePos = getWorldPos(depth, texCoord);
     float surfaceDist = length(surfacePos - CameraPos);
 
-    // === Raymarch ===
-    vec3 rayPos = CameraPos;
+    // 第 1 层：类似原版 Darkness 的距离黑雾。
+    float darknessEnd = max(0.001, fogRadius);
+    float darkFactor = clamp(1.0 - (darknessEnd - surfaceDist) / darknessEnd, 0.0, 1.0);
+    // darknessStrength：黑雾开关/强度，0 = 关闭。
+    darkFactor = min(darkFactor, 1) * fadeProgress * darknessStrength;
+    vec3 darkened = mix(baseColor, vec3(0.0), darkFactor);
+
+    // 第 2 层：真正体积雾（Beer-Lambert raymarch）
     vec3 rayDir = getWorldRayDir(texCoord);
     float fogAcc = 0.0;
-    vec3 fogColor = vec3(11./255., 77./255., 66./255.);
-    float stepSize = FOG_RADIUS / float(STEPS);
+    vec3 fogCol = fogColor;
+    float radius = max(0.001, fogRadius);
+    int steps = clamp(fogSteps, 1, 64);   // 步数太少了看不出立体
+    float marchEnd = min(surfaceDist, radius);
+    float stepSize = marchEnd / float(steps);
 
-    for (int i = 0; i < STEPS; i++) {
-        if (surfaceDist < FOG_RADIUS && depth < 1.0) break;
+    float T = 1.0;                 // 透射率：光线还剩多少
+    vec3 scattered = vec3(0.0);    // 累积的雾散射颜色
 
+    vec3 rayPos = CameraPos;
+    for (int i = 0; i < steps; i++) {
         rayPos += rayDir * stepSize;
-        float noise = fbm3(flowWarp(rayPos * 0.1, GameTime * 0.08));
-        float density = smoothstep(0.01, 0.2, noise);
-        fogColor *= noise;
-        fogAcc += density * stepSize;
-    }
-    float fogFactor = 1.0 - exp(-fogAcc * 3.);
 
-    vec3 finalColor = mix(baseColor, fogColor, fogFactor * fadeProgress);
+        float noise = fbm3(flowWarp(rayPos * 0.1, GameTime * 0.08));
+        // 密度：噪声加正偏置，避免平均密度趋近 0（上一步“稀释”的根因之一）
+        float density = smoothstep(0.0, 0.25, noise * 0.5 + 0.5);
+        // 距离衰减：近处淡、远处浓，立体感的来源，同时替代原来的边界硬切
+        density *= smoothstep(0.0, radius * 0.3, length(rayPos - CameraPos));
+        if(i < 1) fogCol *= noise;
+        if (density > 0.001) {
+            float ext = density * stepSize * max(0.01, fogDensityStrength);
+            float segT = exp(-ext);
+            scattered += T * (1.0 - segT) * fogCol;
+            T *= segT;
+        }
+    }
+
+    vec3 volColor = darkened * T + scattered;
+    vec3 finalColor = mix(darkened, volColor, fadeProgress);
     fragColor = vec4(finalColor, 0.7);
 }
