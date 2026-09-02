@@ -30,7 +30,6 @@ public class EchoDruseBlock extends Block implements EntityBlock {
                 .lightLevel(state -> 2)
                 .sound(SoundType.SCULK)
                 .strength(2.2f, 2.2f)
-                .emissiveRendering((state, level, pos) -> state.getValue(GROWTH_STAGE) >= 2)
                 .requiresCorrectToolForDrops()
         );
         this.registerDefaultState(this.defaultBlockState().setValue(GROWTH_STAGE, 1));

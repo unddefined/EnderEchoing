@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -43,6 +44,7 @@ public class EchoRenderer {
     private static int countTicks = 0;
     private static int countdownTicks = 60;
     private static int sculkveilCountTicks = -43;
+    private static int deepDarkCountTicks = -43;
     private static int teleportTicks = 0;
     private static int responseTime = 120;
     private static boolean isCounting = false;
@@ -52,8 +54,23 @@ public class EchoRenderer {
     public static void renderEcho(RenderLevelStageEvent event) {
         if (mc.player == null) return;
         float PartialTicks = event.getPartialTick().getGameTimeDeltaTicks();
-        SculkVeilRenderer.updateFadeProgress(mc.player.hasEffect(SCULK_VEIL), PartialTicks);
-        if (!isCounting && SculkVeilRenderer.fadeProgress == 0f) return;
+        boolean hasEffect = mc.player.hasEffect(SCULK_VEIL);
+        boolean inDeepDark = mc.level.getBiome(mc.player.blockPosition()).is(Biomes.DEEP_DARK);
+        // 深暗之域掩码重建：渲染线程执行（避免跨线程读 mc.level），
+        // 每 100 tick 或移动 64 格重建一次。
+//        int px = mc.player.getBlockX(), py = mc.player.getBlockY(), pz = mc.player.getBlockZ();
+//        if (SculkVeilRenderer.DEEP_DARK.maskCenterX == Integer.MIN_VALUE
+//                || Math.abs(px - SculkVeilRenderer.DEEP_DARK.maskCenterX) > 64
+//                || Math.abs(pz - SculkVeilRenderer.DEEP_DARK.maskCenterZ) > 64
+//                || mc.player.tickCount % 100 == 0) {
+//            SculkVeilRenderer.DEEP_DARK.updateDeepDarkMask(px, py, pz);
+//        }
+        // buff 渲染器：影匿效果驱动；深暗之域内让位给 DEEP_DARK，避免重复渲染。
+        SculkVeilRenderer.BUFF.updateFadeProgress(hasEffect && !inDeepDark, PartialTicks);
+        SculkVeilRenderer.DEEP_DARK.DARKNESS_STRENGTH = hasEffect ? 1f : 0f;
+        SculkVeilRenderer.DEEP_DARK.fogDensity = hasEffect ? 0.1f : 0.05f;
+        SculkVeilRenderer.DEEP_DARK.updateFadeProgress(inDeepDark, PartialTicks);
+        if (!isCounting && SculkVeilRenderer.BUFF.fadeProgress == 0f && SculkVeilRenderer.DEEP_DARK.fadeProgress == 0f) return;
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
         // AFTER_LEVEL 在 LevelRenderer.renderLevel 返回后才触发：此时世界渲染已完成，
         // 主 framebuffer 里是最终画面（Iris 的 composite + final pass 也已写入其中），
@@ -63,13 +80,13 @@ public class EchoRenderer {
         renderWorldEffects(event.getPoseStack(), PartialTicks, event.getModelViewMatrix(), event.getProjectionMatrix());
     }
 
-    private static void renderWorldEffects(PoseStack poseStack,
-                                           float partialTicks, Matrix4f modelView,
-                                           Matrix4f projection) {
+    private static void renderWorldEffects(PoseStack poseStack, float partialTicks, Matrix4f modelView, Matrix4f projection) {
         int tick = countdownTicks < 59 ? countdownTicks : countTicks;
         var bufferSource = mc.renderBuffers().bufferSource();
-        if (modelView != null && projection != null && SculkVeilRenderer.fadeProgress != 0f)
-            SculkVeilRenderer.renderSculkVeil(sculkveilCountTicks, partialTicks, modelView, projection);
+        if (modelView != null && projection != null && SculkVeilRenderer.BUFF.fadeProgress != 0f)
+            SculkVeilRenderer.BUFF.render(sculkveilCountTicks, partialTicks, modelView, projection);
+        if (modelView != null && projection != null && SculkVeilRenderer.DEEP_DARK.fadeProgress != 0f)
+            SculkVeilRenderer.DEEP_DARK.render(deepDarkCountTicks, partialTicks, modelView, projection);
 
         // 立即模式四边形（EchoSounding/EchoResponse/EchoResponding）在 endBatch() 刷入 GPU 时，
         // 使用的始终是 RenderSystem.getModelViewMatrix()/getProjectionMatrix()（见 BufferUploader），
@@ -79,8 +96,7 @@ public class EchoRenderer {
         if (modelView != null) modelViewStack.mul(modelView);
         RenderSystem.applyModelViewMatrix();
         RenderSystem.backupProjectionMatrix();
-        if (projection != null)
-            RenderSystem.setProjectionMatrix(projection, VertexSorting.DISTANCE_TO_ORIGIN);
+        if (projection != null) RenderSystem.setProjectionMatrix(projection, VertexSorting.DISTANCE_TO_ORIGIN);
 
         try {
             mc.getMainRenderTarget().bindWrite(false);
@@ -128,8 +144,10 @@ public class EchoRenderer {
         if (targetPos != null && targetPos.pos().equals(BlockPos.ZERO)) targetPos = null;
         var player = event.getEntity();
         var level = player.level();
-        if (SculkVeilRenderer.fadeProgress != 0f) sculkveilCountTicks++;
+        if (SculkVeilRenderer.BUFF.fadeProgress != 0f) sculkveilCountTicks++;
         else sculkveilCountTicks = -43;
+        if (SculkVeilRenderer.DEEP_DARK.fadeProgress != 0f) deepDarkCountTicks++;
+        else deepDarkCountTicks = -43;
         if (teleportTicks > 82 && !player.isCurrentlyGlowing() && !isTeleporting) {
             PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos,false));
             echoMap.remove(targetPos.pos());
@@ -139,6 +157,7 @@ public class EchoRenderer {
             if (level.dimension().equals(targetPos.dimension()))
                 echoMap.putIfAbsent(targetPos.pos(), new EchoResponse(targetPos.pos()));
             teleportTicks++;
+            SculkVeilRenderer.BUFF.fogRadius = Math.max(1f, SculkVeilRenderer.BUFF.fogRadius - 0.18f);
         }
         if (EchoSoundingPos != null) {
             isCounting = true;
@@ -159,6 +178,7 @@ public class EchoRenderer {
         new HashMap<>(echoMap).forEach((p, e) -> {
             if (e.isElementHovering) {
                 teleportTicks++;
+                SculkVeilRenderer.BUFF.fogRadius = Math.max(1f, SculkVeilRenderer.BUFF.fogRadius - 0.15f);
                 e.hoveringTicks++;
                 targetPos = new GlobalPos(level.dimension(), p);
                 if (teleportTicks > 40 && !player.isCurrentlyGlowing() && !isTeleporting) {
@@ -168,8 +188,10 @@ public class EchoRenderer {
                     PacketDistributor.sendToServer(new TeleportRequestPacket(targetPos,false));
                 }
             }
-            if (!targetPreseted && countTicks > responseTime && targetPos != null && targetPos.pos().equals(p) && !e.isElementHovering)
+            if (!targetPreseted && countTicks > responseTime && targetPos != null && targetPos.pos().equals(p) && !e.isElementHovering) {
                 teleportTicks = 0;
+                SculkVeilRenderer.BUFF.fogRadius = 12f;
+            }
         });
         countTicks = isCounting ? countTicks + 1 : 0;
         if (countdownTicks == 0) {
@@ -190,6 +212,7 @@ public class EchoRenderer {
         targetPreseted = false;
         targetPos = null;
         teleportTicks = 0;
+        SculkVeilRenderer.BUFF.fogRadius = 12f;
 //        sculkveilCountTicks = -43;
         isTeleporting = false;
     }

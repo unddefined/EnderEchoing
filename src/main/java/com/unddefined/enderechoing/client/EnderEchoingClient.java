@@ -41,6 +41,7 @@ import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECH
 public class EnderEchoingClient {
     private static final Minecraft mc = Minecraft.getInstance();
     public static PostChain sculkVeilPostChain = null;
+    public static PostChain deepDarkVeilPostChain = null;
 
     public EnderEchoingClient(ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.
@@ -54,6 +55,8 @@ public class EnderEchoingClient {
         event.enqueueWork(() -> {
             try {
                 sculkVeilPostChain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), mc.getMainRenderTarget(),
+                        ResourceLocation.fromNamespaceAndPath("enderechoing", "shaders/post/sculk_veil.json"));
+                deepDarkVeilPostChain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), mc.getMainRenderTarget(),
                         ResourceLocation.fromNamespaceAndPath("enderechoing", "shaders/post/sculk_veil.json"));
             } catch (IOException e) {
                 throw new RuntimeException(e);

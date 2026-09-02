@@ -15,6 +15,8 @@ import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 
+import static net.minecraft.client.renderer.LightTexture.FULL_BLOCK;
+
 public class EnderEchoingCoreRenderer extends GeoItemRenderer<EnderEchoingCore> {
     public EnderEchoingCoreRenderer(GeoModel<EnderEchoingCore> model) {
         super(new EnderEchoingCoreModel());
@@ -25,7 +27,7 @@ public class EnderEchoingCoreRenderer extends GeoItemRenderer<EnderEchoingCore> 
         if (!isReRender && bone.getName().equals("core")) {
             renderType = RenderType.entitySolid(Core_layer);
             buffer = bufferSource.getBuffer(renderType);
-            packedLight = 0xF000F0;
+            packedLight = FULL_BLOCK;
         }
 
         super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender,partialTick, packedLight, packedOverlay,colour);

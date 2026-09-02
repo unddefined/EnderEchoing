@@ -3,6 +3,7 @@
 uniform sampler2D DiffuseSampler;
 uniform sampler2D DepthSampler;
 uniform sampler2D NoiseSample;
+uniform sampler2D DeepDarkMask;
 uniform mat4 InverseProjectionMatrix;
 uniform mat4 InverseModelViewMatrix;
 uniform vec3 CameraPos;
@@ -13,6 +14,11 @@ uniform int   fogSteps;
 uniform float fogDensityStrength;
 uniform vec3  fogColor;
 uniform float darknessStrength;
+uniform float marchRadius;
+uniform vec2  maskOrigin;
+uniform float maskScale;
+uniform float maskSize;
+uniform float useMask;
 
 in vec2 texCoord;
 out vec4 fragColor;
@@ -108,7 +114,6 @@ float snoise(vec3 v){
     dot(p2, x2), dot(p3, x3)));
 }
 
-#define NUM_OCTAVES 2
 float fbm3(vec3 p) {
     float f = 0.0;
     float amp = 0.5;
@@ -117,20 +122,20 @@ float fbm3(vec3 p) {
     -0.80, 0.36, -0.48,
     -0.60, -0.48, 0.64
     );
-    for (int i = 0; i < NUM_OCTAVES; ++i) {
+    for (int i = 0; i < 2; ++i) {
         f += amp * snoise(p);
         p = rot * p * 2.0 + 10.0;
-        amp *= 0.5;
+        amp *= 0.55;
     }
     return f;
 }
 vec3 flowWarp(vec3 p, float time) {
     vec3 q = vec3(
-    fbm3(p + vec3(0.0, 0.0, time * 0.05)),
+    fbm3(p + vec3(0.1, 0.1, time * 0.05)),
     fbm3(p + vec3(13.5, 9.2, time * 0.07)),
     fbm3(p + vec3(5.3, 17.8, time * 0.09))
     );
-    return p + q * 0.5;// 控制扰动强度
+    return p + q * 0.55;// 控制扰动强度
 }
 
 void main() {
@@ -152,22 +157,30 @@ void main() {
     float fogAcc = 0.0;
     vec3 fogCol = fogColor;
     float radius = max(0.001, fogRadius);
-    int steps = clamp(fogSteps, 1, 64);   // 步数太少了看不出立体
-    float marchEnd = min(surfaceDist, radius);
-    float stepSize = marchEnd / float(steps);
+    int steps = clamp(fogSteps, 1, 64);   // 作为最小步数
+    // 远处深暗之域：采到 marchRadius，步长约 6 格，距离越远自动加步数。
+    float marchEnd = min(surfaceDist, max(marchRadius, radius));
+    int n = clamp(max(int(ceil(marchEnd / 6.0)), steps), 1, 64);
+    float stepSize = marchEnd / float(n);
 
     float T = 1.0;                 // 透射率：光线还剩多少
     vec3 scattered = vec3(0.0);    // 累积的雾散射颜色
 
     vec3 rayPos = CameraPos;
-    for (int i = 0; i < steps; i++) {
+    for (int i = 0; i < n; i++) {
         rayPos += rayDir * stepSize;
+
+        // 深暗之域掩码：useMask=1 时限制在深暗之域，否则全区域（buff 模式）。
+        float mask = useMask > 0.5
+            ? texture(DeepDarkMask, (rayPos.xz - maskOrigin) / (maskScale * maskSize)).r
+            : 1.0;
+        if (mask < 0.5) continue;
 
         float noise = fbm3(flowWarp(rayPos * 0.1, GameTime * 0.08));
         // 密度：噪声加正偏置，避免平均密度趋近 0（上一步“稀释”的根因之一）
         float density = smoothstep(0.0, 0.25, noise * 0.5 + 0.5);
         // 距离衰减：近处淡、远处浓，立体感的来源，同时替代原来的边界硬切
-        density *= smoothstep(0.0, radius * 0.3, length(rayPos - CameraPos));
+        density *= smoothstep(0.0, radius * 0.4, length(rayPos - CameraPos));
         if(i < 1) fogCol *= noise;
         if (density > 0.001) {
             float ext = density * stepSize * max(0.01, fogDensityStrength);
