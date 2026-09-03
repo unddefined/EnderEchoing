@@ -59,6 +59,7 @@
   "config.enderechoing.configuration.sculk_whisper_hurt_range": "幽匿低鸣体伤害范围",
   "config.enderechoing.configuration.sculk_whisper_affect_range": "幽匿低鸣体效果范围",
   "config.enderechoing.configuration.sculk_whisper_hurt_damage": "幽匿低鸣体伤害",
+  "config.enderechoing.configuration.sculk_shrieker_can_summon_chance": "幽匿尖啸体获得可召唤状态的概率(1/N)",
   "effect.enderechoing.tinnitus": "耳鸣",
   "effect.enderechoing.deafness": "失聪",
   "effect.enderechoing.stagger": "踉跄",

@@ -84,6 +84,10 @@ public class Config {
             .comment("Damage dealt by the Sculk Whisper's damaging infrasound burst.")
             .defineInRange("sculk_whisper_hurt_damage",  15, 1, Integer.MAX_VALUE);
 
+    public static final ModConfigSpec.IntValue SCULK_SHRIEKER_CAN_SUMMON_CHANCE = BUILDER
+            .comment("1 in N chance for a Sculk Shrieker to gain CAN_SUMMON when a nearby entity dies on a Sculk Catalyst.")
+            .defineInRange("sculk_shrieker_can_summon_chance", 7, 1, Integer.MAX_VALUE);
+
 
     static final ModConfigSpec SPEC = BUILDER.build();
 }

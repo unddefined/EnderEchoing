@@ -59,6 +59,7 @@
   "config.enderechoing.configuration.sculk_whisper_hurt_range": "Sculk Whisper damage range",
   "config.enderechoing.configuration.sculk_whisper_affect_range": "Sculk Whisper effect range",
   "config.enderechoing.configuration.sculk_whisper_hurt_damage": "Sculk Whisper damage",
+  "config.enderechoing.configuration.sculk_shrieker_can_summon_chance": "Sculk Shrieker CAN_SUMMON chance (1 in N)",
   "effect.enderechoing.tinnitus": "Tinnitus",
   "effect.enderechoing.deafness": "Deafness",
   "effect.enderechoing.stagger": "Stagger",
