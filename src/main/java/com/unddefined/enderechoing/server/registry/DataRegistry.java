@@ -3,6 +3,7 @@ package com.unddefined.enderechoing.server.registry;
 import com.mojang.serialization.Codec;
 import com.unddefined.enderechoing.server.DataComponents.EntityData;
 import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
+import com.unddefined.enderechoing.server.DataComponents.VisitedStructures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
@@ -47,6 +48,9 @@ public class DataRegistry {
     );
     public static final Supplier<AttachmentType<BlockPos>> EE_PEARL_POSITION = ATTACHMENT_TYPES.register(
             "ee_pearl_position", () -> AttachmentType.builder(() -> BlockPos.ZERO).build()
+    );
+    public static final Supplier<AttachmentType<VisitedStructures>> VISITED_STRUCTURES = ATTACHMENT_TYPES.register(
+            "visited_structures", () -> AttachmentType.serializable(VisitedStructures::new).copyOnDeath().build()
     );
 
     public static List<ItemStack> initDefaultIconList() {

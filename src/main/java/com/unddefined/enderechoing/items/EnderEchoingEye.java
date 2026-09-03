@@ -3,16 +3,14 @@ package com.unddefined.enderechoing.items;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity;
 import com.unddefined.enderechoing.entities.EnderEchoingEyeEntity;
 import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedData;
+import com.unddefined.enderechoing.server.EnderEchoingEyeLocator;
 import com.unddefined.enderechoing.server.registry.DataRegistry;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -24,7 +22,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.levelgen.structure.Structure;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
@@ -34,10 +31,9 @@ import java.util.Comparator;
 import static com.unddefined.enderechoing.Config.*;
 import static com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity.zeroUUID;
 import static com.unddefined.enderechoing.compat.curios.EnderEchoCuriosPlugin.*;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.VISITED_STRUCTURES;
 
 public class EnderEchoingEye extends Item implements ICurioItem {
-    private static final TagKey<Structure> ANCIENT_CITY_LOCATED = TagKey.create(Registries.STRUCTURE,
-            ResourceLocation.fromNamespaceAndPath("enderechoing", "ancient_city_located"));
     private EndCrystal crystal;
     private EnderEchoCrystalBlockEntity EECrystal;
 
@@ -51,12 +47,14 @@ public class EnderEchoingEye extends Item implements ICurioItem {
         player.startUsingItem(hand);
         if (!(level instanceof ServerLevel S)) return InteractionResultHolder.consume(itemStack);
 
-        BlockPos cityPos = S.findNearestMapStructure(ANCIENT_CITY_LOCATED, player.blockPosition(), 100, false);
-        if (cityPos == null) return InteractionResultHolder.consume(itemStack);
+        EnderEchoingEyeLocator.markVisitedIfInside((ServerPlayer) player);
+        BlockPos targetPos = EnderEchoingEyeLocator.findNearestUnvisited(S, player.blockPosition(),
+                player.getData(VISITED_STRUCTURES.get()).all());
+        if (targetPos == null) return InteractionResultHolder.consume(itemStack);
 
         EnderEchoingEyeEntity eye = new EnderEchoingEyeEntity(level, player.getX(), player.getY(0.5D), player.getZ());
         eye.setItem(itemStack);
-        eye.signalTo(cityPos);
+        eye.signalTo(targetPos);
         level.gameEvent(GameEvent.PROJECTILE_SHOOT, eye.position(), GameEvent.Context.of(player));
         level.addFreshEntity(eye);
 
