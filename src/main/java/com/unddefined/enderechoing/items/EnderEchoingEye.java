@@ -45,12 +45,12 @@ public class EnderEchoingEye extends Item implements ICurioItem {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         player.startUsingItem(hand);
-        if (!(level instanceof ServerLevel S)) return InteractionResultHolder.consume(itemStack);
+        if (!(level instanceof ServerLevel S)) return InteractionResultHolder.fail(itemStack);
 
         EnderEchoingEyeLocator.markVisitedIfInside((ServerPlayer) player);
         BlockPos targetPos = EnderEchoingEyeLocator.findNearestUnvisited(S, player.blockPosition(),
                 player.getData(VISITED_STRUCTURES.get()).all());
-        if (targetPos == null) return InteractionResultHolder.consume(itemStack);
+        if (targetPos == null) return InteractionResultHolder.fail(itemStack);
 
         EnderEchoingEyeEntity eye = new EnderEchoingEyeEntity(level, player.getX(), player.getY(0.5D), player.getZ());
         eye.setItem(itemStack);
@@ -63,6 +63,7 @@ public class EnderEchoingEye extends Item implements ICurioItem {
         itemStack.consume(1, player);
         player.awardStat(Stats.ITEM_USED.get(this));
         player.swing(hand, true);
+        player.getCooldowns().addCooldown(this, 5 * 20);
         return InteractionResultHolder.success(itemStack);
     }
 

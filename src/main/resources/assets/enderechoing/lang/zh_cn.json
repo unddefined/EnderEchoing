@@ -76,5 +76,7 @@
   "screen.enderechoing.even_earlier_death":  "更更早的死亡地点",
   "menu.title.enderechoing.warpmenu": "选择一个目的地",
   "screen.enderechoing.warp": "折跃",
+  "pearl_target_offline": "目标玩家不在线或不存在",
+  "pearl_target_cross_dimension": "目标玩家不在同一维度，无法传送",
   "pearl_not_enough": "末影回响珍珠不足"
 }

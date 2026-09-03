@@ -2,6 +2,7 @@ package com.unddefined.enderechoing.items;
 
 import com.unddefined.enderechoing.blocks.entity.EnderEchoicResonatorBlockEntity;
 import com.unddefined.enderechoing.network.packet.OpenEditScreenPacket;
+import com.unddefined.enderechoing.server.DataComponents.EntityData;
 import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.core.BlockPos;
@@ -10,7 +11,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -38,6 +41,7 @@ public class EnderEchoingPearl extends Item {
 
         if (handStack.getItem() instanceof EnderEchoingPearl) {
             //pearl.use()标记
+            handStack.remove(ENTITY.get());
             handStack.set(DataComponents.CUSTOM_NAME, Component.literal(Name));
             handStack.set(POSITION.get(), new GlobalPos(level.dimension(), playerPos));
             handStack.set(TBOUND.get(), bound);
@@ -64,10 +68,12 @@ public class EnderEchoingPearl extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         var itemStack = player.getItemInHand(hand);
         var positionData = itemStack.get(POSITION.get());
+        var entityData = itemStack.get(ENTITY.get());
         if (level.isClientSide) return InteractionResultHolder.fail(itemStack);
 
-        if (player.isShiftKeyDown() && positionData != null) {
+        if (player.isShiftKeyDown() && (positionData != null || entityData != null)) {
             itemStack.remove(POSITION.get());
+            itemStack.remove(ENTITY.get());
             itemStack.remove(DataComponents.CUSTOM_NAME);
             return InteractionResultHolder.success(itemStack);
         }
@@ -76,6 +82,19 @@ public class EnderEchoingPearl extends Item {
                 level.getBlockEntity(player.blockPosition()) instanceof EnderEchoicResonatorBlockEntity ? "><" : "", BlockPos.ZERO));
 
         return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
+    }
+
+    @Override
+    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand) {
+        if (!(target instanceof Player boundPlayer)) return InteractionResult.PASS;
+        if (!player.level().isClientSide) {
+            // 绑定玩家：POSITION 只存 GlobalPos，玩家 ID 存入 ENTITY(EntityData)
+            stack.set(ENTITY.get(), new EntityData(boundPlayer.getUUID()));
+            stack.set(DataComponents.CUSTOM_NAME, Component.literal(boundPlayer.getGameProfile().getName()));
+            stack.remove(POSITION.get());
+            stack.remove(TBOUND.get());
+        }
+        return InteractionResult.sidedSuccess(player.level().isClientSide);
     }
 
     @Override

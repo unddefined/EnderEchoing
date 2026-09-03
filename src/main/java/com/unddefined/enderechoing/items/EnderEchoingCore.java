@@ -48,8 +48,7 @@ import java.util.function.Consumer;
 import static com.unddefined.enderechoing.Config.EECORE_TP_DISTANCE;
 import static com.unddefined.enderechoing.EnderEchoing.GZERO;
 import static com.unddefined.enderechoing.server.registry.BlockRegistry.ENDER_ECHO_CRYSTAL;
-import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
-import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_POSITION;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.*;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 
@@ -153,8 +152,35 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 if (S.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(itemStack);
                 // 检查玩家是否发光，如果发光则无法使用
                 if (S.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
-                // 查找最近的EnderEchoicResonator方块
+                // 新增：副手持有绑定到其他玩家的珍珠时，优先传送到该玩家的位置
+                var offhandPearl = player.getOffhandItem();
+                var boundPlayer = offhandPearl.get(ENTITY.get());
+                if (boundPlayer != null && !boundPlayer.playerId().equals(player.getUUID())) {
+                    ServerPlayer target = S.server.getPlayerList().getPlayer(boundPlayer.playerId());
+                    if (target == null) {
+                        S.displayClientMessage(Component.translatable("pearl_target_offline"), true);
+                        return InteractionResultHolder.fail(itemStack);
+                    }
+                    // 不可跨维度传送
+                    if (!target.level().dimension().equals(level.dimension())) {
+                        S.displayClientMessage(Component.translatable("pearl_target_cross_dimension"), true);
+                        return InteractionResultHolder.fail(itemStack);
+                    }
+                    target.addEffect(new MobEffectInstance(SCULK_VEIL, 20 * 3, 0, false, true));
+                    // 传送成功后消耗一个绑定该玩家的珍珠（副手中的那一个）
+                    offhandPearl.shrink(1);
+                    // 渲染传送特效
+                    PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(player.blockPosition()));
+                    PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(new GlobalPos(level.dimension(),target.blockPosition()), true));
+                    // 添加玩家动画
+                    PacketDistributor.sendToPlayer(S, new SetPlayerAnimationPacket());
+                    // 添加动画
+                    player.addEffect(new MobEffectInstance(SCULK_VEIL, 20 * 3, 0, false, true));
+                    if (level instanceof ServerLevel SL) triggerAnim(S, GeoItem.getOrAssignId(itemStack, SL), CONTROLLER_NAME, ANIM_USE);
 
+                    player.startUsingItem(hand);
+                }
+                // 查找最近的EnderEchoicResonator方块
                 if (manager.teleporters().stream().filter(e -> e.dimension().equals(level.dimension())).toList().isEmpty())
                     return InteractionResultHolder.fail(itemStack);
                 var nearestTeleporterPos = manager.getNearestTeleporter(level, player.blockPosition());

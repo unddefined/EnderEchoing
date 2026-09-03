@@ -76,5 +76,7 @@
   "screen.enderechoing.previous_death": "Previous Death",
   "screen.enderechoing.earlier_death": "Earlier Death",
   "screen.enderechoing.even_earlier_death": "Even Earlier Death",
+  "pearl_target_offline": "Target player is offline or does not exist",
+  "pearl_target_cross_dimension": "Target player is in another dimension, cannot teleport",
   "pearl_not_enough": "Ender Echoing Pearl not enough"
 }
