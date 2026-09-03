@@ -4,6 +4,7 @@ import com.unddefined.enderechoing.Config;
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
+import com.unddefined.enderechoing.util.Utils;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -35,19 +36,23 @@ public record TeleportRequestPacket(GlobalPos targetPos, boolean canWarp) implem
             var blockEntity = level.getBlockEntity(player.blockPosition().above(2));
             boolean crossDimension = !level.dimension().equals(msg.targetPos.dimension());
             boolean needsPearl = !MarkedPositionsManager.getManager(player).getMarkedTeleportersMap(level).containsKey(pos);
-
-            if (!crossDimension) player.teleportTo(pos.getCenter().x, pos.getCenter().y, pos.getCenter().z);
-            else {
+            var playerList = Utils.getNearEchoPlayers(level, player);
+            if (!crossDimension) {
+                player.teleportTo(pos.getCenter().x, pos.getCenter().y, pos.getCenter().z);
+                playerList.forEach( p -> p.teleportTo(pos.getCenter().x, pos.getCenter().y, pos.getCenter().z));
+            } else {
                 ServerLevel destination = player.getServer().getLevel(msg.targetPos.dimension());
                 if (destination == null) return;
                 player.changeDimension(new DimensionTransition(destination, pos.getCenter(), player.getDeltaMovement(),
                         player.getYRot(), player.getXRot(), DimensionTransition.PLAY_PORTAL_SOUND));
+                playerList.forEach( p -> p.changeDimension(new DimensionTransition(destination, pos.getCenter(), player.getDeltaMovement(),
+                        player.getYRot(), player.getXRot(), DimensionTransition.PLAY_PORTAL_SOUND)));
             }
 
             // 只有传送成功后才扣除费用。
             int cost = (needsPearl && !msg.canWarp ? 1 : 0) + (crossDimension ? 1 : 0);
             if (cost > 0) player.setData(EE_PEARL_AMOUNT, player.getData(EE_PEARL_AMOUNT) - cost);
-            if (msg.canWarp){
+            if (msg.canWarp) {
                 player.getCooldowns().addCooldown(WARP_CORE.asItem(), Config.ENDER_ECHOING_CORE_COOLDOWN.get() * 5);
                 return;
             }
@@ -57,5 +62,7 @@ public record TeleportRequestPacket(GlobalPos targetPos, boolean canWarp) implem
     }
 
     @Override
-    public @NotNull Type<? extends CustomPacketPayload> type() {return TYPE;}
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 }

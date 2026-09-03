@@ -10,6 +10,7 @@ import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.DataRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
+import com.unddefined.enderechoing.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -47,6 +48,7 @@ import java.util.List;
 
 import static com.unddefined.enderechoing.EnderEchoing.GZERO;
 import static com.unddefined.enderechoing.blocks.EnderEchoTunerBlock.CHARGED;
+import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_CORE;
 import static com.unddefined.enderechoing.server.registry.ItemRegistry.ENDER_ECHOING_PEARL;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
@@ -93,7 +95,7 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
-        return List.of(new ItemStack(ItemRegistry.ENDER_ECHOING_CORE.get()), new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));
+        return List.of(new ItemStack(ENDER_ECHOING_CORE.get()), new ItemStack(ItemRegistry.CALIBRATED_SCULK_SHRIEKER_ITEM.get()));
     }
 
     @Override
@@ -130,6 +132,11 @@ public class EnderEchoicResonatorBlock extends Block implements EntityBlock {
         if (manager.teleporters().isEmpty() && manager.markedPositions().isEmpty()) return;
         level.scheduleTick(pos, this, 40);
         if (!state.getValue(CoolDown)) return;
+        var playerList = Utils.getNearEchoPlayers(level, player);
+        playerList.forEach(e -> {
+                PacketDistributor.sendToPlayer(e, new SetEchoSoundingPosPacket(pos));
+                e.addEffect(new MobEffectInstance(SCULK_VEIL, state.getValue(CHARGED) ? 300 : 60));
+        });
         PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
         player.addEffect(new MobEffectInstance(SCULK_VEIL, state.getValue(CHARGED) ? 300 : 60));
         level.setBlock(pos, state.setValue(CoolDown, false).setValue(CHARGED, false), 3);

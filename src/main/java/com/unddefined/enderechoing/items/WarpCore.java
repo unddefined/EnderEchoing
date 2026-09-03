@@ -123,6 +123,15 @@ public class WarpCore extends Item implements GeoItem {
     }
 
     @Override
+    public boolean onDroppedByPlayer(ItemStack item, Player player) {
+        if (!(player instanceof ServerPlayer S)) return false;
+        if (S.hasEffect(SCULK_VEIL)) return true;
+        PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
+        PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(new HashMap<>()));
+        return true;
+    }
+
+    @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
         var stack = player.getItemInHand(hand);
         if (!player.isShiftKeyDown()) {

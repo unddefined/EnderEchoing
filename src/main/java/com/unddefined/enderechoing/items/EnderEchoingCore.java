@@ -7,6 +7,7 @@ import com.unddefined.enderechoing.client.renderer.item.EnderEchoingCoreRenderer
 import com.unddefined.enderechoing.network.packet.*;
 import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
+import com.unddefined.enderechoing.util.Utils;
 import dev.kosmx.playerAnim.api.layered.AnimationStack;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -143,15 +144,26 @@ public class EnderEchoingCore extends Item implements GeoItem {
     }
 
     @Override
+    public boolean onDroppedByPlayer(ItemStack item, Player player) {
+        if (!(player instanceof ServerPlayer S)) return false;
+        if (S.hasEffect(SCULK_VEIL)) return true;
+        PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(BlockPos.ZERO));
+        PacketDistributor.sendToPlayer(S, new RenderEchoNamesPacket(new HashMap<>()));
+        return true;
+    }
+
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
         var itemStack = player.getItemInHand(hand);
         var manager = MarkedPositionsManager.getManager(player);
+        var playerList = Utils.getNearEchoPlayers(level, player);
+
         if (!player.isShiftKeyDown()) {
             if (player instanceof ServerPlayer S) {
                 // 检查是否在冷却中
                 if (S.getCooldowns().isOnCooldown(this)) return InteractionResultHolder.fail(itemStack);
                 // 检查玩家是否发光，如果发光则无法使用
                 if (S.isCurrentlyGlowing()) return InteractionResultHolder.fail(itemStack);
+                var sculk_veil = new MobEffectInstance(SCULK_VEIL, 20 * 3, 0, false, true);
                 // 新增：副手持有绑定到其他玩家的珍珠时，优先传送到该玩家的位置
                 var offhandPearl = player.getOffhandItem();
                 var boundPlayer = offhandPearl.get(ENTITY.get());
@@ -166,16 +178,19 @@ public class EnderEchoingCore extends Item implements GeoItem {
                         S.displayClientMessage(Component.translatable("pearl_target_cross_dimension"), true);
                         return InteractionResultHolder.fail(itemStack);
                     }
-                    target.addEffect(new MobEffectInstance(SCULK_VEIL, 20 * 3, 0, false, true));
+                    target.addEffect(sculk_veil);
                     // 传送成功后消耗一个绑定该玩家的珍珠（副手中的那一个）
                     offhandPearl.shrink(1);
                     // 渲染传送特效
+                    var targetPos = new GlobalPos(level.dimension(),target.blockPosition());
                     PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(player.blockPosition()));
-                    PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(new GlobalPos(level.dimension(),target.blockPosition()), true));
-                    // 添加玩家动画
+                    PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(targetPos, true));
+                    player.addEffect(sculk_veil);
+                    playerList.forEach(e -> {
+                        e.addEffect(sculk_veil);
+                        PacketDistributor.sendToPlayer(e, new SetEchoSoundingPosPacket(player.blockPosition()));
+                    });
                     PacketDistributor.sendToPlayer(S, new SetPlayerAnimationPacket());
-                    // 添加动画
-                    player.addEffect(new MobEffectInstance(SCULK_VEIL, 20 * 3, 0, false, true));
                     if (level instanceof ServerLevel SL) triggerAnim(S, GeoItem.getOrAssignId(itemStack, SL), CONTROLLER_NAME, ANIM_USE);
 
                     player.startUsingItem(hand);
@@ -197,10 +212,12 @@ public class EnderEchoingCore extends Item implements GeoItem {
                 // 渲染传送特效
                 PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(player.blockPosition()));
                 PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(nearestTeleporterPos, true));
-                // 添加玩家动画
                 PacketDistributor.sendToPlayer(S, new SetPlayerAnimationPacket());
-                // 添加动画
-                player.addEffect(new MobEffectInstance(SCULK_VEIL, 20 * 3, 0, false, true));
+                player.addEffect(sculk_veil);
+                playerList.forEach(e -> {
+                    e.addEffect(sculk_veil);
+                    PacketDistributor.sendToPlayer(e, new SetEchoSoundingPosPacket(player.blockPosition()));
+                });
                 if (level instanceof ServerLevel SL) triggerAnim(S, GeoItem.getOrAssignId(itemStack, SL), CONTROLLER_NAME, ANIM_USE);
 
                 player.startUsingItem(hand);
