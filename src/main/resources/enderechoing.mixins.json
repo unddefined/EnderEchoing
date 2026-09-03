@@ -10,6 +10,7 @@
     "FlyTowardsPositionParticleMixin",
     "FogDataAccessor",
     "MixinPlayerRenderer",
+    "SculkBlockMixin",
     "SculkPatchFeatureMixin"
   ],
   "client": [
