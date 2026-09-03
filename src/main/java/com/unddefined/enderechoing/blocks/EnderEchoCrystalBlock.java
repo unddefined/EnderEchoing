@@ -1,6 +1,7 @@
 package com.unddefined.enderechoing.blocks;
 
 import com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity;
+import com.unddefined.enderechoing.blocks.entity.EnderEchoTunerBlockEntity;
 import com.unddefined.enderechoing.entities.EnderEchoCrystalEntity;
 import com.unddefined.enderechoing.network.packet.SendMarkedPositionNamesPacket;
 import com.unddefined.enderechoing.network.packet.SendSyncedTeleporterPositionsPacket;
@@ -48,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.unddefined.enderechoing.Config.EECrystal_TP_DISTANCE;
+import static com.unddefined.enderechoing.EnderEchoing.GZERO;
+import static com.unddefined.enderechoing.server.registry.DataRegistry.EE_PEARL_AMOUNT;
 import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 import static net.minecraft.world.item.Items.AMETHYST_SHARD;
 import static net.minecraft.world.item.Items.ECHO_SHARD;
@@ -140,13 +143,25 @@ public class EnderEchoCrystalBlock extends Block implements EntityBlock {
     @Override
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
         if (!(entity instanceof ServerPlayer player)) return;
+
+        var tuner = level.getBlockEntity(pos.above(2));
+        var D = EECrystal_TP_DISTANCE.get();
+        //定向即时传送
+        if (tuner instanceof EnderEchoTunerBlockEntity B && B.getSelectedPos() != null && !B.getSelectedPos().equals(GZERO)
+                && player.getData(EE_PEARL_AMOUNT) > 0
+                && B.getSelectedPos().dimension().equals(level.dimension())
+                && Math.sqrt(B.getSelectedPos().pos().distSqr(pos)) <= D * D * 0.05){
+            var Pos = B.getSelectedPos().pos().getCenter();
+            player.teleportTo(Pos.x,Pos.y,Pos.z);
+            player.setData(EE_PEARL_AMOUNT, player.getData(EE_PEARL_AMOUNT) - 1);
+            return;
+        }
         var crystals = EnderEchoCrystalSavedData.get((ServerLevel) level).getAll().stream().filter(C -> C.pos().dimension().equals(level.dimension())).toList();
         if (crystals.size() < 2) return;
         if (entity.isCurrentlyGlowing()) return;
         PacketDistributor.sendToPlayer(player, new SetEchoSoundingPosPacket(pos));
         Map<BlockPos, String> posList = new HashMap<>();
-        var D = EECrystal_TP_DISTANCE.get();
-        crystals.stream().filter(p -> p.pos().pos().distSqr(pos) <= D * D).filter(
+        crystals.stream().filter(p -> Math.sqrt(p.pos().pos().distSqr(pos)) <= D).filter(
                 p -> level.getBlockState(p.pos().pos()).getValue(CHANNEL).equals(state.getValue(CHANNEL))
         ).forEach(p -> posList.put(p.pos().pos(),p.name()));
         PacketDistributor.sendToPlayer(player, new SendSyncedTeleporterPositionsPacket(posList.keySet().stream().toList()));
