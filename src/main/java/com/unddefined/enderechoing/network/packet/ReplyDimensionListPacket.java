@@ -10,6 +10,8 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,6 +29,7 @@ public record ReplyDimensionListPacket(List<ResourceKey<Level>> dimensionList) i
     @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {return TYPE;}
 
+    @OnlyIn(Dist.CLIENT)
     public static void handle(ReplyDimensionListPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player().level().isClientSide &&

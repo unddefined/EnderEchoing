@@ -8,6 +8,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
@@ -25,6 +27,7 @@ public record ReplyPlayerDataPacket(int amount, List<ItemStack> iconList) implem
             ReplyPlayerDataPacket::new
     );
 
+    @OnlyIn(Dist.CLIENT)
     public static void handle(ReplyPlayerDataPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player().level().isClientSide && Minecraft.getInstance().screen instanceof PositionEditScreen P)

@@ -49,6 +49,7 @@ public class EchoRenderer {
     private static int responseTime = 120;
     private static boolean isCounting = false;
     private static boolean isTeleporting = false;
+    private static long lastTickGameTime = -1;
 
     @SubscribeEvent
     public static void renderEcho(RenderLevelStageEvent event) {
@@ -140,10 +141,24 @@ public class EchoRenderer {
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
+        // 客户端会给模拟范围内的每个玩家实体触发 tick（本地 + 附近的其他玩家）。
+        // 渲染器状态属于本地玩家：按客户端游戏 tick 去重，保证每个 tick 只推进一次，
+        // 并始终用本地玩家状态计算；远端玩家的 tick 既不能加速也不能重置本地效果。
+        if (mc.player == null || mc.level == null) return;
+        long gameTime = mc.level.getGameTime();
+        if (gameTime == lastTickGameTime) return;
+        lastTickGameTime = gameTime;
+        // 速度调整：每个游戏 tick 推进两次（等效 2x）。
+        // 发包/状态切换有 isTeleporting 等守卫，不会在同一 tick 内重复发送。
+        tickEffects();
+        tickEffects();
+    }
+
+    private static void tickEffects() {
+        var player = mc.player;
+        var level = mc.level;
         if (EchoSoundingPos != null && EchoSoundingPos.equals(BlockPos.ZERO)) reset();
         if (targetPos != null && targetPos.pos().equals(BlockPos.ZERO)) targetPos = null;
-        var player = event.getEntity();
-        var level = player.level();
         if (SculkVeilRenderer.BUFF.fadeProgress != 0f) sculkveilCountTicks++;
         else sculkveilCountTicks = -43;
         if (SculkVeilRenderer.DEEP_DARK.fadeProgress != 0f) deepDarkCountTicks++;

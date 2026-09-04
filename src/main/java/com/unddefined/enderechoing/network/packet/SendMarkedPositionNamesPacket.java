@@ -2,13 +2,14 @@ package com.unddefined.enderechoing.network.packet;
 
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.client.renderer.EchoRenderer;
-import com.unddefined.enderechoing.client.renderer.ResonatorNameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,6 +24,7 @@ public record SendMarkedPositionNamesPacket(Map<BlockPos, String> markedPosition
             ByteBufCodecs.map(HashMap::new, BlockPos.STREAM_CODEC, ByteBufCodecs.STRING_UTF8, 256),
             SendMarkedPositionNamesPacket::markedPositionNames, SendMarkedPositionNamesPacket::new);
 
+    @OnlyIn(Dist.CLIENT)
     public static void handle(SendMarkedPositionNamesPacket msg, IPayloadContext ctx) {
         ctx.enqueueWork(() -> EchoRenderer.MarkedPositionNames = msg.markedPositionNames());
     }

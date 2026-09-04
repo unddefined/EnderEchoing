@@ -65,13 +65,26 @@ neoForge {
         client {
             client()
 
+            // Client 1 (Alice) keeps the existing run/ directory.
+            programArguments.addAll '--username', 'Alice'
+
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        // Second dev client (Bob) with its own game directory.
+        client2 {
+            client()
+
+            gameDirectory = project.file('run-client-2')
+            programArguments.addAll '--username', 'Bob'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
         server {
             server()
             programArgument '--nogui'
+            gameDirectory = project.file('run-server')
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 

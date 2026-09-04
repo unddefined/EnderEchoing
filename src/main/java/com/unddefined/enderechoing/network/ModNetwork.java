@@ -2,10 +2,17 @@ package com.unddefined.enderechoing.network;
 
 import com.unddefined.enderechoing.EnderEchoing;
 import com.unddefined.enderechoing.network.packet.*;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
+import java.util.function.Supplier;
 
 @EventBusSubscriber(modid = EnderEchoing.MODID)
 public class ModNetwork {
@@ -23,17 +30,17 @@ public class ModNetwork {
         );
 
         // 注册打开编辑屏幕数据包
-        registrar.playToClient(
+        registerClientPayload(registrar,
                 OpenEditScreenPacket.TYPE,
                 OpenEditScreenPacket.STREAM_CODEC,
-                OpenEditScreenPacket::handle
+                () -> OpenEditScreenPacket::handle
         );
 
         // 注册次声波粒子效果数据包
-        registrar.playToClient(
+        registerClientPayload(registrar,
                 InfrasoundParticlePacket.TYPE,
                 InfrasoundParticlePacket.STREAM_CODEC,
-                InfrasoundParticlePacket::handle
+                () -> InfrasoundParticlePacket::handle
         );
 
         // 注册添加效果数据包
@@ -74,49 +81,49 @@ public class ModNetwork {
                 SetTunerSelectedTabPacket.STREAM_CODEC,
                 SetTunerSelectedTabPacket::handle
         );
-        registrar.playToClient(
+        registerClientPayload(registrar,
                 SetTeleportPosPacket.TYPE,
                 SetTeleportPosPacket.STREAM_CODEC,
-                SetTeleportPosPacket::handle
+                () -> SetTeleportPosPacket::handle
         );
-        registrar.playToClient(
+        registerClientPayload(registrar,
                 SetEchoSoundingPosPacket.TYPE,
                 SetEchoSoundingPosPacket.STREAM_CODEC,
-                SetEchoSoundingPosPacket::handle
+                () -> SetEchoSoundingPosPacket::handle
         );
-        registrar.playToClient(
+        registerClientPayload(registrar,
                 SetPlayerAnimationPacket.TYPE,
                 SetPlayerAnimationPacket.STREAM_CODEC,
-                SetPlayerAnimationPacket::handle
+                () -> SetPlayerAnimationPacket::handle
         );
-        registrar.playToClient(
+        registerClientPayload(registrar,
                 SendMarkedPositionNamesPacket.TYPE,
                 SendMarkedPositionNamesPacket.STREAM_CODEC,
-                SendMarkedPositionNamesPacket::handle
+                () -> SendMarkedPositionNamesPacket::handle
         );
 
-        registrar.playToClient(
+        registerClientPayload(registrar,
                 RenderEchoNamesPacket.TYPE,
                 RenderEchoNamesPacket.STREAM_CODEC,
-                RenderEchoNamesPacket::handle
+                () -> RenderEchoNamesPacket::handle
         );
 
-        registrar.playToClient(
+        registerClientPayload(registrar,
                 SendSyncedTeleporterPositionsPacket.TYPE,
                 SendSyncedTeleporterPositionsPacket.STREAM_CODEC,
-                SendSyncedTeleporterPositionsPacket::handle
+                () -> SendSyncedTeleporterPositionsPacket::handle
         );
-        
+
         // 注册结构信息请求和回复数据包
         registrar.playToServer(
                 RequestStructureInfoPacket.TYPE,
                 RequestStructureInfoPacket.STREAM_CODEC,
                 RequestStructureInfoPacket::handle
         );
-        registrar.playToClient(
+        registerClientPayload(registrar,
                 ReplyStructureInfoPacket.TYPE,
                 ReplyStructureInfoPacket.STREAM_CODEC,
-                ReplyStructureInfoPacket::handle
+                () -> ReplyStructureInfoPacket::handle
         );
 
         // 注册维度列表请求和回复数据包
@@ -125,10 +132,10 @@ public class ModNetwork {
                 RequestDimensionListPacket.STREAM_CODEC,
                 RequestDimensionListPacket::handle
         );
-        registrar.playToClient(
+        registerClientPayload(registrar,
                 ReplyDimensionListPacket.TYPE,
                 ReplyDimensionListPacket.STREAM_CODEC,
-                ReplyDimensionListPacket::handle
+                () -> ReplyDimensionListPacket::handle
         );
 
         // 注册设置充能状态数据包
@@ -143,10 +150,10 @@ public class ModNetwork {
                 RequestPlayerDataPacket.STREAM_CODEC,
                 RequestPlayerDataPacket::handle
         );
-        registrar.playToClient(
+        registerClientPayload(registrar,
                 ReplyPlayerDataPacket.TYPE,
                 ReplyPlayerDataPacket.STREAM_CODEC,
-                ReplyPlayerDataPacket::handle
+                () -> ReplyPlayerDataPacket::handle
         );
 
         registrar.playToServer(
@@ -160,6 +167,20 @@ public class ModNetwork {
                 ShareToTeamPacket.STREAM_CODEC,
                 ShareToTeamPacket::handle
         );
+    }
 
+    /**
+     * Client-bound payloads must keep their real handler only on the client. A dedicated
+     * server still registers the payload type so channel negotiation matches, but with a
+     * no-op handler, since the client-only handle is never executed there.
+     * The handler is supplied lazily so the stripped {@code @OnlyIn(CLIENT)} handle is
+     * never resolved on a dedicated server.
+     */
+    private static <T extends CustomPacketPayload> void registerClientPayload(
+            PayloadRegistrar registrar, CustomPacketPayload.Type<T> type,
+            StreamCodec<? super RegistryFriendlyByteBuf, T> codec, Supplier<IPayloadHandler<T>> clientHandler) {
+
+        if (FMLEnvironment.dist.isClient()) registrar.playToClient(type, codec, clientHandler.get());
+        else registrar.playToClient(type, codec, (payload, context) -> {});
     }
 }

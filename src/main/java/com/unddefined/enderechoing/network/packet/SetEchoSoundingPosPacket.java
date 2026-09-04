@@ -7,6 +7,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +20,7 @@ public record SetEchoSoundingPosPacket(BlockPos targetPos) implements CustomPack
              buf -> new SetEchoSoundingPosPacket(buf.readBlockPos())
     );
 
+    @OnlyIn(Dist.CLIENT)
     public static void handle(SetEchoSoundingPosPacket msg, IPayloadContext ctx) {
         ctx.enqueueWork(() -> EchoRenderer.EchoSoundingPos = msg.targetPos);
     }

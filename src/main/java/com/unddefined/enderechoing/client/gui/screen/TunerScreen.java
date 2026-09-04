@@ -84,6 +84,8 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         populateTeamList();
         this.addWidget(waypointList);
         this.addWidget(teamList);
+        waypointList.visible = true;
+        teamList.visible = false;
 
         this.itemField = new EditBox(this.font, editBarX, editBarY, editBarWidth - 66, editBarHeight, Component.translatable("screen.enderechoing.enter_registry_name"));
         this.itemField.setMaxLength(50);
@@ -136,7 +138,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
                 .forEach(e -> waypointList.addWaypoint(e));
     }
 
-    public void populateTeamList(){
+    public void populateTeamList() {
         teamList.children().clear();
         teamList.setScrollAmount(0);
         String search = searchField == null ? "" : searchField.getValue().trim().toLowerCase(Locale.ROOT);
@@ -146,8 +148,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
     }
 
     private Comparator<MarkedPositionsManager.MarkedPositions> getWaypointComparator() {
-        Comparator<MarkedPositionsManager.MarkedPositions> comparator =
-                Comparator.comparing(this::isSelfWaypoint).reversed();
+        Comparator<MarkedPositionsManager.MarkedPositions> comparator = Comparator.comparing(this::isSelfWaypoint).reversed();
         if (sortMode == 1) {
             comparator = comparator.thenComparingDouble(e -> e.pos().distSqr(menu.getTunerPos().pos()));
         } else if (sortMode == 2) {
@@ -192,7 +193,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         // 渲染waypoint列表项的tooltip，避免被列表边框截断
         var hoveredEntry = waypointList.getEntryFromMouse(mouseX, mouseY);
         if (hoveredEntry != null) hoveredEntry.renderTooltip(guiGraphics, mouseX + 5, mouseY + 5);
-        var hoveredMemberEntry  = teamList.getEntryFromMouse(mouseX, mouseY);
+        var hoveredMemberEntry = teamList.getEntryFromMouse(mouseX, mouseY);
         if (hoveredMemberEntry != null) hoveredMemberEntry.renderTooltip(guiGraphics, mouseX + 5, mouseY + 5);
 
         tabBar.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -234,14 +235,6 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (selectedTab == 9){
-            waypointList.visible = false;
-            teamList.visible = true;
-        } else {
-            waypointList.visible = true;
-            teamList.visible = false;
-        }
-
         if (!changeIcon && button == 1 && searchField.isMouseOver(mouseX, mouseY)) {
             searchField.setValue("");
             searchField.setFocused(true);
@@ -276,6 +269,13 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         if (hoveredMemberEntry != null && hoveredMemberEntry.mouseClicked(mouseX, mouseY, button)) return true;
 
         if (tabBar.mouseClicked(mouseX, mouseY, button)) return true;
+        if (selectedTab == 9) {
+            waypointList.visible = false;
+            teamList.visible = true;
+        } else {
+            waypointList.visible = true;
+            teamList.visible = false;
+        }
 
         return super.mouseClicked(mouseX, mouseY, button);
     }
@@ -301,7 +301,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
             if (!(mouseX >= tx && mouseX < tx + slotSize && mouseY >= ty && mouseY < ty + slotSize)) continue;
 
-            if (i == 9){
+            if (i == 9) {
                 PacketDistributor.sendToServer(new ShareToTeamPacket(M));
                 return super.mouseReleased(mouseX, mouseY, button);
             }

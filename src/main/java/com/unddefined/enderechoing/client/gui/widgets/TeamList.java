@@ -54,33 +54,31 @@ public class TeamList extends ContainerObjectSelectionList<TeamList.MemberEntry>
 
     public void openContextMenu(int mouseX, int mouseY, TunerMenu.Members member, MemberEntry entry) {
         contextMenu.clear();
-        if (!member.isOnline()) return;
+//        if (!member.isOnline()) return;
 
-        if (screen.getMenu().canWarp() && !entry.isSelf){
+        if (screen.getMenu().canWarp() && !entry.isSelf && member.isOnline()){
         contextMenu.enableWarp = screen.getMenu().ee_pearl_amount > 0;
         contextMenu.addItem("screen.enderechoing.warp", () -> {
             screen.onClose();
             PacketDistributor.sendToServer(
                     new TeleportRequestPacket(new GlobalPos(member.dimension(), member.blockPos()), true));
-        });
-        contextMenu.open(mouseX, mouseY, (idx, item) -> {
-            contextMenu.addItem("screen.enderechoing.copy", () -> {
-                screen.getMenu().ee_pearl_amount--;
-                var pearl = new ItemStack(ENDER_ECHOING_PEARL.get(), 1);
-                pearl.set(ENTITY, new EntityData(member.uuid()));
-                pearl.set(CUSTOM_NAME, Component.literal(member.playerName()));
-                screen.getMenu().givePlayerPearl(pearl);
-            });
         });}
+        contextMenu.addItem("screen.enderechoing.copy", () -> {
+            var pearl = new ItemStack(ENDER_ECHOING_PEARL.get(), 1);
+            pearl.set(ENTITY, new EntityData(member.uuid()));
+            pearl.set(CUSTOM_NAME, Component.literal(member.playerName()));
+            screen.getMenu().givePlayerPearl(pearl);
+        });
         contextMenu.addItem("screen.enderechoing.remove", () -> {
             contextMenu.addItem("screen.enderechoing.confirm_remove", () -> {
                 screen.getMenu().getMembers().remove(member);
                 removeEntry(entry);
                 PacketDistributor.sendToServer(new RemoveTeamMemberPacket(member.uuid()));
-                screen.getMenu().ee_pearl_amount++;
+                if (!entry.isSelf) screen.getMenu().ee_pearl_amount++;
             });
             contextMenu.open(mouseX, mouseY, (idx, item) -> {});
         });
+        contextMenu.open(mouseX, mouseY, (idx, item) -> {});
     }
 
     @Override
@@ -131,7 +129,7 @@ public class TeamList extends ContainerObjectSelectionList<TeamList.MemberEntry>
                     .append(" (").append(Component.translatable(
                             member.isOnline() ? "screen.enderechoing.member_online" : "screen.enderechoing.member_offline"))
                     .append(")");
-            int color = member.isOnline() ? 0xE0E0E0 : 0x808080;
+            int color = member.isOnline() ? 0xE0E0E0 : selected && canSelect() ? 0xFFFFA0 : 0xA8A8A8;
             gfx.drawString(mc.font, text, left + entryWidth / 2 - mc.font.width(text) / 2, top + 6, color, false);
         }
 
@@ -142,10 +140,10 @@ public class TeamList extends ContainerObjectSelectionList<TeamList.MemberEntry>
             if (member.isOnline()) {
                 tooltip.add(Component.translatable("item.enderechoing.ender_echoing_pearl.position",
                         member.blockPos().toShortString(), Component.translationArg(member.dimension().location()))
-                        .withColor(canSelect() ? 0xE0E0E0 : 0x808080));
+                        .withColor(canSelect() ? 0xE0E0E0 : 0xA8A8A8));
                 tooltip.add(Component.translatable("screen.enderechoing.distance",
                         (int) Math.sqrt(parent.screen.getMenu().getTunerPos().pos().distSqr(member.blockPos())))
-                        .withColor(canSelect() ? 0xE0E0E0 : 0x808080));
+                        .withColor(canSelect() ? 0xE0E0E0 : 0xA8A8A8));
             } else tooltip.add(Component.translatable("screen.enderechoing.member_offline"));
 
             gfx.renderComponentTooltip(mc.font, tooltip, mouseX, mouseY);
@@ -158,9 +156,10 @@ public class TeamList extends ContainerObjectSelectionList<TeamList.MemberEntry>
             selected = !selected;
             if (button == 1) {
                 selected = true;
+                parent.selectedMember = member;
                 parent.openContextMenu((int) mouseX, (int) mouseY, member, this);
             }
-            if (button == 0 && canSelect()) {
+            if (button == 0 && canSelect() && member.isOnline() && !isSelf) {
                 parent.selectedMember = selected ? member : null;
                 parent.setSelected(this);
                 parent.screen.waypointList.selectedPosition = null;

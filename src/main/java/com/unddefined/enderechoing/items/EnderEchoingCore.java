@@ -194,6 +194,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
                     if (level instanceof ServerLevel SL) triggerAnim(S, GeoItem.getOrAssignId(itemStack, SL), CONTROLLER_NAME, ANIM_USE);
 
                     player.startUsingItem(hand);
+                    return InteractionResultHolder.consume(itemStack);
                 }
                 // 查找最近的EnderEchoicResonator方块
                 if (manager.teleporters().stream().filter(e -> e.dimension().equals(level.dimension())).toList().isEmpty())

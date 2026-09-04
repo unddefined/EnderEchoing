@@ -31,7 +31,7 @@ public class EnderEchoingPearl extends Item {
         super(properties.stacksTo(16));
     }
 
-    public static void handleSetDataRequest(ServerPlayer player, String name,int iconIndex, ItemStack handStack, Level level) {
+    public static void handleSetDataRequest(ServerPlayer player, String name, int iconIndex, ItemStack handStack, Level level) {
         var Name = name.isEmpty() ? Component.translatable("item.enderechoing.ender_echoing_pearl").getString() : name;
         var playerPos = player.blockPosition();
         var pearl = new ItemStack(ItemRegistry.ENDER_ECHOING_PEARL.get());
@@ -78,7 +78,7 @@ public class EnderEchoingPearl extends Item {
             return InteractionResultHolder.success(itemStack);
         }
 
-        if (positionData == null) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket(
+        if (positionData == null && entityData == null) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket(
                 level.getBlockEntity(player.blockPosition()) instanceof EnderEchoicResonatorBlockEntity ? "><" : "", BlockPos.ZERO));
 
         return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
@@ -86,14 +86,18 @@ public class EnderEchoingPearl extends Item {
 
     @Override
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand) {
-        if (!(target instanceof Player boundPlayer)) return InteractionResult.PASS;
+        if (!(target instanceof ServerPlayer boundPlayer)) return InteractionResult.PASS;
         if (!player.level().isClientSide) {
-            // 绑定玩家：POSITION 只存 GlobalPos，玩家 ID 存入 ENTITY(EntityData)
-            stack.set(ENTITY.get(), new EntityData(boundPlayer.getUUID()));
-            stack.set(DataComponents.CUSTOM_NAME, Component.literal(boundPlayer.getGameProfile().getName()));
-            stack.remove(POSITION.get());
-            stack.remove(TBOUND.get());
+            // 绑定玩家：POSITION 只存 GlobalPos，玩家 ID 存入 ENTITY(EntityData)。
+            // 创造模式下 vanilla 传入的是副本，必须改写玩家实际手持的物品。
+            ItemStack heldStack = player.getItemInHand(hand);
+            if (!(heldStack.getItem() instanceof EnderEchoingPearl)) return InteractionResult.PASS;
+            heldStack.set(ENTITY.get(), new EntityData(boundPlayer.getUUID()));
+            heldStack.set(DataComponents.CUSTOM_NAME, Component.literal(boundPlayer.getGameProfile().getName()));
+            heldStack.remove(POSITION.get());
+            heldStack.remove(TBOUND.get());
         }
+
         return InteractionResult.sidedSuccess(player.level().isClientSide);
     }
 

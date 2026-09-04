@@ -28,3 +28,5 @@ repo
 
 /run/
 *.log
+/run-server/
+/run-client-2/

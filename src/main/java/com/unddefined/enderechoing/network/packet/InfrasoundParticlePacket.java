@@ -7,6 +7,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import static com.unddefined.enderechoing.client.particles.ParticleMethods.spawnInfrasoundParticles;
@@ -23,6 +25,7 @@ public record InfrasoundParticlePacket(Vec3 center, float radius, boolean isStat
              buf -> new InfrasoundParticlePacket(buf.readVec3(), buf.readFloat(), buf.readBoolean())
     );
 
+    @OnlyIn(Dist.CLIENT)
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
             if (Minecraft.getInstance().level != null) spawnInfrasoundParticles(Minecraft.getInstance().level, center, radius, isStatic);
