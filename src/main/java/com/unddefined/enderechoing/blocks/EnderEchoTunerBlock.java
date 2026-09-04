@@ -5,6 +5,7 @@ import com.unddefined.enderechoing.client.gui.TunerMenu;
 import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import com.unddefined.enderechoing.server.registry.BlockEntityRegistry;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
+import com.unddefined.enderechoing.server.team.TeamManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -101,6 +102,31 @@ public class EnderEchoTunerBlock extends Block implements EntityBlock {
         }
         if (hand != InteractionHand.MAIN_HAND) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if (stack.is(ENDER_ECHOING_PEARL.get())) {
+            var entityData = stack.get(ENTITY);
+            if (entityData != null && !entityData.playerId().equals(player.getUUID())) {
+                if (player instanceof ServerPlayer inviter) {
+                    var result = TeamManager.invite(inviter.server, inviter.getUUID(), entityData.playerId());
+                    var target = inviter.server.getPlayerList().getPlayer(entityData.playerId());
+                    String targetName = target != null ? target.getGameProfile().getName()
+                            : (stack.get(CUSTOM_NAME) != null ? stack.get(CUSTOM_NAME).getString() : "?");
+                    switch (result) {
+                        case SUCCESS_CREATED, SUCCESS_JOINED -> {
+                            stack.shrink(1);
+                            inviter.sendSystemMessage(Component.translatable(
+                                    result == TeamManager.InviteResult.SUCCESS_CREATED
+                                            ? "message.enderechoing.team.invite_created"
+                                            : "message.enderechoing.team.invite_joined",
+                                    targetName));
+                            if (target != null) target.sendSystemMessage(Component.translatable(
+                                    "message.enderechoing.team.invite_received", inviter.getGameProfile().getName()));
+                        }
+                        case DENIED_SELF -> inviter.sendSystemMessage(Component.translatable("message.enderechoing.team.invite_self"));
+                        case DENIED_ALREADY_IN_TEAM -> inviter.sendSystemMessage(Component.translatable("message.enderechoing.team.invite_target_in_team"));
+                        case DENIED_NO_PERMISSION -> inviter.sendSystemMessage(Component.translatable("message.enderechoing.team.invite_no_permission"));
+                    }
+                }
+                return ItemInteractionResult.SUCCESS;
+            }
             var stackPos = stack.get(POSITION);
             boolean result = stackPos != null && MarkedPositionsManager.getManager(player)
                     .addMarkedPosition(stackPos.dimension(), stackPos.pos(), stack.get(CUSTOM_NAME).getString(), 0, Boolean.TRUE.equals(stack.get(TBOUND)));

@@ -182,7 +182,7 @@ public class EnderEchoingCore extends Item implements GeoItem {
                     // 传送成功后消耗一个绑定该玩家的珍珠（副手中的那一个）
                     offhandPearl.shrink(1);
                     // 渲染传送特效
-                    var targetPos = new GlobalPos(level.dimension(),target.blockPosition());
+                    var targetPos = new GlobalPos(level.dimension(), target.blockPosition());
                     PacketDistributor.sendToPlayer(S, new SetEchoSoundingPosPacket(player.blockPosition()));
                     PacketDistributor.sendToPlayer(S, new SetTeleportPosPacket(targetPos, true));
                     player.addEffect(sculk_veil);
@@ -229,7 +229,11 @@ public class EnderEchoingCore extends Item implements GeoItem {
             String name = A ? (B ? ">÷<" : "><") : (B ? "÷" : "");
             if (A) manager.teleporters().stream().filter(e -> e.dimension().equals(level.dimension()))
                     .filter(e -> e.pos().equals(player.blockPosition())).findFirst()
-                    .ifPresent(e -> manager.teleporters().add(new MarkedPositionsManager.Teleporters(new GlobalPos(level.dimension(), player.blockPosition()))));
+                    .ifPresentOrElse(e -> {
+                    }, () -> {
+                        manager.teleporters().add(new MarkedPositionsManager.Teleporters(new GlobalPos(level.dimension(), player.blockPosition())));
+                        player.displayClientMessage(Component.translatable("new_resonator_added"), true);
+                    });
 
             if (!level.isClientSide()) PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenEditScreenPacket(name, player.blockPosition()));
             player.setData(EE_PEARL_POSITION.get(), player.blockPosition());

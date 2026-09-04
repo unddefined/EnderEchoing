@@ -62,9 +62,9 @@ public class DataRegistry {
         icons.add(new ItemStack(Items.IRON_PICKAXE));
         icons.add(new ItemStack(Items.LEATHER));
         icons.add(new ItemStack(Items.WATER_BUCKET));
-        icons.add(new ItemStack(Items.CHEST_MINECART));
-        icons.add(new ItemStack(Items.FURNACE));
         icons.add(new ItemStack(Items.REDSTONE_TORCH));
+        icons.add(new ItemStack(Items.FURNACE));
+        icons.add(new ItemStack(Items.PLAYER_HEAD));
         return icons;
     }
 }

@@ -149,5 +149,17 @@ public class ModNetwork {
                 ReplyPlayerDataPacket::handle
         );
 
+        registrar.playToServer(
+                RemoveTeamMemberPacket.TYPE,
+                RemoveTeamMemberPacket.STREAM_CODEC,
+                RemoveTeamMemberPacket::handle
+        );
+
+        registrar.playToServer(
+                ShareToTeamPacket.TYPE,
+                ShareToTeamPacket.STREAM_CODEC,
+                ShareToTeamPacket::handle
+        );
+
     }
 }

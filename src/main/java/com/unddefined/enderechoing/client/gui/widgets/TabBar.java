@@ -90,7 +90,7 @@ public class TabBar {
                 screen.selectedTab = i;
                 screen.populateWaypointList();
 
-                if (button == 1) {
+                if (button == 1 && i < 9) {
                     // 右键 → 弹出菜单
                     if (i == 0) {
                         menu.givePlayerPearl(new ItemStack(ENDER_ECHOING_PEARL.get(), Math.min(menu.ee_pearl_amount, 8)));
@@ -133,7 +133,7 @@ public class TabBar {
         if (!(screen instanceof TunerScreen screen)) return false;
         var menu = screen.getMenu();
         var currentIcon = menu.getIconList().get(screen.selectedTab);
-        if (screen.selectedTab == 0) return false;
+        if (screen.selectedTab == 0 || screen.selectedTab == 9) return false;
         // 左右方向键交换选中tab位置
         if (keyCode == 263) { // 左箭头键
             if (screen.selectedTab > 1) {
@@ -167,7 +167,7 @@ public class TabBar {
         if (!dragging) return false;
         dragging = false;
 
-        for (int i = 1; i <= 9; i++) {
+        for (int i = 1; i < 9; i++) {
             double slotSize = 20;
             double tx = x - 30 + i * slotSize + 9;
             double ty = y;
@@ -186,7 +186,7 @@ public class TabBar {
     public boolean mouseDragged(int button) {
         if (!(screen instanceof TunerScreen screen)) return false;
         if (button != 0) return false;
-        if (screen.selectedTab < 1) return false;
+        if (screen.selectedTab < 1 || screen.selectedTab == 9) return false;
         if (!dragging && !tabClicked) return false;
         this.dragging = true;
         return true;

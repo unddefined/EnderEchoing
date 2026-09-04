@@ -3,7 +3,9 @@ package com.unddefined.enderechoing.client.gui.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.unddefined.enderechoing.client.gui.TunerMenu;
 import com.unddefined.enderechoing.client.gui.widgets.TabBar;
+import com.unddefined.enderechoing.client.gui.widgets.TeamList;
 import com.unddefined.enderechoing.client.gui.widgets.WaypointList;
+import com.unddefined.enderechoing.network.packet.ShareToTeamPacket;
 import com.unddefined.enderechoing.network.packet.SyncTunerDataPacket;
 import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
@@ -45,7 +47,8 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
     public EditBox searchField;
     private ItemStack jeiItem = ItemStack.EMPTY;
     private int editBarX, editBarY;
-    private WaypointList waypointList;
+    public WaypointList waypointList;
+    public TeamList teamList;
     private boolean dragging = false;
     private TabBar tabBar;
     private WaypointList.WaypointEntry focusingEntry;
@@ -75,9 +78,12 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         editBarY = this.height / 5 - 17;
         tabBar = new TabBar(listLeft + 29, listBottom - 30, this);
         waypointList = new WaypointList(this.minecraft, listWidth, listTop, listLeft, listBottom, 24, this);
+        teamList = new TeamList(this.minecraft, listWidth, listTop, listLeft, listBottom, 24, this);
 
         populateWaypointList();
+        populateTeamList();
         this.addWidget(waypointList);
+        this.addWidget(teamList);
 
         this.itemField = new EditBox(this.font, editBarX, editBarY, editBarWidth - 66, editBarHeight, Component.translatable("screen.enderechoing.enter_registry_name"));
         this.itemField.setMaxLength(50);
@@ -87,7 +93,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
         searchField = new EditBox(this.font, editBarX, editBarY, editBarWidth - 51, editBarHeight, Component.literal("search"));
         searchField.setMaxLength(50);
-        searchField.setResponder(s -> populateWaypointList());
+        searchField.setResponder(s -> {populateWaypointList();populateTeamList();});
         this.addWidget(this.searchField);
 
         SortButton = this.addRenderableWidget(new ImageButton(editBarX + 192, editBarY + 1, 18, 18,
@@ -128,6 +134,15 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
                 .filter(e -> search.isEmpty() || e.name().toLowerCase(Locale.ROOT).contains(search))
                 .sorted(getWaypointComparator())
                 .forEach(e -> waypointList.addWaypoint(e));
+    }
+
+    public void populateTeamList(){
+        teamList.children().clear();
+        teamList.setScrollAmount(0);
+        String search = searchField == null ? "" : searchField.getValue().trim().toLowerCase(Locale.ROOT);
+        this.getMenu().getMembers().stream()
+                .filter(e -> search.isEmpty() || e.playerName().toLowerCase(Locale.ROOT).contains(search))
+                .forEach(member -> teamList.addMember(member));
     }
 
     private Comparator<MarkedPositionsManager.MarkedPositions> getWaypointComparator() {
@@ -172,10 +187,13 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         SortButton.render(guiGraphics, mouseX, mouseY, partialTick);
 
         waypointList.render(guiGraphics, mouseX, mouseY, partialTick);
+        teamList.render(guiGraphics, mouseX, mouseY, partialTick);
 
         // 渲染waypoint列表项的tooltip，避免被列表边框截断
         var hoveredEntry = waypointList.getEntryFromMouse(mouseX, mouseY);
         if (hoveredEntry != null) hoveredEntry.renderTooltip(guiGraphics, mouseX + 5, mouseY + 5);
+        var hoveredMemberEntry  = teamList.getEntryFromMouse(mouseX, mouseY);
+        if (hoveredMemberEntry != null) hoveredMemberEntry.renderTooltip(guiGraphics, mouseX + 5, mouseY + 5);
 
         tabBar.render(guiGraphics, mouseX, mouseY, partialTick);
 
@@ -184,6 +202,7 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
                 this.height / 7 - 11, 0xd1d6b6, false);
 
         waypointList.getContextMenu().render(guiGraphics, mouseX, mouseY, partialTick);
+        teamList.getContextMenu().render(guiGraphics, mouseX, mouseY, partialTick);
         tabBar.getContextMenu().render(guiGraphics, mouseX, mouseY, partialTick);
         if (dragging) guiGraphics.renderFakeItem(new ItemStack(ItemRegistry.ENDER_ECHOING_PEARL.get()), mouseX - 8, mouseY - 8);
         if (changeIcon && !jeiItem.isEmpty()) guiGraphics.renderFakeItem(jeiItem, mouseX - 8, mouseY - 8);
@@ -215,6 +234,14 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (selectedTab == 9){
+            waypointList.visible = false;
+            teamList.visible = true;
+        } else {
+            waypointList.visible = true;
+            teamList.visible = false;
+        }
+
         if (!changeIcon && button == 1 && searchField.isMouseOver(mouseX, mouseY)) {
             searchField.setValue("");
             searchField.setFocused(true);
@@ -240,9 +267,13 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
         if (tabBar.getContextMenu().isVisible() && tabBar.getContextMenu().mouseClicked(mouseX, mouseY, button)) return true;
 
         if (waypointList.getContextMenu().isVisible() && waypointList.getContextMenu().mouseClicked(mouseX, mouseY, button)) return true;
+        if (teamList.getContextMenu().isVisible() && teamList.getContextMenu().mouseClicked(mouseX, mouseY, button)) return true;
 
         focusingEntry = waypointList.getEntryFromMouse(mouseX, mouseY);
         if (focusingEntry != null && focusingEntry.mouseClicked(mouseX, mouseY, button)) return true;
+
+        var hoveredMemberEntry = teamList.getEntryFromMouse(mouseX, mouseY);
+        if (hoveredMemberEntry != null && hoveredMemberEntry.mouseClicked(mouseX, mouseY, button)) return true;
 
         if (tabBar.mouseClicked(mouseX, mouseY, button)) return true;
 
@@ -270,11 +301,17 @@ public class TunerScreen extends AbstractContainerScreen<TunerMenu> {
 
             if (!(mouseX >= tx && mouseX < tx + slotSize && mouseY >= ty && mouseY < ty + slotSize)) continue;
 
+            if (i == 9){
+                PacketDistributor.sendToServer(new ShareToTeamPacket(M));
+                return super.mouseReleased(mouseX, mouseY, button);
+            }
+
             selectedTab = i;
 
             var newPosition = new MarkedPositionsManager.MarkedPositions(M.dimension(), M.pos(), M.name(), i, M.teleporterBound());
             MarkedPositionsCache.set(MarkedPositionsCache.indexOf(M), newPosition);
             populateWaypointList();
+            return super.mouseReleased(mouseX, mouseY, button);
         }
         // 交换位置
         var swapEntry = waypointList.getEntryFromMouse(mouseX, mouseY);

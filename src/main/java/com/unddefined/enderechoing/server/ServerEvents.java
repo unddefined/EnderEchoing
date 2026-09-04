@@ -6,7 +6,6 @@ import com.unddefined.enderechoing.server.DataComponents.EnderEchoCrystalSavedDa
 import com.unddefined.enderechoing.server.DataComponents.MarkedPositionsManager;
 import com.unddefined.enderechoing.server.registry.ItemRegistry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -54,8 +53,7 @@ public class ServerEvents {
         var data = MarkedPositionsManager.getManager(player).teleporters();
         // 使用 removeIf 安全地过滤并删除无效数据
         data.removeIf(T -> {
-            MinecraftServer server = player.server;
-            ServerLevel target = server.getLevel(T.dimension());
+            ServerLevel target = player.server.getLevel(T.dimension());
 
             // 如果 target 为 null，或者方块不是预期的，则返回 true 进行删除
             if (target == null) return true;

@@ -202,6 +202,7 @@ public class PositionEditScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (tabBar != null) tabBar.mouseClicked(mouseX, mouseY, button);
+        if (tabBar != null) if (tabBar.selectedTab == 9) tabBar.selectedTab = 0;
         return super.mouseClicked(mouseX, mouseY, button);
     }
 

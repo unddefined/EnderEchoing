@@ -28,14 +28,15 @@ import static net.minecraft.core.component.DataComponents.CUSTOM_NAME;
 public class WaypointList extends ContainerObjectSelectionList<WaypointList.WaypointEntry> {
     private final TunerScreen screen;
     private final ContextMenu contextMenu;
-    private MarkedPositionsManager.MarkedPositions selectedPosition;
+    public MarkedPositionsManager.MarkedPositions selectedPosition;
 
     public WaypointList(Minecraft minecraft, int width, int height, int x, int y, int itemHeight, TunerScreen screen) {
         super(minecraft, width, height, y, itemHeight);
         this.setX(x);
         this.screen = screen;
         this.contextMenu = new ContextMenu();
-        selectedPosition = screen.getMarkedPositionsCache().stream().filter(M -> M.pos().equals(screen.getMenu().getSelectedPos().pos())).findFirst().orElse(null);
+        selectedPosition = screen.getMarkedPositionsCache().stream().filter(
+                M -> M.pos().equals(screen.getMenu().getSelectedPos().pos())).findFirst().orElse(null);
     }
 
     public void addWaypoint(MarkedPositionsManager.MarkedPositions M) {this.addEntry(new WaypointEntry(this, M));}
@@ -147,10 +148,10 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
             this.markedPosition = M;
             this.canWarp = menu.canWarp();
             this.isFacing_down = menu.isFacing_down();
-            this.isSelf = markedPosition.pos().above(2).equals(menu.getTunerPos().pos())
+            this.isSelf = M.pos().above(2).equals(menu.getTunerPos().pos())
                     ||(canWarp && (menu.canWarp() && menu.getTunerPos().pos().distSqr(M.pos()) < 4)
                     && menu.getTunerPos().dimension().equals(M.dimension()));
-            this.can_crossDimension = (menu.getTunerPos().dimension().equals(markedPosition.dimension())) || menu.isMultiBlocked();
+            this.can_crossDimension = (menu.getTunerPos().dimension().equals(M.dimension())) || menu.isMultiBlocked();
         }
 
         @Override
@@ -189,6 +190,7 @@ public class WaypointList extends ContainerObjectSelectionList<WaypointList.Wayp
             parent.selectedPosition = selected ? markedPosition : null;
             parent.setSelected(this);
             parent.screen.getMenu().setSelectedPosition(parent.selectedPosition);
+            parent.screen.teamList.selectedMember = null;
 
             return true;
         }
