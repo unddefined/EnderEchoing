@@ -16,6 +16,7 @@ import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import static net.minecraft.world.level.Level.OVERWORLD;
@@ -29,6 +30,7 @@ public class EnderEchoing {
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final GlobalPos GZERO = new GlobalPos(OVERWORLD, BlockPos.ZERO);
+    public static final UUID zeroUUID = new UUID(0, 0);
     public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, MODID);
     public static final Supplier<MenuType<TunerMenu>> TUNER_MENU = MENUS.register("tuner_menu", () -> IMenuTypeExtension.create(TunerMenu::new));
     public EnderEchoing(IEventBus modEventBus, ModContainer modContainer) {
