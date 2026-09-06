@@ -35,10 +35,11 @@ public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEnti
     private final VibrationSystem.Listener vibrationListener = new VibrationSystem.Listener(this);
 
     // 添加冷却计时器
-    private int cooldownTicks = 0;
+    private int cooldownTicks;
 
     public SculkWhisperBlockEntity(BlockPos pos, BlockState blockState) {
         super(BlockEntityRegistry.SCULK_WHISPER.get(), pos, blockState);
+        this.cooldownTicks = SCULK_WHISPER_COOLDOWN.get() * 20;
     }
 
     @Override
@@ -67,14 +68,14 @@ public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEnti
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, SculkWhisperBlockEntity blockEntity) {
-        if (level instanceof ServerLevel serverLevel) {
-            VibrationSystem.Ticker.tick(serverLevel, blockEntity.vibrationData, blockEntity.vibrationUser);
-            // 更新冷却计时器
-            float radius = (float) (SCULK_WHISPER_COOLDOWN.get() * 20 - blockEntity.cooldownTicks) * 0.00025f;
-            if (blockEntity.cooldownTicks > 0) blockEntity.cooldownTicks--;
+        if (!(level instanceof ServerLevel serverLevel)) return;
+        VibrationSystem.Ticker.tick(serverLevel, blockEntity.vibrationData, blockEntity.vibrationUser);
+        // 更新冷却计时器
+        float radius = (float) (SCULK_WHISPER_COOLDOWN.get() * 20 - blockEntity.cooldownTicks) * 0.00025f;
+        if (blockEntity.cooldownTicks > 0) blockEntity.cooldownTicks--;
 
-            PacketDistributor.sendToAllPlayers(new InfrasoundParticlePacket(Vec3.atCenterOf(pos), radius, true));
-        }
+        PacketDistributor.sendToAllPlayers(new InfrasoundParticlePacket(Vec3.atCenterOf(pos), radius, true));
+
     }
 
     static class SculkWhisperVibrationUser implements VibrationSystem.User {
@@ -110,6 +111,7 @@ public class SculkWhisperBlockEntity extends BlockEntity implements GeoBlockEnti
         @Override
         public void onReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, @Nullable Entity entity, @Nullable Entity playerEntity, float distance) {
             Vec3 center = Vec3.atCenterOf(this.blockEntity.getBlockPos().above());
+            if (this.blockEntity.cooldownTicks > 0) return;
             InfrasoundDamage.InfrasoundBurst(level, center, SCULK_WHISPER_HURT_RANGE.getAsInt(), SCULK_WHISPER_AFFECT_RANGE.getAsInt(), SCULK_WHISPER_HURT_DAMAGE.getAsInt(), entity);
 
             // 触发后设置冷却时间

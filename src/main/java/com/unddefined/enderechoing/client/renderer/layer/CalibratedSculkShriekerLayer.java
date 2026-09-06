@@ -40,7 +40,7 @@ public class CalibratedSculkShriekerLayer extends BlockAndItemGeoLayer<Calibrate
             return;
 
         // 使物品始终面向玩家
-        if (stack.is(ItemRegistry.ENDER_ECHOING_PEARL) || stack.is(Items.ENDER_EYE)) {
+        if (stack.is(ItemRegistry.ENDER_ECHOING_PEARL) || stack.is(Items.ENDER_EYE) || stack.is(ItemRegistry.ENDER_ECHOING_EYE)) {
             if (Minecraft.getInstance().level != null && Minecraft.getInstance().cameraEntity != null) {
                 Direction facing = animatable.getBlockState().getValue(FACING);
                 // 首先抵消方块的旋转

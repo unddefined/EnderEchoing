@@ -18,6 +18,7 @@ public class ItemRegistry {
     public static final DeferredItem<Item> ENDER_ECHO_CRYSTAL = ITEMS.registerItem("ender_echo_crystal", EnderEchoCrystal::new);
     public static final DeferredItem<Item> ENDER_ECHO_COMPASS = ITEMS.registerItem("ender_echo_compass", EnderEchoCompass::new);
     public static final DeferredItem<Item> ECHO_DRUSE = ITEMS.registerItem("echo_druse", EchoDruse::new);
+    public static final DeferredItem<Item> WHISPER_DRUSE = ITEMS.registerItem("whisper_druse", WhisperDruse::new);
     public static final DeferredItem<Item> ENDER_ECHOING_PEARL = ITEMS.registerItem("ender_echoing_pearl", EnderEchoingPearl::new);
     public static final DeferredItem<Item> ENDER_ECHOING_EYE = ITEMS.registerItem("ender_echoing_eye", EnderEchoingEye::new);
     public static final DeferredItem<Item> WARP_CORE = ITEMS.registerItem("warp_core", WarpCore::new);

@@ -61,10 +61,10 @@ public class SculkVeilRenderer {
 
     // 玩家 buff 渲染器：影匿效果驱动，相机周围局域雾。
     public static final SculkVeilRenderer BUFF = new SculkVeilRenderer(
-            () -> sculkVeilPostChain, new float[]{7f, 71f, 73f}, 1f, 12f, 0.1f, 12f, false);
+            () -> sculkVeilPostChain, new float[]{7f, 71f, 73f}, 1f, 12f, 0.15f, 12f, false);
     // 深暗之域渲染器：掩码范围内有深暗之域即渲染，雾锚定在深暗之域上空。
     public static final SculkVeilRenderer DEEP_DARK = new SculkVeilRenderer(
-            () -> deepDarkVeilPostChain, new float[]{7f, 71f, 73f}, 0f, 12f, 0.05f, 12f, false);
+            () -> deepDarkVeilPostChain, new float[]{7f, 71f, 73f}, 0f, 12f, 0.06f, 12f, false);
 
     public void render(int tick, float PartialTicks, Matrix4f M, Matrix4f P) {
         if (tick < 0) fadeProgress = 0.001f;

@@ -131,11 +131,11 @@ float fbm3(vec3 p) {
 }
 vec3 flowWarp(vec3 p, float time) {
     vec3 q = vec3(
-    fbm3(p + vec3(0.1, 0.1, time * 0.05)),
+    fbm3(p + vec3(0.0, 0.0, time * 0.05)),
     fbm3(p + vec3(13.5, 9.2, time * 0.07)),
     fbm3(p + vec3(5.3, 17.8, time * 0.09))
     );
-    return p + q * 0.55;// 控制扰动强度
+    return p + q * 0.5;// 控制扰动强度
 }
 
 void main() {
@@ -176,11 +176,11 @@ void main() {
             : 1.0;
         if (mask < 0.5) continue;
 
-        float noise = fbm3(flowWarp(rayPos * 0.1, GameTime * 0.08));
-        // 密度：噪声加正偏置，避免平均密度趋近 0（上一步“稀释”的根因之一）
-        float density = smoothstep(0.0, 0.25, noise * 0.5 + 0.5);
+        float noise = fbm3(flowWarp(rayPos * 0.12, GameTime * 0.08));
+        // 密度：噪声加正偏置，避免平均密度趋近 0
+        float density = smoothstep(0.0, 0.95, noise * 0.5 + 0.5);
         // 距离衰减：近处淡、远处浓，立体感的来源，同时替代原来的边界硬切
-        density *= smoothstep(0.0, radius * 0.4, length(rayPos - CameraPos));
+//        density *= smoothstep(0., radius * 0.8, length(rayPos - CameraPos));
         if(i < 1) fogCol *= noise;
         if (density > 0.001) {
             float ext = density * stepSize * max(0.01, fogDensityStrength);
@@ -192,5 +192,5 @@ void main() {
 
     vec3 volColor = darkened * T + scattered;
     vec3 finalColor = mix(darkened, volColor, fadeProgress);
-    fragColor = vec4(finalColor, 0.7);
+    fragColor = vec4(finalColor, 1);
 }

@@ -6,7 +6,7 @@
 			"bones": {
 				"item": {
 					"rotation": {
-						"vector": ["math.sin(query.anim_time * 120) * 6", 0, "math.cos(query.anim_time * 100) * 4"]
+						"vector": ["math.sin(query.anim_time * 120) * 6", "query.anim_time * math.pi * 10", "math.cos(query.anim_time * 100) * 4"]
 					},
 					"position": {
 						"vector": [0, "math.sin(query.anim_time * 90) * 1", 0]

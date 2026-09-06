@@ -69,7 +69,7 @@ public class EchoRenderer {
         // buff 渲染器：影匿效果驱动；深暗之域内让位给 DEEP_DARK，避免重复渲染。
         SculkVeilRenderer.BUFF.updateFadeProgress(hasEffect && !inDeepDark, PartialTicks);
         SculkVeilRenderer.DEEP_DARK.DARKNESS_STRENGTH = hasEffect ? 1f : 0f;
-        SculkVeilRenderer.DEEP_DARK.fogDensity = hasEffect ? 0.1f : 0.05f;
+        SculkVeilRenderer.DEEP_DARK.fogDensity = hasEffect ? 0.15f : 0.06f;
         SculkVeilRenderer.DEEP_DARK.updateFadeProgress(inDeepDark, PartialTicks);
         if (!isCounting && SculkVeilRenderer.BUFF.fadeProgress == 0f && SculkVeilRenderer.DEEP_DARK.fadeProgress == 0f) return;
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
