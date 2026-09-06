@@ -30,3 +30,4 @@ repo
 *.log
 /run-server/
 /run-client-2/
+/AGENTS.md

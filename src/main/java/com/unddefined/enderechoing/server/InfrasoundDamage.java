@@ -12,15 +12,15 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
+import static com.unddefined.enderechoing.server.registry.ItemRegistry.RHYME_SHARD;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.*;
 import static net.minecraft.world.effect.MobEffects.CONFUSION;
-import static net.minecraft.world.effect.MobEffects.WEAKNESS;
+import static net.minecraft.world.item.Items.ECHO_SHARD;
 
 public class InfrasoundDamage extends DamageSource {
     public static final ResourceKey<DamageType> INFRASOUND_DAMAGE =
@@ -32,18 +32,23 @@ public class InfrasoundDamage extends DamageSource {
 
     public static void InfrasoundBurst(ServerLevel level, Vec3 center, float hurt_range, float affect_range, int damage, Entity causingEntity) {
         // 获取范围内的所有生物实体
-        List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class,
+        var entities = level.getEntitiesOfClass(LivingEntity.class,
                 net.minecraft.world.phys.AABB.ofSize(center, affect_range * 2, affect_range * 2, affect_range * 2));
 
         for (LivingEntity entity : entities) {
             // 计算实体与中心点的距离
             double distanceSqrt = entity.position().distanceTo(center);
+            boolean inHurtRange = distanceSqrt <= hurt_range;
+            boolean inAffectRange = distanceSqrt <= affect_range;
+
+            // 手持龙韵碎片的生物消耗1个碎片，免疫此次次声波爆发对其的全部影响
+            if ((inHurtRange || inAffectRange) && consumeRhymeShard(entity)) continue;
 
             // 对在半径hurt_range范围内的生物造成真实伤害
-            if (distanceSqrt <= hurt_range) {
+            if (inHurtRange) {
                 // 创建伤害源
-                Holder<DamageType> damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(INFRASOUND_DAMAGE);
-                DamageSource damageSource = new InfrasoundDamage(damageTypeHolder, null, causingEntity, center);
+                var damageTypeHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(INFRASOUND_DAMAGE);
+                var damageSource = new InfrasoundDamage(damageTypeHolder, null, causingEntity, center);
 
                 // 造成damage点真实伤害（忽略护甲）
                 entity.hurt(damageSource, damage);
@@ -52,21 +57,53 @@ public class InfrasoundDamage extends DamageSource {
             }
 
             // 对在affect_range范围内的生物应用debuff效果
-            if (distanceSqrt <= affect_range) {
+            if (inAffectRange) {
                 // 计算持续时间 = affect_range - 与中心的距离
                 int duration = (int) (affect_range - distanceSqrt);
 
-                // 应用多种debuff效果
-                entity.addEffect(new MobEffectInstance(ATTACK_SCATTERED, duration * 20, 1));
-                entity.addEffect(new MobEffectInstance(STAGGER, duration * 20, 1));
-                entity.addEffect(new MobEffectInstance(TINNITUS, duration * 20, 1));
-                entity.addEffect(new MobEffectInstance(CONFUSION, duration * 20, 1));
-                entity.addEffect(new MobEffectInstance(WEAKNESS, duration * 20, 1));
+                // 手持回响碎片的生物消耗1个碎片免疫此次debuff，但伤害仍照常结算
+                if (!consumeEchoShard(entity)) {
+                    // 应用多种debuff效果
+                    entity.addEffect(new MobEffectInstance(ATTACK_SCATTERED, duration * 20, 1));
+                    entity.addEffect(new MobEffectInstance(STAGGER, duration * 20, 1));
+                    entity.addEffect(new MobEffectInstance(TINNITUS, duration * 20, 1));
+                    entity.addEffect(new MobEffectInstance(CONFUSION, duration * 20, 1));
+                }
             }
 
         }
 
         // 向所有客户端发送粒子效果数据包
         PacketDistributor.sendToAllPlayers(new InfrasoundParticlePacket(center, affect_range, false));
+    }
+
+    // 优先消耗主手的龙韵碎片，主手没有时消耗副手的；成功消耗返回true
+    private static boolean consumeRhymeShard(LivingEntity entity) {
+        ItemStack mainHand = entity.getMainHandItem();
+        if (mainHand.is(RHYME_SHARD)) {
+            mainHand.shrink(1);
+            return true;
+        }
+        ItemStack offHand = entity.getOffhandItem();
+        if (offHand.is(RHYME_SHARD)) {
+            offHand.shrink(1);
+            return true;
+        }
+        return false;
+    }
+
+    // 优先消耗主手的回响碎片，主手没有时消耗副手的；成功消耗返回true
+    private static boolean consumeEchoShard(LivingEntity entity) {
+        ItemStack mainHand = entity.getMainHandItem();
+        if (mainHand.is(ECHO_SHARD)) {
+            mainHand.shrink(1);
+            return true;
+        }
+        ItemStack offHand = entity.getOffhandItem();
+        if (offHand.is(ECHO_SHARD)) {
+            offHand.shrink(1);
+            return true;
+        }
+        return false;
     }
 }

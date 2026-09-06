@@ -5,6 +5,11 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
 public class ParticleMethods {
+    // 非静态（次声波爆发）粒子密度：约 1 个/格²，总量封顶 3000，
+    // 避免半透明粒子一次性生成过多，在光影下刚生成时造成明显卡顿
+    private static final float NON_STATIC_PARTICLES_PER_BLOCK = 1.0F;
+    private static final int MAX_NON_STATIC_PARTICLES = 3000;
+
     public static void spawnInfrasoundParticles(ClientLevel level, Vec3 center, float radius, boolean isStatic) {
         RandomSource random = level.random;
 
@@ -24,7 +29,7 @@ public class ParticleMethods {
         final float tertiaryB = 0xeb / 255.0f;
 
         if (!isStatic) {
-            int particleCount = (int) (Math.PI * radius * radius * 10);
+            int particleCount = (int) Math.min(Math.PI * radius * radius * 1f, 2400);
             for (int i = 0; i < particleCount; i++) {
                 double angle = random.nextDouble() * 2 * Math.PI;
                 double distance = random.nextDouble() * radius;
@@ -78,4 +83,3 @@ public class ParticleMethods {
         }
     }
 }
-

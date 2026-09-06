@@ -111,7 +111,6 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
         else {
             level.setBlock(pos, state.cycle(RCHARGED), 2);
             InfrasoundBurst(pos, S, B);
-            B.cooldownTicks = SCULK_WHISPER_COOLDOWN.get() * 20;
         }
     }
 
@@ -220,6 +219,7 @@ public class CalibratedSculkShriekerBlock extends Block implements EntityBlock {
         float A = 1f / Math.max(1, B.cooldownTicks);
         InfrasoundDamage.InfrasoundBurst(S, pos.getCenter(), Math.max(1, SCULK_WHISPER_HURT_RANGE.getAsInt() * A),
                 Math.max(1, SCULK_WHISPER_AFFECT_RANGE.getAsInt() * A), Math.max(1, (int) (SCULK_WHISPER_HURT_DAMAGE.getAsInt() * A)), null);
+        B.cooldownTicks = SCULK_WHISPER_COOLDOWN.get() * 20;
     }
 
     @Override
