@@ -43,6 +43,7 @@ public class EnderEchoingClient {
     private static final Minecraft mc = Minecraft.getInstance();
     public static PostChain sculkVeilPostChain = null;
     public static PostChain deepDarkVeilPostChain = null;
+    public static PostChain sculkIntrusionPostChain = null;
 
     public EnderEchoingClient(ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.
@@ -59,6 +60,8 @@ public class EnderEchoingClient {
                         ResourceLocation.fromNamespaceAndPath("enderechoing", "shaders/post/sculk_veil.json"));
                 deepDarkVeilPostChain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), mc.getMainRenderTarget(),
                         ResourceLocation.fromNamespaceAndPath("enderechoing", "shaders/post/sculk_veil.json"));
+                sculkIntrusionPostChain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), mc.getMainRenderTarget(),
+                        ResourceLocation.fromNamespaceAndPath("enderechoing", "shaders/post/sculk_intrusion.json"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

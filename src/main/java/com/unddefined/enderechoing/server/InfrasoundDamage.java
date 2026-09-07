@@ -11,6 +11,7 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -54,6 +55,7 @@ public class InfrasoundDamage extends DamageSource {
                 entity.hurt(damageSource, damage);
                 if (entity instanceof Player player)
                     player.getWardenSpawnTracker().ifPresent(t -> t.setWarningLevel(t.getWarningLevel() - 1));
+                if (entity instanceof Warden W) W.hurt(damageSource, W.getHealth() * damage / 120f);
             }
 
             // 对在affect_range范围内的生物应用debuff效果

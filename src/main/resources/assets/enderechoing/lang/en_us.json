@@ -66,6 +66,7 @@
   "effect.enderechoing.stagger": "Stagger",
   "effect.enderechoing.attack_scattered": "Attack Scattered",
   "effect.enderechoing.sculk_veil": "Sculk Veil",
+  "effect.enderechoing.sculk_intrusion": "Sculk Intrusion",
   "menu.title.enderechoing.tunermenu": "Ender Echo Tuner",
   "menu.title.enderechoing.warpmenu": "Select a destination",
   "screen.enderechoing.warp":"Warp",

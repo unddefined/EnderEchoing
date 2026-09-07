@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.unddefined.enderechoing.Config.EchoSoundingDistance;
+import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_INTRUSION;
 import static com.unddefined.enderechoing.server.registry.MobEffectRegistry.SCULK_VEIL;
 
 @EventBusSubscriber(modid = EnderEchoing.MODID, value = Dist.CLIENT)
@@ -57,6 +58,7 @@ public class EchoRenderer {
         float PartialTicks = event.getPartialTick().getGameTimeDeltaTicks();
         boolean hasEffect = mc.player.hasEffect(SCULK_VEIL);
         boolean inDeepDark = mc.level.getBiome(mc.player.blockPosition()).is(Biomes.DEEP_DARK);
+        boolean hasIntrusion = mc.player.hasEffect(SCULK_INTRUSION);
         // 深暗之域掩码重建：渲染线程执行（避免跨线程读 mc.level），
         // 每 100 tick 或移动 64 格重建一次。
 //        int px = mc.player.getBlockX(), py = mc.player.getBlockY(), pz = mc.player.getBlockZ();
@@ -71,7 +73,10 @@ public class EchoRenderer {
         SculkVeilRenderer.DEEP_DARK.DARKNESS_STRENGTH = hasEffect ? 1f : 0f;
         SculkVeilRenderer.DEEP_DARK.fogDensity = hasEffect ? 0.15f : 0.06f;
         SculkVeilRenderer.DEEP_DARK.updateFadeProgress(inDeepDark, PartialTicks);
-        if (!isCounting && SculkVeilRenderer.BUFF.fadeProgress == 0f && SculkVeilRenderer.DEEP_DARK.fadeProgress == 0f) return;
+        SculkIntrusionRenderer.INSTANCE.updateFadeProgress(hasIntrusion, PartialTicks);
+        if (!isCounting && SculkVeilRenderer.BUFF.fadeProgress == 0f
+                && SculkVeilRenderer.DEEP_DARK.fadeProgress == 0f
+                && SculkIntrusionRenderer.INSTANCE.fadeProgress == 0f) return;
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
         // AFTER_LEVEL 在 LevelRenderer.renderLevel 返回后才触发：此时世界渲染已完成，
         // 主 framebuffer 里是最终画面（Iris 的 composite + final pass 也已写入其中），
@@ -125,6 +130,9 @@ public class EchoRenderer {
                 });
             }
             bufferSource.endBatch();
+            // 幽匿侵扰最后叠加：覆盖影匿雾与回响特效，GUI 仍绘制在其上层。
+            if (SculkIntrusionRenderer.INSTANCE.fadeProgress != 0f)
+                SculkIntrusionRenderer.INSTANCE.render(partialTicks);
         } finally {
             RenderSystem.enableDepthTest();
             // 恢复 RenderSystem 状态，避免影响后续手部/GUI 渲染。
