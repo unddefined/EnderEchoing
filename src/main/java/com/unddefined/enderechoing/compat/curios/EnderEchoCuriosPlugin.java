@@ -34,8 +34,6 @@ public class EnderEchoCuriosPlugin {
     public static void registerCapabilities(final RegisterCapabilitiesEvent evt) {
         evt.registerItem(CuriosCapability.ITEM,
                 (stack, context) -> new ICurio() {
-                    private EndCrystal crystal;
-
                     @Override
                     public ItemStack getStack() {
                         return stack;
@@ -59,13 +57,13 @@ public class EnderEchoCuriosPlugin {
                         showResonatorName(player);
                         if (player.totalExperience < EndCrystal_HEAL_XP_COST.getAsInt()
                                 || player.getHealth() >= player.getMaxHealth()) return;
-                        crystal = enderEyeCurioHealTick(player);
+                        enderEyeCurioHealTick(player);
                     }
 
                     @Override
                     public void onUnequip(SlotContext slotContext, ItemStack newStack) {
                         if (!(slotContext.entity() instanceof ServerPlayer player)) return;
-                        onEnderEyeUnequip(crystal, player);
+                        onEnderEyeUnequip(player);
                     }
                 }, Items.ENDER_EYE);
     }
@@ -104,9 +102,15 @@ public class EnderEchoCuriosPlugin {
         PacketDistributor.sendToPlayer(player, new RenderEchoNamesPacket(posName));
     }
 
-    public static void onEnderEyeUnequip(EndCrystal crystal, ServerPlayer player) {
-        Map<BlockPos, String> posName = new java.util.HashMap<>();
+    public static void onEnderEyeUnequip(ServerPlayer player) {
+        Map<BlockPos, String> posName = new HashMap<>();
         PacketDistributor.sendToPlayer(player, new RenderEchoNamesPacket(posName));
-        if (crystal != null) crystal.getEntityData().set(ENDER_EYE_OWNER, Optional.empty());
+        // Capability wrappers are recreated on every query, so no remembered EndCrystal
+        // reference survives to this callback. Clear by authoritative owner data instead.
+        player.level().getEntitiesOfClass(EndCrystal.class,
+                        player.getBoundingBox().inflate(EECrystal_HEAL_DISTANCE.get())).stream()
+                .filter(c -> c.getEntityData().get(ENDER_EYE_OWNER)
+                        .map(owner -> owner.equals(player.getUUID())).orElse(false))
+                .forEach(c -> c.getEntityData().set(ENDER_EYE_OWNER, Optional.empty()));
     }
 }

@@ -27,6 +27,9 @@ import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import static com.unddefined.enderechoing.Config.*;
 import static com.unddefined.enderechoing.blocks.entity.EnderEchoCrystalBlockEntity.zeroUUID;
@@ -34,8 +37,14 @@ import static com.unddefined.enderechoing.compat.curios.EnderEchoCuriosPlugin.*;
 import static com.unddefined.enderechoing.server.registry.DataRegistry.VISITED_STRUCTURES;
 
 public class EnderEchoingEye extends Item implements ICurioItem {
-    private EndCrystal crystal;
-    private EnderEchoCrystalBlockEntity EECrystal;
+    // Item instances are singletons shared by every stack and player.
+    // Binding state must be scoped per player so one player cannot clear another's binding.
+    private final Map<UUID, PlayerState> playerStates = new HashMap<>();
+
+    private static class PlayerState {
+        EndCrystal crystal;
+        EnderEchoCrystalBlockEntity eECrystal;
+    }
 
     public EnderEchoingEye(Properties properties) {
         super(properties.stacksTo(8));
@@ -83,11 +92,13 @@ public class EnderEchoingEye extends Item implements ICurioItem {
         if (!(ctx.entity() instanceof ServerPlayer player)) return;
         showResonatorName(player);
         if (player.totalExperience < EECrystal_HEAL_XP_COST.get() || player.getHealth() >= player.getMaxHealth()) return;
+        PlayerState state = playerStates.computeIfAbsent(player.getUUID(), ignored -> new PlayerState());
 
-        if (EECrystal == null || EECrystal.getPlayerUUID().equals(zeroUUID) || !EECrystal.getPlayerUUID().equals(player.getUUID()))
-            crystal = enderEyeCurioHealTick(player);
-        if (crystal != null) {
-            var UUID = crystal.getEntityData().get(DataRegistry.ENDER_EYE_OWNER);
+        if (state.eECrystal == null || state.eECrystal.getPlayerUUID().equals(zeroUUID)
+                || !state.eECrystal.getPlayerUUID().equals(player.getUUID()))
+            state.crystal = enderEyeCurioHealTick(player);
+        if (state.crystal != null) {
+            var UUID = state.crystal.getEntityData().get(DataRegistry.ENDER_EYE_OWNER);
             if (UUID.isPresent() && UUID.get().equals(player.getUUID())) return;
         }
 
@@ -96,12 +107,14 @@ public class EnderEchoingEye extends Item implements ICurioItem {
         EnderEchoCrystalSavedData.get(level).crystals.stream().filter(c -> c.pos().dimension().equals(level.dimension()))
                 .min(Comparator.comparingDouble(c -> c.pos().pos().distToCenterSqr(player.getX(), player.getY(), player.getZ())))
                 .filter(c -> Math.sqrt(c.pos().pos().distToCenterSqr(player.getX(), player.getY(), player.getZ())) < D)
-                .ifPresentOrElse(c -> EECrystal = (EnderEchoCrystalBlockEntity) level.getBlockEntity(c.pos().pos()), () -> EECrystal = null);
-        if (EECrystal == null) return;
+                .ifPresentOrElse(c -> state.eECrystal = (EnderEchoCrystalBlockEntity) level.getBlockEntity(c.pos().pos()),
+                        () -> state.eECrystal = null);
+        if (state.eECrystal == null) return;
 
-        if (!EECrystal.getPlayerUUID().equals(zeroUUID) && !EECrystal.getPlayerUUID().equals(player.getUUID())) return;
+        if (!state.eECrystal.getPlayerUUID().equals(zeroUUID) && !state.eECrystal.getPlayerUUID().equals(player.getUUID()))
+            return;
 
-        EECrystal.setPlayerUUID(player.getUUID());
+        state.eECrystal.setPlayerUUID(player.getUUID());
 
         if (level.getGameTime() % EECrystal_HEAL_INTERVAL.get() * 10 != 0) return;
         player.giveExperiencePoints(-EECrystal_HEAL_XP_COST.get());
@@ -111,8 +124,9 @@ public class EnderEchoingEye extends Item implements ICurioItem {
     @Override
     public void onUnequip(SlotContext slotContext, ItemStack newStack, ItemStack stack) {
         if (!(slotContext.entity() instanceof ServerPlayer player)) return;
-        onEnderEyeUnequip(crystal, player);
-        if (EECrystal != null) EECrystal.setPlayerUUID(null);
+        PlayerState state = playerStates.remove(player.getUUID());
+        onEnderEyeUnequip(player);
+        if (state != null && state.eECrystal != null) state.eECrystal.setPlayerUUID(zeroUUID);
     }
 
     @Override

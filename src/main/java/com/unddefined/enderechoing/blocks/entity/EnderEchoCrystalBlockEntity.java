@@ -36,7 +36,7 @@ public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlock
     }
 
     public void setPlayerUUID(UUID playerUUID) {
-        this.playerUUID = playerUUID;
+        this.playerUUID = playerUUID == null ? zeroUUID : playerUUID;
         if (level != null) level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
         setChanged();
     }
@@ -59,7 +59,7 @@ public class EnderEchoCrystalBlockEntity extends BlockEntity implements GeoBlock
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        tag.putUUID("player", playerUUID);
+        tag.putUUID("player", playerUUID == null ? zeroUUID : playerUUID);
     }
 
     @Override
